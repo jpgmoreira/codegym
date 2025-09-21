@@ -293,6 +293,13 @@
         mainCtx.lineTo(x, yMax);
         mainCtx.stroke();
       }
+      if (allXvaluesSorted.length <= initialXlabelsLimit) {
+        const x0 = _toCanvasCoordX(0, scaleX, offsetX);
+        mainCtx.beginPath();
+        mainCtx.moveTo(x0, y0);
+        mainCtx.lineTo(x0, yMax);
+        mainCtx.stroke();
+      }
     }
     mainCtx.restore();
   }
