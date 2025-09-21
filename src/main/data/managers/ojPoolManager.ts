@@ -17,6 +17,10 @@ type OjPoolType = {
   };
 };
 
+/**
+ * Singleton for managing the pool of currently filtered OJ problems.
+ * Access via OjPoolManager.instance
+ */
 export class OjPoolManager {
   static #instance: OjPoolManager;
   private pool!: OjPoolType;
