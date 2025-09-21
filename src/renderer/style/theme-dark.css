@@ -1,0 +1,194 @@
+.theme-dark {
+  /* Header */
+  --header-bg: #393d41;
+  --header-btn-hover-bg: #51565e;
+  --header-color: #ccc;
+  --header-context-menu-border-color: #777;
+  /* Footer */
+  --footer-bg: #282828;
+  /* Inputs */
+  --input-bg: #3f444b;
+  --input-border-color: #37393b;
+  /* Tags and badges */
+  --badge-bg: #0072c7;
+  /* Tables */
+  --table-bg: #232627;
+  --table-row-border: #373b3e;
+  --table-td-hover: #3f4344;
+  /* Modal */
+  --modal-border-color: #1b2125;
+}
+
+.theme-dark * {
+  color: white;
+}
+
+.theme-dark *:focus:not(.outline-none) {
+  outline: 4px solid rgba(100, 100, 100, 0.3);
+}
+
+.theme-dark body {
+  background-color: #181a1b;
+}
+
+/* Header active link */
+.theme-dark a.router-link-exact-active {
+  background-color: var(--header-btn-hover-bg);
+}
+
+/* Inputs */
+.theme-dark input,
+.theme-dark select {
+  background-color: var(--input-bg);
+}
+
+/* Buttons */
+.theme-dark button.btn-primary {
+  background-color: #0072f9;
+}
+.theme-dark button.btn-primary:disabled {
+  background-color: #4f95eb;
+}
+.theme-dark button.btn-primary:hover:not(:disabled) {
+  background-color: #035ece;
+}
+.theme-dark button.btn-warning {
+  background-color: #ffbf2f;
+  color: black;
+}
+.theme-dark button.btn-warning:hover:not(:disabled) {
+  background-color: #e29e00;
+}
+.theme-dark button.btn-danger {
+  background-color: #e23047;
+}
+.theme-dark button.btn-danger:hover:not(:disabled) {
+  background-color: #d1162f;
+}
+.theme-dark button.btn-secondary {
+  background-color: #6b757d;
+}
+.theme-dark button.btn-secondary:hover:not(:disabled) {
+  background-color: #596168;
+}
+
+/* Links */
+.theme-dark a {
+  color: #1c92fb;
+}
+.theme-dark a:hover {
+  color: #41a5fc;
+}
+
+/* Toast */
+.theme-dark .toast-container.success {
+  color: #1d922f;
+  background-color: #c3e2c5;
+  border: 1px solid #1d922f;
+}
+.theme-dark .toast-container.error {
+  color: #cc000b;
+  background-color: #ffcdce;
+  border: 1px solid #cc000b;
+}
+.theme-dark .toast-container.warning {
+  color: #7c7917;
+  background-color: #fff829;
+  border: 1px solid #7c7917;
+}
+.theme-dark .toast-container.info {
+  color: #001de6;
+  background-color: #d5d8fd;
+  border: 1px solid #001de6;
+}
+
+/* Modal */
+.theme-dark .modal-container .modal {
+  background-color: #2d373f;
+  border: 1px solid var(--modal-border-color);
+}
+.theme-dark .modal-container .modal-header {
+  border-bottom: 1px solid var(--modal-border-color);
+}
+.theme-dark .modal-container .modal-footer {
+  border-top: 1px solid var(--modal-border-color);
+}
+.theme-dark .modal-container .backdrop {
+  background-color: #aaaaaa7c;
+}
+
+/* Text colors */
+.theme-dark .text-danger {
+  color: #ff7578;
+}
+
+/* Alerts */
+.theme-dark .alert.success {
+  color: #1d922f;
+  background-color: #c3e2c5;
+  border: 1px solid #1d922f;
+}
+.theme-dark .alert.error {
+  color: #cc000b;
+  background-color: #ffcdce;
+  border: 1px solid #cc000b;
+}
+.theme-dark .alert.warning {
+  color: #7c7917;
+  background-color: #fff829;
+  border: 1px solid #7c7917;
+}
+.theme-dark .alert.info {
+  color: #001de6;
+  background-color: #d5d8fd;
+  border: 1px solid #001de6;
+}
+
+/* Problems page */
+.theme-dark .problems-page .filters {
+  background-color: #2c353f;
+}
+.theme-dark .problems-page .snapshot {
+  background-color: #2c353f;
+}
+.theme-dark .problems-page .tags-container {
+  background: var(--input-bg);
+  border-color: var(--input-border-color);
+}
+.theme-dark .problems-page .tag-badge {
+  background-color: var(--badge-bg);
+}
+
+/* Multiselect */
+.theme-dark .multiselect .context-menu {
+  background-color: var(--input-bg);
+}
+.theme-dark .multiselect .context-menu .highlight {
+  background-color: #525a63;
+}
+.theme-dark .multiselect .badge {
+  background-color: var(--badge-bg);
+}
+.theme-dark .multiselect .badge:focus {
+  outline-color: #fa9907a8;
+}
+.theme-dark .multiselect .badge .close-button {
+  border-color: #025391;
+}
+
+/* Table */
+.theme-dark table {
+  background-color: var(--table-bg);
+}
+.theme-dark thead {
+  background-color: var(--table-bg);
+  box-shadow: 0 1px 0 0 white;
+}
+.theme-dark tbody tr {
+  border: 1px solid var(--table-row-border);
+  border-left: none;
+  border-right: none;
+}
+.theme-dark tbody tr:hover {
+  background-color: var(--table-td-hover);
+}

@@ -1,0 +1,258 @@
+<script setup lang="ts">
+  /**
+   * [August 17th 2025]
+   *
+   * A multiselect component with reactive props written for Vue 3.
+   * If anything changes on the input props, the component will
+   *   reflect the changes.
+   * This component does not copy the initial state passed as
+   *   props, instead it emits events and the parent component
+   *   is responsible for managing the state and re-injecting
+   *   it as props in this component.
+   * It does not modify the input props in any way.
+   *
+   * Usage:
+   *
+   *  - Pass the "options" prop as an array of objects in the form:
+   *    {
+   *      text: <string>
+   *      value: string
+   *    }
+   *    You should not have duplicate values in the options.
+   *
+   *  On the parent component, you can listen to the following events:
+   *    - select-option   (passes an option value);
+   *    - deselect-option (passes an option value);
+   *    - create-option   (passes an option name);
+   *
+   * Optional props:
+   *   - placeholder <string>         A placeholder for the text input;
+   *   - selected    <string[]>       An array of string containing the pre-selected values;
+   *   - create:     <boolean>        Used to allow the creation of new options. Default is false.
+   *   - close:      <boolean>        Display or not close buttons inside the badges. Default is false;
+   *   - direction:  <"up" | "down">  The opening direction for the context menu. Default is down.
+   *
+   * Styling:
+   *   - You can apply the styling for this component's elements using the
+   *     following CSS classes and selectors:
+   *        .multiselect
+   *        .multiselect .context-menu
+   *        .multiselect .context-menu .option
+   *        .multiselect .context-menu .highlight
+   *        .multiselect .badge
+   *        .multiselect .badge .close-button
+   *        .multiselect .badge .close-button svg path  (set the "stroke" CSS property to change X color)
+   *        .multiselect .badges-container
+   *        .multiselect .editor
+   */
+  import { computed, reactive, useTemplateRef } from 'vue';
+  export type MultiselectOption = {
+    text: string;
+    value: string;
+  };
+  export type MultiselectProps = {
+    options: MultiselectOption[];
+    placeholder?: string;
+    selected?: string[];
+    create?: boolean;
+    close?: boolean;
+    direction?: 'up' | 'down';
+  };
+  const props = defineProps<MultiselectProps>();
+  const editor = useTemplateRef('editor');
+  const contextMenu = useTemplateRef('context-menu');
+  const badgesContainer = useTemplateRef('badges-container');
+  const state = reactive({
+    content: '',
+    editorHasFocus: false,
+    highlightedContextIndex: 0,
+  });
+  const emit = defineEmits<{
+    (e: 'selectOption', optionValue: string): void;
+    (e: 'createOption', optionText: string): void;
+    (e: 'deselectOption', optionValue: string): void;
+  }>();
+  function focusEditor() {
+    editor.value?.focus();
+  }
+  function selectOption(optionValue: string) {
+    emit('selectOption', optionValue);
+    state.highlightedContextIndex = Math.min(
+      contextOptions.value.length - 1,
+      state.highlightedContextIndex
+    );
+    state.highlightedContextIndex = Math.max(0, state.highlightedContextIndex);
+  }
+  function handleEditorBlur(e: FocusEvent) {
+    if (e.relatedTarget === contextMenu.value) {
+      focusEditor();
+      return;
+    }
+    state.content = '';
+    state.editorHasFocus = false;
+    state.highlightedContextIndex = 0;
+  }
+  function handleEditorEnter() {
+    const option = contextOptions.value[state.highlightedContextIndex];
+    if (option) {
+      selectOption(option.value);
+    } else if (props.create) {
+      emit('createOption', state.content);
+      state.content = '';
+      state.highlightedContextIndex = 0;
+    }
+  }
+  function handleEditorInput() {
+    contextMenu.value?.scrollTo({
+      top: 0,
+      behavior: 'instant',
+    });
+    state.highlightedContextIndex = 0;
+  }
+  function deselectOption(optionValue: string) {
+    emit('deselectOption', optionValue);
+  }
+  function handleBadgeKeydown(event: KeyboardEvent, optionValue: string) {
+    const badges = badgesContainer.value?.children as HTMLElement[] | undefined;
+    if (!badges) return;
+    const current = event.currentTarget as HTMLElement;
+    const index = Array.from(badges).indexOf(current);
+    if (event.key === 'Backspace') {
+      const previous = current?.previousElementSibling as HTMLElement;
+      previous?.focus();
+      deselectOption(optionValue);
+    } else if (event.key === 'Delete') {
+      const next = current?.nextElementSibling as HTMLElement;
+      next?.focus();
+      deselectOption(optionValue);
+    } else if (event.key === 'ArrowLeft' && index > 0) {
+      badges[index - 1].focus();
+    } else if (event.key === 'ArrowRight' && index < badges.length - 1) {
+      badges[index + 1].focus();
+    }
+  }
+  function contextUp() {
+    state.highlightedContextIndex = Math.max(0, state.highlightedContextIndex - 1);
+    const child = contextMenu.value?.children[state.highlightedContextIndex] as
+      | HTMLElement
+      | undefined;
+    if (child) {
+      child.scrollIntoView({ behavior: 'instant', block: 'nearest' });
+    }
+  }
+  function contextDown() {
+    state.highlightedContextIndex = Math.min(
+      contextOptions.value.length - 1,
+      state.highlightedContextIndex + 1
+    );
+    const child = contextMenu.value?.children[state.highlightedContextIndex] as
+      | HTMLElement
+      | undefined;
+    if (child) {
+      child.scrollIntoView({ behavior: 'instant', block: 'nearest' });
+    }
+  }
+  const selectedOptions = computed(() =>
+    props.options.filter((op) => props.selected?.some((val) => op.value === val))
+  );
+  const contextOptions = computed(() =>
+    props.options.filter((op) => {
+      if (props.selected?.some((val) => val === op.value)) return false;
+      if (!state.content) return true;
+      return op.text.toLowerCase().includes(state.content.toLowerCase());
+    })
+  );
+  const showContextMenu = computed(() => state.editorHasFocus && contextOptions.value.length);
+  const contextMenuStyle = computed(() => {
+    if (props.direction === 'up') return { bottom: '100%' };
+    return { top: '100%' };
+  });
+</script>
+
+<template>
+  <div class="multiselect">
+    <div
+      class="context-menu"
+      ref="context-menu"
+      v-if="showContextMenu"
+      :style="contextMenuStyle"
+      tabindex="0"
+    >
+      <div
+        class="option"
+        v-for="(option, index) in contextOptions"
+        :key="option.value"
+        :class="{ highlight: index === state.highlightedContextIndex }"
+        @mouseover="state.highlightedContextIndex = index"
+        @click="selectOption(option.value)"
+      >
+        {{ option.text }}
+      </div>
+    </div>
+    <div class="badges-container" ref="badges-container">
+      <span
+        class="badge"
+        v-for="option in selectedOptions"
+        :key="option.value"
+        tabindex="0"
+        @keydown.prevent="handleBadgeKeydown($event, option.value)"
+      >
+        {{ option.text }}
+        <button
+          class="close-button"
+          v-if="props.close"
+          type="button"
+          @click="deselectOption(option.value)"
+          aria-label="remove option"
+        >
+          <svg width="10" height="10" viewBox="0 0 10 10">
+            <path d="M1 1 L9 9 M9 1 L1 9" stroke="currentColor" stroke-width="1" />
+          </svg>
+        </button>
+      </span>
+    </div>
+    <input
+      type="text"
+      class="editor"
+      ref="editor"
+      :placeholder="props.placeholder"
+      v-model="state.content"
+      @input="handleEditorInput"
+      @focus="state.editorHasFocus = true"
+      @blur="handleEditorBlur"
+      @keydown.up.prevent="contextUp"
+      @keydown.down.prevent="contextDown"
+      @keydown.enter.prevent="handleEditorEnter"
+    />
+  </div>
+</template>
+
+<style scoped>
+  .multiselect {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+  }
+  .badges-container {
+    display: flex;
+    flex-wrap: wrap;
+  }
+  .context-menu {
+    cursor: pointer;
+    position: absolute;
+    left: -1px;
+    right: -1px;
+    max-height: 130px;
+    overflow-y: scroll;
+  }
+  .badge {
+    cursor: pointer;
+    display: flex;
+  }
+  .badge .close-button {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    height: 100%;
+  }
+</style>

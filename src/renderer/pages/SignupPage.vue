@@ -1,0 +1,48 @@
+<script lang="ts" setup>
+  import { ref } from 'vue';
+  import { useRouter } from 'vue-router';
+  import { useUIStore } from '@renderer/store/ui';
+  import { useProfileStore } from '@renderer/store/profile';
+  import Header from '@renderer/components/Header/Header.vue';
+  import HeaderButton from '@renderer/components/Header/HeaderButton.vue';
+  import BusyButton from '@renderer/components/UI/BusyButton.vue';
+  const profileStore = useProfileStore();
+  const uiStore = useUIStore();
+  const router = useRouter();
+  const name = ref('');
+  const fetching = ref(false);
+  const isBusy = ref(false);
+  async function createProfile() {
+    fetching.value = true;
+    const result = await profileStore.createProfile(name.value);
+    fetching.value = false;
+    if (result.status === 'error') {
+      uiStore.showToast(result.errorMsg, 'error');
+    } else {
+      document.title = `${profileStore.currProfile!.name}@codegym`;
+      router.replace(profileStore.currProfile!.page);
+    }
+  }
+</script>
+
+<template>
+  <Header v-if="profileStore.registry.profileRecords.length">
+    <HeaderButton to="/login">Login</HeaderButton>
+    <HeaderButton to="/signup">Create Profile</HeaderButton>
+  </Header>
+  <div class="flex flex-col items-center justify-center w-full flex-1">
+    <div>
+      <label for="profile-name" class="text-lg mr-2">Create a new profile:</label>
+      <input type="text" v-model.trim="name" placeholder="Profile name" />
+    </div>
+    <BusyButton
+      class="btn-primary mt-5 flex items-center"
+      @click="createProfile"
+      :busy-signal="fetching"
+      v-model="isBusy"
+    >
+      Create
+      <span v-if="isBusy" class="loader ml-1"></span>
+    </BusyButton>
+  </div>
+</template>

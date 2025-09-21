@@ -1,0 +1,37 @@
+<script lang="ts" setup>
+  import { computed } from 'vue';
+  import { useProfileStore } from '@renderer/store/profile';
+  import { useOjMetaStore } from '@renderer/store/ojMeta';
+  import { toLocaleNumber } from '@common/utils/utils';
+  const profileStore = useProfileStore();
+  const ojMetaStore = useOjMetaStore();
+  const snapshot = computed(() => profileStore.currProfile!.ojContext['neps'].snapshot!);
+  const meta = computed(() => ojMetaStore['neps']);
+</script>
+
+<template>
+  <div>
+    <ul class="list-disc list-inside">
+      <li>
+        Score:
+        <span class="font-bold">
+          {{ toLocaleNumber(snapshot.info.score) }} [{{
+            toLocaleNumber(meta.stats.score.min!)
+          }}
+          &ndash; {{ toLocaleNumber(meta.stats.score.max!) }}].
+        </span>
+      </li>
+      <li>
+        Solved by:
+        <span class="font-bold">{{ toLocaleNumber(snapshot.info.solved) }} users.</span>
+      </li>
+      <li>
+        Solved bucket:
+        <span class="font-bold">
+          {{ toLocaleNumber(snapshot.info.solvedBucket) }} of
+          {{ toLocaleNumber(meta.stats.solvedBucket.max!) }}.
+        </span>
+      </li>
+    </ul>
+  </div>
+</template>
