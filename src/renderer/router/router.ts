@@ -5,6 +5,7 @@ import LoginPage from '@renderer/pages/LoginPage.vue';
 import SignupPage from '@renderer/pages/SignupPage.vue';
 import ProblemsPage from '@renderer/pages/ProblemsPage/ProblemsPage.vue';
 import HistoryPage from '@renderer/pages/HistoryPage.vue';
+import GraphPage from '@renderer/pages/GraphPage.vue';
 
 const routes = [
   {
@@ -22,6 +23,10 @@ const routes = [
   {
     path: '/history',
     component: HistoryPage,
+  },
+  {
+    path: '/graph',
+    component: GraphPage,
   },
 ];
 

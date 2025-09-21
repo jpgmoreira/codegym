@@ -30,7 +30,7 @@ export class GraphManager {
 
   public async getGraphData(): Promise<GraphRecord[]> {
     if (!this.db) return [];
-    return await this.db.findAsync({}).sort({ timestamp: 1 });
+    return await this.db.findAsync({}).sort({ date: 1 });
   }
 
   public async updateGraph(source: OjWithContests, date: number, value: -1 | 1) {

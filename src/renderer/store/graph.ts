@@ -1,4 +1,5 @@
 import { GraphRecord } from '@common/schemas/graph';
+import { StartupData } from '@common/schemas/startup';
 import { defineStore } from 'pinia';
 
 export const useGraphStore = defineStore('graph', {
@@ -6,6 +7,9 @@ export const useGraphStore = defineStore('graph', {
     graphData: [] as GraphRecord[],
   }),
   actions: {
+    initFromStartupData(data: StartupData) {
+      this.graphData = data.graphData;
+    },
     findGraphRecord(date: number): GraphRecord | null {
       let left = 0;
       let right = this.graphData.length - 1;
