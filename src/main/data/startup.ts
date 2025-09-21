@@ -6,8 +6,10 @@ import { HistoryManager } from './managers/historyManager';
 import { OjList } from '@common/types/oj';
 import { getEmptyFirstHistoryPages, StartupData } from '@common/schemas/startup';
 import { OjProblem } from '@common/schemas/problems';
+import { CacheManager } from './managers/cacheManager';
 
 export async function loadStartupData(): Promise<StartupData> {
+  CacheManager.instance; // Forces cache load at startup to avoid slow loading of the first problem.
   const ojMeta = OjMetaManager.instance.getAllMeta();
   const currProfile = ProfileManager.instance.getCurrProfile();
   const profileRegistry = ProfileManager.instance.getProfileRegistry();
