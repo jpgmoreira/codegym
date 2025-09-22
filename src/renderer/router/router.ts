@@ -7,6 +7,7 @@ import ProblemsPage from '@renderer/pages/ProblemsPage/ProblemsPage.vue';
 import HistoryPage from '@renderer/pages/HistoryPage.vue';
 import GraphPage from '@renderer/pages/GraphPage.vue';
 import SettingsPage from '@renderer/pages/SettingsPage.vue';
+import ContestsPage from '@renderer/pages/ContestsPage.vue';
 
 const routes = [
   {
@@ -32,6 +33,10 @@ const routes = [
   {
     path: '/settings',
     component: SettingsPage,
+  },
+  {
+    path: '/contests',
+    component: ContestsPage,
   },
 ];
 
