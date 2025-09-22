@@ -39,7 +39,7 @@
       uiStore.showToast('Profile name cannot be empty!', 'error');
       return;
     }
-    const result = await stateStore.renameCurrProfile(newName);
+    const result = await profileStore.renameCurrProfile(newName);
     if (result.status === 'success') {
       uiStore.showToast('Profile renamed successfully!', 'success');
       document.title = `${newName}@codegym`;
@@ -126,7 +126,7 @@
     <h1 class="text-2xl">Profile</h1>
     <div class="flex items-center px-5">
       <label for="profile-name" class="mr-1">Profile name:</label>
-      <input type="text" name="profile-name" id="profile-name" v-model="name" />
+      <input type="text" name="profile-name" id="profile-name" v-model.trim="name" />
       <button type="button" class="btn-primary ml-1" @click="handleRename">Rename</button>
     </div>
     <div class="flex justify-between px-5">

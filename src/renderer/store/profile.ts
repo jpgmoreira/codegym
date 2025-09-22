@@ -14,6 +14,7 @@ import { getTodayDate } from '@common/utils/dateUtils';
 import { getEmptyGraphRecord } from '@common/schemas/graph';
 import { toRaw } from 'vue';
 import { OjProblem } from '@common/schemas/problems';
+import { GenericResponseDTO } from '@common/dto/genericResponseDTO';
 
 export const useProfileStore = defineStore('profile', {
   state: () => ({
@@ -106,6 +107,18 @@ export const useProfileStore = defineStore('profile', {
       const ojContext = this.currProfile!.ojContext[currOj];
       ojContext.snapshot = snapshot;
       window.api.send(Channels.setCurrOjSnapshot, toRaw(snapshot));
+    },
+    async renameCurrProfile(newName: string) {
+      const result = await window.api.invoke<GenericResponseDTO>(
+        Channels.renameCurrProfile,
+        newName
+      );
+      if (result.status === 'success') {
+        this.currProfile!.name = newName;
+        const record = this.registry.profileRecords.find((p) => p.id === this.currProfile!.id);
+        record!.name = newName;
+      }
+      return result;
     },
   },
 });

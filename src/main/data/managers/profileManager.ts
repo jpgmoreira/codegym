@@ -105,6 +105,27 @@ export class ProfileManager {
     ojContext.snapshot = snapshot;
   }
 
+  public renameCurrProfile(newName: string) {
+    newName = newName.trim();
+    const validationResult = this.validateProfileName(newName);
+    if (validationResult.status === 'error') {
+      return validationResult;
+    }
+    const { profileRecords, currProfileId } = this.registryProxy!.proxy;
+    const currProfileRecord = profileRecords.find((p) => p.id === currProfileId);
+    if (!currProfileRecord || !this.currProfileProxy) {
+      return {
+        status: 'error',
+        errorMsg: 'Current profile is not valid!',
+      };
+    }
+    currProfileRecord.name = newName;
+    this.currProfileProxy.proxy.name = newName;
+    return {
+      status: 'success',
+    };
+  }
+
   public async createProfile(name: string): Promise<CreateProfileResponseDTO> {
     name = name.trim();
     const validationResult = this.validateProfileName(name);

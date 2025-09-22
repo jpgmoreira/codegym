@@ -13,4 +13,5 @@ export enum Channels {
   updateOjFilters = 'update-oj-filters',
   fetchHistoryPage = 'fetch-history-page',
   setCurrOjSnapshot = 'set-curr-oj-snapshot',
+  renameCurrProfile = 'rename-curr-profile',
 }

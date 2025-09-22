@@ -11,6 +11,7 @@ import { StartupData } from '@common/schemas/startup';
 import { loadStartupData } from '@main/data/startup';
 import { OjProblem } from '@common/schemas/problems';
 import { HistoryManager } from '@main/data/managers/historyManager';
+import { GenericResponseDTO } from '@common/dto/genericResponseDTO';
 
 ipcMain.handle(
   Channels.createProfile,
@@ -39,4 +40,10 @@ ipcMain.handle(
   Channels.fetchHistoryPage,
   <T extends Oj>(_: IpcMainInvokeEvent, oj: T, page: number): Promise<OjProblem[T][]> =>
     HistoryManager.instance.fetchHistoryPage(oj, page)
+);
+
+ipcMain.handle(
+  Channels.renameCurrProfile,
+  async (_, newName: string): Promise<GenericResponseDTO> =>
+    ProfileManager.instance.renameCurrProfile(newName)
 );
