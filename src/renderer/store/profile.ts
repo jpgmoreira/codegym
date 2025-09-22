@@ -67,6 +67,18 @@ export const useProfileStore = defineStore('profile', {
       this.currProfile = null;
       this.registry.currProfileId = null;
     },
+    deleteProfile() {
+      const currProfileId = this.currProfile!.id;
+      this.clear();
+      const { profileRecords } = this.registry;
+      for (let i = 0; i < profileRecords.length; i++) {
+        if (profileRecords[i].id === currProfileId) {
+          profileRecords.splice(i, 1);
+          break;
+        }
+      }
+      window.api.send(Channels.deleteCurrProfile);
+    },
     async requestNewProblem() {
       const oj = this.currProfile!.currOj;
       const ojStatusStore = useOjStatusStore();

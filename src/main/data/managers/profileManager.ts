@@ -18,6 +18,7 @@ import { OjProblem } from '@common/schemas/problems';
 import { EventEmitter } from '@common/helpers/eventEmitter';
 import { Events } from '@main/events/events';
 import { GenericResponseDTO } from '@common/dto/genericResponseDTO';
+import fs from 'fs';
 
 EventEmitter.instance.on(Events.clearProfileData, () => {
   ProfileManager.instance.clear();
@@ -87,6 +88,20 @@ export class ProfileManager {
   public clear() {
     this.currProfileProxy = null;
     this.registryProxy!.proxy.currProfileId = null;
+  }
+
+  public deleteCurrProfile() {
+    const id = this.currProfileProxy!.proxy.id;
+    const { profileRecords } = this.registryProxy!.proxy;
+    for (let i = 0; i < profileRecords.length; i++) {
+      if (profileRecords[i].id === id) {
+        profileRecords.splice(i, 1);
+        break;
+      }
+    }
+    this.logout();
+    const dirPath = path.join(DATA_DIR, 'profileData', id);
+    fs.rmSync(dirPath, { recursive: true, force: true });
   }
 
   public updateCurrOj(oj: Oj) {

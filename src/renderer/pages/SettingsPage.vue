@@ -24,7 +24,7 @@
       boolean
     >
   );
-  const currProfileName = computed(() => profileStore.currProfile!.name);
+  const currProfileName = computed(() => profileStore.currProfile?.name);
   function lastCacheUpdate(oj: Oj): string | null {
     const timestamp = ojMetaStore.ojMeta[oj].lastCacheUpdate;
     if (timestamp) return parseTimestamp(timestamp);
@@ -53,7 +53,7 @@
     router.replace('/login');
   }
   function handleDelete() {
-    stateStore.deleteProfile();
+    profileStore.deleteProfile();
     document.title = 'codegym';
     if (profileStore.registry.profileRecords.length) {
       router.replace('/login');
