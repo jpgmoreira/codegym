@@ -38,10 +38,10 @@ export function throttle<T extends (...args: any[]) => void>(fn: T, wait: number
 }
 
 /**
- * Returns a random alphanumeric ID with at least 14 characters.
+ * Returns a random alphanumeric ID with ~20 characters.
  */
 export function randomId() {
-  return Date.now().toString(36) + Math.random().toString(36).substring(2, 8);
+  return Date.now().toString(36) + Math.random().toString(36).substring(1);
 }
 
 export function isAuthPage(page: string): page is AuthPage {
