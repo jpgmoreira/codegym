@@ -22,6 +22,10 @@ EventEmitter.instance.on(Events.loadInitialData, (data: StartupData) => {
   useProfileStore().initFromStartupData(data);
 });
 
+EventEmitter.instance.on(Events.clearProfileData, () => {
+  useProfileStore().clear();
+});
+
 export const useProfileStore = defineStore('profile', {
   state: () => ({
     currProfile: null as Profile | null,
@@ -54,6 +58,14 @@ export const useProfileStore = defineStore('profile', {
       const result = await window.api.invoke<StartupData>(Channels.login, profileId);
       this.initFromStartupData(result);
       return result;
+    },
+    logout() {
+      EventEmitter.instance.emit(Events.clearProfileData);
+      window.api.send(Channels.logout);
+    },
+    clear() {
+      this.currProfile = null;
+      this.registry.currProfileId = null;
     },
     async requestNewProblem() {
       const oj = this.currProfile!.currOj;

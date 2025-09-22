@@ -8,6 +8,10 @@ EventEmitter.instance.on(Events.loadInitialData, (data: StartupData) => {
   useGraphStore().initFromStartupData(data);
 });
 
+EventEmitter.instance.on(Events.clearProfileData, () => {
+  useGraphStore().clear();
+});
+
 export const useGraphStore = defineStore('graph', {
   state: () => ({
     graphData: [] as GraphRecord[],
@@ -15,6 +19,9 @@ export const useGraphStore = defineStore('graph', {
   actions: {
     initFromStartupData(data: StartupData) {
       this.graphData = data.graphData;
+    },
+    clear() {
+      this.graphData = [];
     },
     findGraphRecord(date: number): GraphRecord | null {
       let left = 0;

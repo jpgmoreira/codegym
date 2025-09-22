@@ -6,6 +6,7 @@ export const allowedSendChannels = Object.freeze([
   Channels.setCurrSnapshotSolvedDate,
   Channels.updateOjFilters,
   Channels.setCurrOjSnapshot,
+  Channels.logout,
 ] as const);
 export const allowedInvokeChannels = Object.freeze([
   Channels.createProfile,

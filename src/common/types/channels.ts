@@ -7,6 +7,7 @@ export enum Channels {
   updateCurrPage = 'update-curr-page',
   createProfile = 'create-profile',
   login = 'login',
+  logout = 'logout',
   updateOjCache = 'update-oj-cache',
   getOjProblem = 'get-oj-problem',
   setCurrSnapshotSolvedDate = 'set-curr-snapshot-solved-date',

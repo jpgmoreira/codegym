@@ -10,6 +10,10 @@ EventEmitter.instance.on(Events.loadInitialData, (data: StartupData) => {
   useHistoryStore().initFromStartupData(data);
 });
 
+EventEmitter.instance.on(Events.clearProfileData, () => {
+  useHistoryStore().clear();
+});
+
 /**
  * Store for managing the first history page for each OJ.
  * This is used for faster loading time in the history page.
@@ -26,6 +30,9 @@ export const useHistoryStore = defineStore('history', {
       if (page.length > HISTORY_PAGE_SIZE) {
         page.pop();
       }
+    },
+    clear() {
+      Object.assign(this, getEmptyFirstHistoryPages);
     },
   },
 });

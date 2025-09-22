@@ -48,7 +48,7 @@
     }
   }
   function handleLogout() {
-    stateStore.logout();
+    profileStore.logout();
     document.title = 'codegym';
     router.replace('/login');
   }
