@@ -6,6 +6,7 @@
   import Header from '@renderer/components/Header/Header.vue';
   import HeaderButton from '@renderer/components/Header/HeaderButton.vue';
   import BusyButton from '@renderer/components/UI/BusyButton.vue';
+  import { APP_NAME } from '@common/constants';
   const store = useProfileStore();
   const router = useRouter();
   const fetching = ref<string | null>(null);
@@ -14,7 +15,7 @@
   async function onClick(profileId: string) {
     fetching.value = profileId;
     await store.login(profileId);
-    document.title = `${store.currProfile!.name}@codegym`;
+    document.title = `${store.currProfile!.name}@${APP_NAME}`;
     router.replace(store.currProfile!.page);
   }
 </script>

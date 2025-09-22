@@ -15,7 +15,7 @@ export const useOjMetaStore = defineStore('ojMeta', {
   }),
   actions: {
     initFromStartupData(data: StartupData) {
-      Object.assign(this, data.ojMeta);
+      this.ojMeta = data.ojMeta;
     },
     updateOjMeta<T extends Oj>(oj: T, data: OjMeta[T]) {
       this.ojMeta[oj] = data;

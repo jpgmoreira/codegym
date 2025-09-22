@@ -4,6 +4,11 @@
   "version": "1.0.0",
   "description": "An application for practicing competitive programming",
   "main": ".vite/build/main.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jpgmoreira/codegym.git"
+  },
+  "homepage": "https://github.com/jpgmoreira/codegym",
   "scripts": {
     "start": "electron-forge start",
     "debug": "electron-forge start -- --inspect=9229 --remote-debugging-port=9222",

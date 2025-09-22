@@ -13,8 +13,7 @@ export class OjMetaManager {
   private proxy: FileProxy<OjMeta>;
 
   private constructor() {
-    const ojMeta = getEmptyOjMeta();
-    this.proxy = new FileProxy(path.join(DATA_DIR, 'ojMeta.json'), ojMeta);
+    this.proxy = new FileProxy(path.join(DATA_DIR, 'ojMeta.json'), getEmptyOjMeta());
   }
 
   public static get instance(): OjMetaManager {

@@ -11,6 +11,7 @@
   import BusyButton from '@renderer/components/UI/BusyButton.vue';
   import SettingsPageHeader from '@renderer/components/Header/custom/SettingsPageHeader.vue';
   import Modal from '@renderer/components/UI/Modal.vue';
+  import { APP_NAME } from '@common/constants';
   const profileStore = useProfileStore();
   const ojMetaStore = useOjMetaStore();
   const ojStatusStore = useOjStatusStore();
@@ -42,19 +43,19 @@
     const result = await profileStore.renameCurrProfile(newName);
     if (result.status === 'success') {
       uiStore.showToast('Profile renamed successfully!', 'success');
-      document.title = `${newName}@codegym`;
+      document.title = `${newName}@${APP_NAME}`;
     } else {
       uiStore.showToast(result.errorMsg, 'error');
     }
   }
   function handleLogout() {
     profileStore.logout();
-    document.title = 'codegym';
+    document.title = APP_NAME;
     router.replace('/login');
   }
   function handleDelete() {
     profileStore.deleteProfile();
-    document.title = 'codegym';
+    document.title = APP_NAME;
     if (profileStore.registry.profileRecords.length) {
       router.replace('/login');
     } else {
@@ -140,7 +141,10 @@
     <h1 class="text-2xl">Version</h1>
     <div class="px-5">
       <div>CodeGym &ndash; Version {{ packageJson.version }}</div>
-      <div>Homepage:</div>
+      <div>
+        Homepage:
+        <a :href="packageJson.homepage">{{ packageJson.homepage }}</a>
+      </div>
     </div>
   </div>
 </template>

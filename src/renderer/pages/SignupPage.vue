@@ -6,6 +6,7 @@
   import Header from '@renderer/components/Header/Header.vue';
   import HeaderButton from '@renderer/components/Header/HeaderButton.vue';
   import BusyButton from '@renderer/components/UI/BusyButton.vue';
+  import { APP_NAME } from '@common/constants';
   const profileStore = useProfileStore();
   const uiStore = useUIStore();
   const router = useRouter();
@@ -19,7 +20,7 @@
     if (result.status === 'error') {
       uiStore.showToast(result.errorMsg, 'error');
     } else {
-      document.title = `${profileStore.currProfile!.name}@codegym`;
+      document.title = `${profileStore.currProfile!.name}@${APP_NAME}`;
       router.replace(profileStore.currProfile!.page);
     }
   }
