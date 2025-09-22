@@ -15,6 +15,12 @@ import { getEmptyGraphRecord } from '@common/schemas/graph';
 import { toRaw } from 'vue';
 import { OjProblem } from '@common/schemas/problems';
 import { GenericResponseDTO } from '@common/dto/genericResponseDTO';
+import { EventEmitter } from '@common/helpers/eventEmitter';
+import { Events } from '@renderer/events/events';
+
+EventEmitter.instance.on(Events.loadInitialData, (data: StartupData) => {
+  useProfileStore().initFromStartupData(data);
+});
 
 export const useProfileStore = defineStore('profile', {
   state: () => ({

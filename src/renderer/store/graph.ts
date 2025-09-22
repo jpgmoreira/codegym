@@ -1,6 +1,12 @@
+import { EventEmitter } from '@common/helpers/eventEmitter';
 import { GraphRecord } from '@common/schemas/graph';
 import { StartupData } from '@common/schemas/startup';
+import { Events } from '@renderer/events/events';
 import { defineStore } from 'pinia';
+
+EventEmitter.instance.on(Events.loadInitialData, (data: StartupData) => {
+  useGraphStore().initFromStartupData(data);
+});
 
 export const useGraphStore = defineStore('graph', {
   state: () => ({

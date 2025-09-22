@@ -1,16 +1,11 @@
 import { Channels } from '@common/types/channels';
 import { StartupData } from '@common/schemas/startup';
 import { router } from '@renderer/router/router';
-import { useProfileStore } from '@renderer/store/profile';
-import { useOjMetaStore } from '@renderer/store/ojMeta';
-import { useHistoryStore } from '@renderer/store/history';
-import { useGraphStore } from '@renderer/store/graph';
+import { EventEmitter } from '@common/helpers/eventEmitter';
+import { Events } from '@renderer/events/events';
 
 window.api.on(Channels.loadStartupData, (data: StartupData) => {
-  useProfileStore().initFromStartupData(data);
-  useOjMetaStore().initFromStartupData(data);
-  useHistoryStore().initFromStartupData(data);
-  useGraphStore().initFromStartupData(data);
+  EventEmitter.instance.emit(Events.loadInitialData, data);
   document.documentElement.classList.add('theme-dark');
   if (!data.currProfile) {
     document.title = 'codegym';

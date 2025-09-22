@@ -1,8 +1,14 @@
 import { HISTORY_PAGE_SIZE } from '@common/constants';
+import { EventEmitter } from '@common/helpers/eventEmitter';
 import { OjProblem } from '@common/schemas/problems';
 import { getEmptyFirstHistoryPages, StartupData } from '@common/schemas/startup';
 import { Oj } from '@common/types/oj';
+import { Events } from '@renderer/events/events';
 import { defineStore } from 'pinia';
+
+EventEmitter.instance.on(Events.loadInitialData, (data: StartupData) => {
+  useHistoryStore().initFromStartupData(data);
+});
 
 /**
  * Store for managing the first history page for each OJ.
