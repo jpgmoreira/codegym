@@ -6,7 +6,7 @@
   const profileStore = useProfileStore();
   const ojMetaStore = useOjMetaStore();
   const snapshot = computed(() => profileStore.currProfile!.ojContext['leetcode'].snapshot!);
-  const meta = computed(() => ojMetaStore['leetcode']);
+  const meta = computed(() => ojMetaStore.ojMeta['leetcode']);
   const difficultyList = ['Easy', 'Medium', 'Hard'];
 </script>
 

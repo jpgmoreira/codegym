@@ -26,7 +26,7 @@
   );
   const currProfileName = computed(() => profileStore.currProfile!.name);
   function lastCacheUpdate(oj: Oj): string | null {
-    const timestamp = ojMetaStore[oj].lastCacheUpdate;
+    const timestamp = ojMetaStore.ojMeta[oj].lastCacheUpdate;
     if (timestamp) return parseTimestamp(timestamp);
     return null;
   }

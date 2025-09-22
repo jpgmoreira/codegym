@@ -73,7 +73,7 @@ export const useProfileStore = defineStore('profile', {
       const ojMetaStore = useOjMetaStore();
       const historyStore = useHistoryStore();
       let result: GetOjProblemResponseDTO<typeof oj>;
-      if (!ojMetaStore[oj].lastCacheUpdate) {
+      if (!ojMetaStore.ojMeta[oj].lastCacheUpdate) {
         try {
           await ojStatusStore.updateOjCache(oj);
         } catch {

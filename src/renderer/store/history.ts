@@ -19,20 +19,22 @@ EventEmitter.instance.on(Events.clearProfileData, () => {
  * This is used for faster loading time in the history page.
  */
 export const useHistoryStore = defineStore('history', {
-  state: getEmptyFirstHistoryPages,
+  state: () => ({
+    firstHistoryPages: getEmptyFirstHistoryPages(),
+  }),
   actions: {
     initFromStartupData(data: StartupData) {
-      Object.assign(this, data.firstHistoryPages);
+      this.firstHistoryPages = data.firstHistoryPages;
     },
     insertRecord<T extends Oj>(oj: T, snapshot: OjProblem[T]) {
-      const page = this[oj] as OjProblem[T][];
+      const page = this.firstHistoryPages[oj] as OjProblem[T][];
       page.unshift(snapshot);
       if (page.length > HISTORY_PAGE_SIZE) {
         page.pop();
       }
     },
     clear() {
-      Object.assign(this, getEmptyFirstHistoryPages);
+      this.firstHistoryPages = getEmptyFirstHistoryPages();
     },
   },
 });

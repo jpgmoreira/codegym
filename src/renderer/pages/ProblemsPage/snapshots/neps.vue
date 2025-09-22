@@ -6,7 +6,7 @@
   const profileStore = useProfileStore();
   const ojMetaStore = useOjMetaStore();
   const snapshot = computed(() => profileStore.currProfile!.ojContext['neps'].snapshot!);
-  const meta = computed(() => ojMetaStore['neps']);
+  const meta = computed(() => ojMetaStore.ojMeta['neps']);
 </script>
 
 <template>

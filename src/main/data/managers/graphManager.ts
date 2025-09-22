@@ -3,6 +3,12 @@ import { DATA_DIR } from '../constants';
 import Datastore from '@seald-io/nedb';
 import path from 'path';
 import { OjWithContests } from '@common/types/oj';
+import { EventEmitter } from '@common/helpers/eventEmitter';
+import { Events } from '@main/events/events';
+
+EventEmitter.instance.on(Events.clearProfileData, () => {
+  GraphManager.instance.clear();
+});
 
 /**
  * Singleton for managing graph data.
@@ -41,5 +47,9 @@ export class GraphManager {
     }
     record[source] += value;
     await this.db.updateAsync({ date }, record, { upsert: true });
+  }
+
+  public clear() {
+    this.db = null;
   }
 }

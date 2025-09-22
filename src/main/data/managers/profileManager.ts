@@ -15,6 +15,13 @@ import { toBase62 } from '@common/utils/utils';
 import { loadStartupData } from '../startup';
 import { OjContext } from '@common/schemas/ojContext';
 import { OjProblem } from '@common/schemas/problems';
+import { EventEmitter } from '@common/helpers/eventEmitter';
+import { Events } from '@main/events/events';
+import { GenericResponseDTO } from '@common/dto/genericResponseDTO';
+
+EventEmitter.instance.on(Events.clearProfileData, () => {
+  ProfileManager.instance.clear();
+});
 
 /**
  * Singleton for managing profiles.
@@ -73,6 +80,15 @@ export class ProfileManager {
     this.registryProxy!.proxy.currProfileId = profileId;
   }
 
+  public logout() {
+    EventEmitter.instance.emit(Events.clearProfileData);
+  }
+
+  public clear() {
+    this.currProfileProxy = null;
+    this.registryProxy!.proxy.currProfileId = null;
+  }
+
   public updateCurrOj(oj: Oj) {
     this.currProfileProxy!.proxy.currOj = oj;
   }
@@ -105,7 +121,7 @@ export class ProfileManager {
     ojContext.snapshot = snapshot;
   }
 
-  public renameCurrProfile(newName: string) {
+  public renameCurrProfile(newName: string): GenericResponseDTO {
     newName = newName.trim();
     const validationResult = this.validateProfileName(newName);
     if (validationResult.status === 'error') {

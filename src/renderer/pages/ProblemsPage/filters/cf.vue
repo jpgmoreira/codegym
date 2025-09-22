@@ -9,7 +9,7 @@
   const filters = computed(() => ojContext.value['cf'].filters);
   const tagsOptions = computed<MultiselectOption[]>(() => {
     const result: MultiselectOption[] = [];
-    ojMetaStore['cf']?.tags.forEach((tag) => {
+    ojMetaStore.ojMeta['cf']?.tags.forEach((tag) => {
       result.push({
         text: tag,
         value: tag,

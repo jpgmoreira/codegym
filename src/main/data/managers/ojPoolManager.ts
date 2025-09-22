@@ -5,6 +5,12 @@ import { ProfileManager } from './profileManager';
 import { CacheManager } from './cacheManager';
 import { shuffleArray, toBase62 } from '@common/utils/utils';
 import { HistoryManager } from './historyManager';
+import { EventEmitter } from '@common/helpers/eventEmitter';
+import { Events } from '@main/events/events';
+
+EventEmitter.instance.on(Events.clearProfileData, () => {
+  OjPoolManager.instance.clear();
+});
 
 type OjPoolType = {
   [K in Oj]: {

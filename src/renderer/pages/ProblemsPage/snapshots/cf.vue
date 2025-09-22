@@ -6,7 +6,7 @@
   const profileStore = useProfileStore();
   const ojMetaStore = useOjMetaStore();
   const snapshot = computed(() => profileStore.currProfile!.ojContext['cf'].snapshot!);
-  const meta = computed(() => ojMetaStore['cf']);
+  const meta = computed(() => ojMetaStore.ojMeta['cf']);
   const showTags = ref(false);
 </script>
 

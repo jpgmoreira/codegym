@@ -7,7 +7,7 @@
   const profileStore = useProfileStore();
   const ojMetaStore = useOjMetaStore();
   const snapshot = computed(() => profileStore.currProfile!.ojContext['uva'].snapshot!);
-  const meta = computed(() => ojMetaStore['uva']);
+  const meta = computed(() => ojMetaStore.ojMeta['uva']);
 </script>
 
 <template>

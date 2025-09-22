@@ -2,8 +2,14 @@ import { OjProblem } from '@common/schemas/problems';
 import { DATA_DIR } from '../constants';
 import { HISTORY_MAX_SIZE, HISTORY_PAGE_SIZE } from '@common/constants';
 import { Oj } from '@common/types/oj';
+import { EventEmitter } from '@common/helpers/eventEmitter';
+import { Events } from '@main/events/events';
 import Datastore from '@seald-io/nedb';
 import path from 'path';
+
+EventEmitter.instance.on(Events.clearProfileData, () => {
+  HistoryManager.instance.clear();
+});
 
 /**
  * Singleton for managing history data.
@@ -59,5 +65,9 @@ export class HistoryManager {
   public async replaceHistorySnapshot(snapshot: OjProblem[Oj]) {
     if (!this.db) return;
     await this.db.updateAsync({ id: snapshot.id }, snapshot);
+  }
+
+  public clear() {
+    this.db = null;
   }
 }

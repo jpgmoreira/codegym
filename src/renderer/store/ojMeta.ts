@@ -10,13 +10,15 @@ EventEmitter.instance.on(Events.loadInitialData, (data: StartupData) => {
 });
 
 export const useOjMetaStore = defineStore('ojMeta', {
-  state: getEmptyOjMeta,
+  state: () => ({
+    ojMeta: getEmptyOjMeta(),
+  }),
   actions: {
     initFromStartupData(data: StartupData) {
       Object.assign(this, data.ojMeta);
     },
     updateOjMeta<T extends Oj>(oj: T, data: OjMeta[T]) {
-      this.$state[oj] = data;
+      this.ojMeta[oj] = data;
     },
   },
 });

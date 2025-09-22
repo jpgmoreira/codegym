@@ -39,7 +39,7 @@
     if (lastPage.value !== null && page > lastPage.value) return; // Reached last page.
     let items: OjProblem[Oj][];
     if (page === 1) {
-      items = historyStore[currOj.value];
+      items = historyStore.firstHistoryPages[currOj.value];
     } else {
       items = await window.api.invoke<OjProblem[Oj][]>(
         Channels.fetchHistoryPage,

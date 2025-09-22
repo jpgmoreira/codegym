@@ -39,3 +39,5 @@ ipcMain.on(
 ipcMain.on(Channels.setCurrOjSnapshot, (_, snapshot: OjProblem[Oj]) =>
   ProfileManager.instance.setCurrOjSnapshot(snapshot)
 );
+
+ipcMain.on(Channels.logout, ProfileManager.instance.logout);
