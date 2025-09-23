@@ -1,6 +1,6 @@
 <script lang="ts" setup>
   import { randomId } from '@common/utils/utils';
-  import { reactive, computed } from 'vue';
+  import { reactive, computed, ref } from 'vue';
   // - Types:
   type Node =
     | {
@@ -9,7 +9,6 @@
         text: string;
         depth: number;
         open: boolean;
-        parent: Node | null;
         prev: Node | null;
         next: Node | null;
         head: Node | null;
@@ -20,11 +19,10 @@
         type: 'file';
         text: string;
         depth: number;
-        parent: Node | null;
         prev: Node | null;
         next: Node | null;
       };
-  type ContextType = 'root' | 'dir';
+  type ContextType = 'root' | 'dir' | 'file';
   type NodeType = Node['type'];
 
   // - Structures:
@@ -39,10 +37,14 @@
     y: 0,
     type: 'root' as ContextType,
     visible: false,
-    target: null as Node | null,
+    targetNode: null as Node | null,
   });
 
   // - Functions:
+  function resetContext() {
+    context.visible = false;
+    context.targetNode = null;
+  }
   function showRootContext(e: MouseEvent) {
     context.x = e.clientX;
     context.y = e.clientY;
@@ -54,11 +56,14 @@
     context.y = e.clientY;
     context.type = 'dir';
     context.visible = true;
-    context.target = node;
+    context.targetNode = node;
   }
-  function resetContext() {
-    context.visible = false;
-    context.target = null;
+  function showFileContext(node: Node, e: MouseEvent) {
+    context.x = e.clientX;
+    context.y = e.clientY;
+    context.type = 'file';
+    context.visible = true;
+    context.targetNode = node;
   }
   function getEmptyDir(): Node {
     const result = {
@@ -67,7 +72,6 @@
       text: `Folder ${controller.nextDir}`,
       depth: 0,
       open: true,
-      parent: null,
       head: null,
       tail: null,
       prev: null,
@@ -82,7 +86,6 @@
       type: 'file',
       text: `File ${controller.nextFile}`,
       depth: 0,
-      parent: null,
       prev: null,
       next: null,
     } as const;
@@ -108,10 +111,9 @@
   function createDirNode(type: NodeType) {
     // O(1)
     const newNode = type === 'dir' ? getEmptyDir() : getEmptyFile();
-    const parent = context.target;
+    const parent = context.targetNode;
     if (!parent || parent.type !== 'dir') return;
     newNode.depth = parent.depth + 1;
-    newNode.parent = parent;
     parent.open = true;
     if (!parent.tail) {
       parent.head = newNode;
@@ -155,6 +157,10 @@
       <div v-else-if="context.type === 'dir'">
         <div class="context-button" @click="createDirNode('file')">Create a new xxfile</div>
         <div class="context-button" @click="createDirNode('dir')">Create a new xxfolder</div>
+        <div class="context-button">Rename</div>
+      </div>
+      <div v-else-if="context.type === 'file'">
+        <div class="context-button">Rename</div>
       </div>
     </div>
     <div class="border" v-for="node in flattened">
@@ -162,11 +168,20 @@
         <div v-if="node.type === 'dir'">
           <span v-if="node.open" @click="toggleDirOpen(node)">-</span>
           <span v-else @click="toggleDirOpen(node)">+</span>
-          <span @click.right.stop="(e) => showDirContext(node, e)">
-            {{ node.text }}
-          </span>
+          <input
+            type="text"
+            readonly
+            :value.trim="node.text"
+            @click.right.stop="(e) => showDirContext(node, e)"
+          />
         </div>
-        <div v-else>{{ node.text }}</div>
+        <input
+          type="text"
+          readonly
+          :value.trim="node.text"
+          v-else
+          @click.right.stop="(e) => showFileContext(node, e)"
+        />
       </div>
     </div>
   </div>
