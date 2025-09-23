@@ -9,6 +9,7 @@
         text: string;
         depth: number;
         open: boolean;
+        parent: Node | null;
         prev: Node | null;
         next: Node | null;
         head: Node | null;
@@ -17,8 +18,9 @@
     | {
         id: string;
         type: 'file';
-        depth: number;
         text: string;
+        depth: number;
+        parent: Node | null;
         prev: Node | null;
         next: Node | null;
       };
@@ -64,7 +66,8 @@
       type: 'dir',
       text: `Folder ${controller.nextDir}`,
       depth: 0,
-      open: false,
+      open: true,
+      parent: null,
       head: null,
       tail: null,
       prev: null,
@@ -79,11 +82,16 @@
       type: 'file',
       text: `File ${controller.nextFile}`,
       depth: 0,
+      parent: null,
       prev: null,
       next: null,
     } as const;
     controller.nextFile++;
     return result;
+  }
+  function toggleDirOpen(node: Node) {
+    if (node.type !== 'dir') return;
+    node.open = !node.open;
   }
   function createRootNode(type: NodeType) {
     // O(1)
@@ -103,6 +111,7 @@
     const parent = context.target;
     if (!parent || parent.type !== 'dir') return;
     newNode.depth = parent.depth + 1;
+    newNode.parent = parent;
     if (!parent.tail) {
       parent.head = newNode;
       parent.tail = newNode;
@@ -113,11 +122,12 @@
     }
   }
   function flatten(node: Node): Node[] {
+    // O(n)
     const result: Node[] = [];
     let iterator: Node | null = node;
     while (iterator) {
       result.push(iterator);
-      if (iterator.type === 'dir' && iterator.head) {
+      if (iterator.type === 'dir' && iterator.open && iterator.head) {
         result.push(...flatten(iterator.head));
       }
       iterator = iterator.next;
@@ -125,6 +135,7 @@
     return result;
   }
   const flattened = computed<Node[]>(() =>
+    // O(n)
     controller.head === null ? [] : flatten(controller.head)
   );
 </script>
@@ -147,8 +158,12 @@
     </div>
     <div class="border" v-for="node in flattened">
       <div :style="{ paddingLeft: `${node.depth * 20}px` }">
-        <div v-if="node.type === 'dir'" @click.right.stop="(e) => showDirContext(node, e)">
-          {{ node.text }}
+        <div v-if="node.type === 'dir'">
+          <span v-if="node.open" @click="toggleDirOpen(node)">-</span>
+          <span v-else @click="toggleDirOpen(node)">+</span>
+          <span @click.right.stop="(e) => showDirContext(node, e)">
+            {{ node.text }}
+          </span>
         </div>
         <div v-else>{{ node.text }}</div>
       </div>
