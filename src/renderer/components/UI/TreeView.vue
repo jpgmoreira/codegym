@@ -180,7 +180,7 @@
         <div class="context-button" @click="startRename">Rename</div>
       </div>
     </div>
-    <div class="border" v-for="node in flattened">
+    <div class="node-row" v-for="node in flattened">
       <div :style="{ paddingLeft: `${node.depth * 20}px` }">
         <div v-if="node.type === 'dir'">
           <span v-if="node.open" @click="toggleDirOpen(node)">-</span>
@@ -230,10 +230,23 @@
   .context-button:hover {
     background-color: #888;
   }
+  .node-row {
+    cursor: pointer;
+  }
+  .node-row:hover {
+    background-color: #515151;
+  }
   input[type='text'] {
     background-color: transparent;
+    line-height: 1rem;
   }
   input[type='text']:focus {
     outline: none;
+  }
+  input[type='text']:not([readonly]) {
+    background-color: #313131;
+  }
+  input[type='text'][readonly] {
+    cursor: pointer;
   }
 </style>
