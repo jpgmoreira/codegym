@@ -112,6 +112,7 @@
     if (!parent || parent.type !== 'dir') return;
     newNode.depth = parent.depth + 1;
     newNode.parent = parent;
+    parent.open = true;
     if (!parent.tail) {
       parent.head = newNode;
       parent.tail = newNode;
