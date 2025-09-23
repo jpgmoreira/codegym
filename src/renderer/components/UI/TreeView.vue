@@ -1,6 +1,6 @@
 <script lang="ts" setup>
   import { randomId } from '@common/utils/utils';
-  import { reactive, computed, ref } from 'vue';
+  import { reactive, computed, ref, onMounted, onBeforeUnmount } from 'vue';
   // - Types:
   type Node =
     | {
@@ -40,7 +40,12 @@
     targetNode: null as Node | null,
     targetDom: null as HTMLInputElement | null,
   });
+  const keys = reactive({
+    ctrl: false,
+    shift: false,
+  });
   const renaming = ref<Node | null>(null);
+  const selectedNodeIds = ref(new Set<string>());
 
   // - Functions:
   function resetContext() {
@@ -141,6 +146,23 @@
       parent.tail = newNode;
     }
   }
+  function _selectNode(node: Node) {
+    // O(n)
+    selectedNodeIds.value.add(node.id);
+    if (node.type === 'dir') {
+      let curr = node.head;
+      while (curr !== node.tail) {
+        _selectNode(curr!);
+        curr = curr!.next;
+      }
+      if (curr) _selectNode(curr);
+    }
+  }
+  function selectNode(node: Node) {
+    // O(n)
+    if (!keys.ctrl && !keys.shift) selectedNodeIds.value.clear();
+    _selectNode(node);
+  }
   function flatten(node: Node): Node[] {
     // O(n)
     const result: Node[] = [];
@@ -154,10 +176,31 @@
     }
     return result;
   }
+  function handleKeyDown(e: KeyboardEvent) {
+    keys.ctrl = e.ctrlKey;
+    keys.shift = e.shiftKey;
+  }
+  function handleKeyUp(e: KeyboardEvent) {
+    keys.ctrl = e.ctrlKey;
+    keys.shift = e.shiftKey;
+  }
+
+  // - Computed:
   const flattened = computed<Node[]>(() =>
     // O(n)
     controller.head === null ? [] : flatten(controller.head)
   );
+
+  // - Lifecycle hooks:
+  onMounted(() => {
+    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('keyup', handleKeyUp);
+  });
+
+  onBeforeUnmount(() => {
+    window.removeEventListener('keydown', handleKeyDown);
+    window.removeEventListener('keyup', handleKeyUp);
+  });
 </script>
 
 <template>
@@ -180,9 +223,9 @@
         <div class="context-button" @click="startRename">Rename</div>
       </div>
     </div>
-    <div class="node-row" v-for="node in flattened">
-      <div :style="{ paddingLeft: `${node.depth * 20}px` }">
-        <div v-if="node.type === 'dir'">
+    <div class="node-row" v-for="node in flattened" @click="selectNode(node)">
+      <div class="padding-container" :style="{ paddingLeft: `${node.depth * 20}px` }">
+        <div class="dir-container" v-if="node.type === 'dir'">
           <span v-if="node.open" @click="toggleDirOpen(node)">-</span>
           <span v-else @click="toggleDirOpen(node)">+</span>
           <input
@@ -230,15 +273,21 @@
   .context-button:hover {
     background-color: #888;
   }
+
   .node-row {
-    cursor: pointer;
+    border: 1px solid blue;
   }
-  .node-row:hover {
-    background-color: #515151;
+  .padding-container {
+    border: 1px solid aqua;
   }
+  .dir-container {
+    border: 1px solid orange;
+  }
+
   input[type='text'] {
     background-color: transparent;
     line-height: 1rem;
+    border: 1px solid olive;
   }
   input[type='text']:focus {
     outline: none;
