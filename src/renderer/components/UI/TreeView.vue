@@ -38,12 +38,27 @@
     type: 'root' as ContextType,
     visible: false,
     targetNode: null as Node | null,
+    targetDom: null as HTMLInputElement | null,
   });
+  const renaming = ref<Node | null>(null);
 
   // - Functions:
   function resetContext() {
     context.visible = false;
     context.targetNode = null;
+    context.targetDom = null;
+  }
+  function startRename() {
+    renaming.value = context.targetNode;
+    context.targetDom?.focus();
+    context.targetDom?.select();
+  }
+  function finishRename(node: Node, e: Event) {
+    const newName = (e.target as HTMLInputElement).value.trim();
+    renaming.value = null;
+    if (node.text !== newName) {
+      node.text = newName;
+    }
   }
   function showRootContext(e: MouseEvent) {
     context.x = e.clientX;
@@ -57,6 +72,7 @@
     context.type = 'dir';
     context.visible = true;
     context.targetNode = node;
+    context.targetDom = e.currentTarget as HTMLInputElement;
   }
   function showFileContext(node: Node, e: MouseEvent) {
     context.x = e.clientX;
@@ -64,6 +80,7 @@
     context.type = 'file';
     context.visible = true;
     context.targetNode = node;
+    context.targetDom = e.currentTarget as HTMLInputElement;
   }
   function getEmptyDir(): Node {
     const result = {
@@ -157,10 +174,10 @@
       <div v-else-if="context.type === 'dir'">
         <div class="context-button" @click="createDirNode('file')">Create a new xxfile</div>
         <div class="context-button" @click="createDirNode('dir')">Create a new xxfolder</div>
-        <div class="context-button">Rename</div>
+        <div class="context-button" @click="startRename">Rename</div>
       </div>
       <div v-else-if="context.type === 'file'">
-        <div class="context-button">Rename</div>
+        <div class="context-button" @click="startRename">Rename</div>
       </div>
     </div>
     <div class="border" v-for="node in flattened">
@@ -170,16 +187,22 @@
           <span v-else @click="toggleDirOpen(node)">+</span>
           <input
             type="text"
-            readonly
+            :readonly="renaming !== node"
             :value.trim="node.text"
+            @keydown.esc="renaming = null"
+            @keydown.enter="(e) => finishRename(node, e)"
+            @blur="(e) => finishRename(node, e)"
             @click.right.stop="(e) => showDirContext(node, e)"
           />
         </div>
         <input
-          type="text"
-          readonly
-          :value.trim="node.text"
           v-else
+          type="text"
+          :readonly="renaming !== node"
+          :value.trim="node.text"
+          @keydown.esc="renaming = null"
+          @keydown.enter="(e) => finishRename(node, e)"
+          @blur="(e) => finishRename(node, e)"
           @click.right.stop="(e) => showFileContext(node, e)"
         />
       </div>
@@ -206,5 +229,11 @@
   }
   .context-button:hover {
     background-color: #888;
+  }
+  input[type='text'] {
+    background-color: transparent;
+  }
+  input[type='text']:focus {
+    outline: none;
   }
 </style>
