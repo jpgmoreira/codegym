@@ -179,13 +179,13 @@
   function _selectFileNode(node: Node) {
     selectedNodeIds.value.add(node.id);
     let curr: Node | null = node.parent;
-    let sum = 1;
+    let delta = 1;
     while (curr) {
       if (curr.type !== 'dir') break;
-      curr.nSelDesc += sum;
+      curr.nSelDesc += delta;
       if (curr.nSelDesc === curr.nDesc) {
         selectedNodeIds.value.add(curr.id);
-        sum++;
+        delta++;
       }
       curr = curr.parent;
     }
@@ -195,6 +195,7 @@
     let curr: Node | null = head;
     while (curr !== tail) {
       if (!curr) break;
+      if (selectedNodeIds.value.has(curr.id)) continue;
       selectedNodeIds.value.add(curr.id);
       if (curr.type === 'dir') {
         curr.nSelDesc = curr.nDesc;
@@ -203,6 +204,7 @@
       curr = curr.next;
     }
     if (!curr) return;
+    if (selectedNodeIds.value.has(curr.id)) return;
     selectedNodeIds.value.add(curr.id);
     if (curr.type === 'dir') {
       curr.nSelDesc = curr.nDesc;
@@ -212,16 +214,16 @@
   function _selectDirNode(node: Node) {
     if (node.type !== 'dir') return;
     selectedNodeIds.value.add(node.id);
-    let sum = node.nDesc - node.nSelDesc + 1;
+    let delta = node.nDesc - node.nSelDesc + 1;
     node.nSelDesc = node.nDesc;
     _markSubtreeAsSelected(node.head, node.tail);
     let curr = node.parent;
     while (curr) {
       if (curr.type !== 'dir') break;
-      curr.nSelDesc += sum;
+      curr.nSelDesc += delta;
       if (curr.nSelDesc === curr.nDesc) {
         selectedNodeIds.value.add(curr.id);
-        sum++;
+        delta++;
       }
       curr = curr.parent;
     }
