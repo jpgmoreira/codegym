@@ -165,12 +165,15 @@
       newNode.prev = parent.tail;
       parent.tail = newNode;
     }
+    const isParentSelected = selectedNodeIds.value.has(parent.id);
     let curr: Node | null = parent;
     while (curr) {
       if (curr.type !== 'dir') break; // Just to make TS happy.
       curr.nDesc++;
+      if (isParentSelected) curr.nSelDesc++;
       curr = curr.parent;
     }
+    if (isParentSelected) selectedNodeIds.value.add(newNode.id);
   }
   // Selection:
   function _selectFileNode(node: Node) {
