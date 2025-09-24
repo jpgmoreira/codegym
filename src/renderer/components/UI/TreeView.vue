@@ -14,8 +14,10 @@
         nDesc: number; // Total number of direct and indirect descendants, not including the node itself.
         nSelDesc: number; // Number of descendants selected, not including the node itself.
         parent: Node | null;
+        // Prev and next sibling:
         prev: Node | null;
         next: Node | null;
+        // Head and tail direct children:
         head: Node | null;
         tail: Node | null;
       }
@@ -185,10 +187,46 @@
       curr = curr.parent;
     }
   }
+  function _markSubtreeAsSelected(head: Node | null, tail: Node | null) {
+    if (!head || !tail) return;
+    let curr: Node | null = head;
+    while (curr !== tail) {
+      if (!curr) break;
+      selectedNodeIds.value.add(curr.id);
+      if (curr.type === 'dir') {
+        curr.nSelDesc = curr.nDesc;
+        _markSubtreeAsSelected(curr.head, curr.tail);
+      }
+      curr = curr.next;
+    }
+    if (!curr) return;
+    selectedNodeIds.value.add(curr.id);
+    if (curr.type === 'dir') {
+      curr.nSelDesc = curr.nDesc;
+      _markSubtreeAsSelected(curr.head, curr.tail);
+    }
+  }
+  function _selectDirNode(node: Node) {
+    if (node.type !== 'dir') return;
+    selectedNodeIds.value.add(node.id);
+    let sum = node.nDesc - node.nSelDesc + 1;
+    node.nSelDesc = node.nDesc;
+    _markSubtreeAsSelected(node.head, node.tail);
+    let curr = node.parent;
+    while (curr) {
+      if (curr.type !== 'dir') break;
+      curr.nSelDesc += sum;
+      if (curr.nSelDesc === curr.nDesc) {
+        selectedNodeIds.value.add(curr.id);
+        sum++;
+      }
+      curr = curr.parent;
+    }
+  }
   function selectNode(node: Node) {
     if (!keys.ctrl) clearSelection();
     if (node.type === 'file') _selectFileNode(node);
-    // else _selectDirNode(node);
+    else _selectDirNode(node);
   }
   function clearSelection() {}
   // Flatten:
