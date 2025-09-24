@@ -134,6 +134,7 @@
   }
 
   // - Functions whose complexity is important:
+  // Creation:
   function createRootNode(type: NodeType) {
     // O(height)
     const newNode = type === 'dir' ? getEmptyDir() : getEmptyFile();
@@ -164,13 +165,33 @@
     }
     let curr: Node | null = parent;
     while (curr) {
-      if (curr.type === 'dir') {
-        curr.nDesc++;
+      if (curr.type !== 'dir') break; // Just to make TS happy.
+      curr.nDesc++;
+      curr = curr.parent;
+    }
+  }
+  // Selection:
+  function _selectFileNode(node: Node) {
+    selectedNodeIds.value.add(node.id);
+    let curr: Node | null = node.parent;
+    let sum = 1;
+    while (curr) {
+      if (curr.type !== 'dir') break;
+      curr.nSelDesc += sum;
+      if (curr.nSelDesc === curr.nDesc) {
+        selectedNodeIds.value.add(curr.id);
+        sum++;
       }
       curr = curr.parent;
     }
   }
-  function selectNode(node: Node) {}
+  function selectNode(node: Node) {
+    if (!keys.ctrl) clearSelection();
+    if (node.type === 'file') _selectFileNode(node);
+    // else _selectDirNode(node);
+  }
+  function clearSelection() {}
+  // Flatten:
   function flatten(node: Node): Node[] {
     // O(n)
     const result: Node[] = [];
