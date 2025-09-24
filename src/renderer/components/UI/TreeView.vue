@@ -236,6 +236,8 @@
             type="text"
             :readonly="renaming !== node"
             :value.trim="node.text"
+            :class="{ selected: selectedNodeIds.has(node.id) }"
+            @click="selectNode(node)"
             @keydown.esc="renaming = null"
             @keydown.enter="(e: KeyboardEvent) => finishRename(node, e)"
             @blur="(e: FocusEvent) => finishRename(node, e)"
@@ -247,6 +249,8 @@
           type="text"
           :readonly="renaming !== node"
           :value.trim="node.text"
+          :class="{ selected: selectedNodeIds.has(node.id) }"
+          @click="selectNode(node)"
           @keydown.esc="renaming = null"
           @keydown.enter="(e: KeyboardEvent) => finishRename(node, e)"
           @blur="(e: FocusEvent) => finishRename(node, e)"
@@ -304,5 +308,8 @@
   input[type='text'][readonly]:hover,
   input[type='text'][readonly]:focus {
     background-color: #515151;
+  }
+  input[type='text'].selected {
+    background-color: #404040;
   }
 </style>
