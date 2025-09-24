@@ -44,5 +44,5 @@
 </script>
 
 <template>
-  <input ref="inputRef" type="text" @input="updateInputLength" @blur="handleBlur" />
+  <input ref="inputRef" type="text" @input="updateInputLength" @blur="handleBlur" v-bind="$attrs" />
 </template>

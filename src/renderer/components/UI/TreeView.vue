@@ -1,6 +1,8 @@
 <script lang="ts" setup>
   import { randomId } from '@common/utils/utils';
   import { reactive, computed, ref, onMounted, onBeforeUnmount } from 'vue';
+  import AutoLengthInput from './AutoLengthInput.vue';
+
   // - Types:
   type Node =
     | {
@@ -38,7 +40,7 @@
     type: 'root' as ContextType,
     visible: false,
     targetNode: null as Node | null,
-    targetDom: null as HTMLInputElement | null,
+    targetDomElement: null as HTMLInputElement | null,
   });
   const keys = reactive({
     ctrl: false,
@@ -51,18 +53,19 @@
   function resetContext() {
     context.visible = false;
     context.targetNode = null;
-    context.targetDom = null;
+    context.targetDomElement = null;
   }
   function startRename() {
     renaming.value = context.targetNode;
-    context.targetDom?.focus();
-    context.targetDom?.select();
+    context.targetDomElement?.focus();
+    context.targetDomElement?.select();
   }
   function finishRename(node: Node, e: Event) {
     const newName = (e.target as HTMLInputElement).value.trim();
     renaming.value = null;
     if (node.text !== newName) {
       node.text = newName;
+      // update name here...
     }
   }
   function showRootContext(e: MouseEvent) {
@@ -77,7 +80,7 @@
     context.type = 'dir';
     context.visible = true;
     context.targetNode = node;
-    context.targetDom = e.currentTarget as HTMLInputElement;
+    context.targetDomElement = e.currentTarget as HTMLInputElement;
   }
   function showFileContext(node: Node, e: MouseEvent) {
     context.x = e.clientX;
@@ -85,7 +88,7 @@
     context.type = 'file';
     context.visible = true;
     context.targetNode = node;
-    context.targetDom = e.currentTarget as HTMLInputElement;
+    context.targetDomElement = e.currentTarget as HTMLInputElement;
   }
   function getEmptyDir(): Node {
     const result = {
@@ -118,6 +121,8 @@
     if (node.type !== 'dir') return;
     node.open = !node.open;
   }
+
+  // - Functions whose complexity is important:
   function createRootNode(type: NodeType) {
     // O(1)
     const newNode = type === 'dir' ? getEmptyDir() : getEmptyFile();
@@ -176,14 +181,6 @@
     }
     return result;
   }
-  function handleKeyDown(e: KeyboardEvent) {
-    keys.ctrl = e.ctrlKey;
-    keys.shift = e.shiftKey;
-  }
-  function handleKeyUp(e: KeyboardEvent) {
-    keys.ctrl = e.ctrlKey;
-    keys.shift = e.shiftKey;
-  }
 
   // - Computed:
   const flattened = computed<Node[]>(() =>
@@ -192,14 +189,21 @@
   );
 
   // - Lifecycle hooks:
+  function windowKeyDown(e: KeyboardEvent) {
+    keys.ctrl = e.ctrlKey;
+    keys.shift = e.shiftKey;
+  }
+  function windowKeyUp(e: KeyboardEvent) {
+    keys.ctrl = e.ctrlKey;
+    keys.shift = e.shiftKey;
+  }
   onMounted(() => {
-    window.addEventListener('keydown', handleKeyDown);
-    window.addEventListener('keyup', handleKeyUp);
+    window.addEventListener('keydown', windowKeyDown);
+    window.addEventListener('keyup', windowKeyUp);
   });
-
   onBeforeUnmount(() => {
-    window.removeEventListener('keydown', handleKeyDown);
-    window.removeEventListener('keyup', handleKeyUp);
+    window.removeEventListener('keydown', windowKeyDown);
+    window.removeEventListener('keyup', windowKeyUp);
   });
 </script>
 
@@ -223,30 +227,30 @@
         <div class="context-button" @click="startRename">Rename</div>
       </div>
     </div>
-    <div class="node-row" v-for="node in flattened" @click="selectNode(node)">
+    <div class="node-row" v-for="node in flattened">
       <div class="padding-container" :style="{ paddingLeft: `${node.depth * 20}px` }">
         <div class="dir-container" v-if="node.type === 'dir'">
           <span v-if="node.open" @click="toggleDirOpen(node)">-</span>
           <span v-else @click="toggleDirOpen(node)">+</span>
-          <input
+          <AutoLengthInput
             type="text"
             :readonly="renaming !== node"
             :value.trim="node.text"
             @keydown.esc="renaming = null"
-            @keydown.enter="(e) => finishRename(node, e)"
-            @blur="(e) => finishRename(node, e)"
-            @click.right.stop="(e) => showDirContext(node, e)"
+            @keydown.enter="(e: KeyboardEvent) => finishRename(node, e)"
+            @blur="(e: FocusEvent) => finishRename(node, e)"
+            @click.right.stop="(e: MouseEvent) => showDirContext(node, e)"
           />
         </div>
-        <input
+        <AutoLengthInput
           v-else
           type="text"
           :readonly="renaming !== node"
           :value.trim="node.text"
           @keydown.esc="renaming = null"
-          @keydown.enter="(e) => finishRename(node, e)"
-          @blur="(e) => finishRename(node, e)"
-          @click.right.stop="(e) => showFileContext(node, e)"
+          @keydown.enter="(e: KeyboardEvent) => finishRename(node, e)"
+          @blur="(e: FocusEvent) => finishRename(node, e)"
+          @click.right.stop="(e: MouseEvent) => showFileContext(node, e)"
         />
       </div>
     </div>
@@ -257,6 +261,7 @@
   .tree-container {
     border: 1px solid red;
     flex-grow: 1;
+    overflow: scroll auto;
   }
   .context {
     background-color: #333;
@@ -281,6 +286,7 @@
     border: 1px solid aqua;
   }
   .dir-container {
+    white-space: nowrap;
     border: 1px solid orange;
   }
 
