@@ -1,0 +1,48 @@
+<script lang="ts" setup>
+  import { onMounted, ref as vueRef } from 'vue';
+  const inputRef = vueRef<HTMLInputElement | null>(null);
+  const measureSpan = document.createElement('span');
+  measureSpan.style.position = 'absolute';
+  measureSpan.style.left = '-99999px';
+  measureSpan.style.top = '0';
+  measureSpan.style.visibility = 'hidden';
+  measureSpan.style.whiteSpace = 'pre';
+  measureSpan.style.display = 'inline-block';
+  document.body.appendChild(measureSpan);
+  function updateInputLength() {
+    const input = inputRef.value;
+    if (!input) return;
+    const style = getComputedStyle(input);
+    measureSpan.style.font = style.font || `${style.fontSize} ${style.fontFamily}`;
+    measureSpan.style.letterSpacing = style.letterSpacing;
+    measureSpan.style.textTransform = style.textTransform;
+    const value = input.value || input.placeholder || ' ';
+    measureSpan.textContent = value;
+    const contentWidth = measureSpan.offsetWidth;
+    const paddingLeft = parseFloat(style.paddingLeft || '0');
+    const paddingRight = parseFloat(style.paddingRight || '0');
+    const borderLeft = parseFloat(style.borderLeftWidth || '0');
+    const borderRight = parseFloat(style.borderRightWidth || '0');
+    const paddingAndBorder = paddingLeft + paddingRight + borderLeft + borderRight;
+    const boxSizing = style.boxSizing;
+    let finalWidth = contentWidth;
+    if (boxSizing === 'border-box') {
+      finalWidth += paddingAndBorder;
+    }
+    input.style.width = Math.max(Math.ceil(finalWidth + 2), 20) + 'px';
+  }
+  function handleBlur() {
+    const input = inputRef.value;
+    if (!input) return;
+    input.value = input.value.trim();
+    updateInputLength();
+  }
+  onMounted(() => {
+    handleBlur();
+    updateInputLength();
+  });
+</script>
+
+<template>
+  <input ref="inputRef" type="text" @input="updateInputLength" @blur="handleBlur" />
+</template>
