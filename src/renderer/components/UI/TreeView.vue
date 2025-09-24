@@ -280,28 +280,29 @@
   }
 
   .node-row {
-    border: 1px solid blue;
+    /* border: 1px solid blue; */
   }
   .padding-container {
-    border: 1px solid aqua;
+    /* border: 1px solid aqua; */
   }
   .dir-container {
     white-space: nowrap;
-    border: 1px solid orange;
+    /* border: 1px solid orange; */
   }
 
   input[type='text'] {
     background-color: transparent;
     line-height: 1rem;
-    border: 1px solid olive;
-  }
-  input[type='text']:focus {
-    outline: none;
+    /* border: 1px solid olive; */
   }
   input[type='text']:not([readonly]) {
     background-color: #313131;
   }
   input[type='text'][readonly] {
     cursor: pointer;
+  }
+  input[type='text'][readonly]:hover,
+  input[type='text'][readonly]:focus {
+    background-color: #515151;
   }
 </style>
