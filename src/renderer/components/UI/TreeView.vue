@@ -11,6 +11,9 @@
         text: string;
         depth: number;
         open: boolean;
+        nDesc: number; // Total number of direct and indirect descendants, not including the node itself.
+        nSelDesc: number; // Number of descendants selected, not including the node itself.
+        parent: Node | null;
         prev: Node | null;
         next: Node | null;
         head: Node | null;
@@ -21,6 +24,7 @@
         type: 'file';
         text: string;
         depth: number;
+        parent: Node | null;
         prev: Node | null;
         next: Node | null;
       };
@@ -48,6 +52,7 @@
   });
   const renaming = ref<Node | null>(null);
   const selectedNodeIds = ref(new Set<string>());
+  const idToNode = new Map<string, Node>();
 
   // - Functions:
   function resetContext() {
@@ -97,11 +102,15 @@
       text: `Folder ${controller.nextDir}`,
       depth: 0,
       open: true,
+      nDesc: 0,
+      nSelDesc: 0,
+      parent: null,
       head: null,
       tail: null,
       prev: null,
       next: null,
     } as const;
+    idToNode.set(result.id, result);
     controller.nextDir++;
     return result;
   }
@@ -111,9 +120,11 @@
       type: 'file',
       text: `File ${controller.nextFile}`,
       depth: 0,
+      parent: null,
       prev: null,
       next: null,
     } as const;
+    idToNode.set(result.id, result);
     controller.nextFile++;
     return result;
   }
@@ -124,7 +135,7 @@
 
   // - Functions whose complexity is important:
   function createRootNode(type: NodeType) {
-    // O(1)
+    // O(height)
     const newNode = type === 'dir' ? getEmptyDir() : getEmptyFile();
     if (!controller.tail) {
       controller.head = newNode;
@@ -136,10 +147,11 @@
     }
   }
   function createDirNode(type: NodeType) {
-    // O(1)
+    // O(height)
     const newNode = type === 'dir' ? getEmptyDir() : getEmptyFile();
     const parent = context.targetNode;
     if (!parent || parent.type !== 'dir') return;
+    newNode.parent = parent;
     newNode.depth = parent.depth + 1;
     parent.open = true;
     if (!parent.tail) {
@@ -150,24 +162,15 @@
       newNode.prev = parent.tail;
       parent.tail = newNode;
     }
-  }
-  function _selectNode(node: Node) {
-    // O(n)
-    selectedNodeIds.value.add(node.id);
-    if (node.type === 'dir') {
-      let curr = node.head;
-      while (curr !== node.tail) {
-        _selectNode(curr!);
-        curr = curr!.next;
+    let curr: Node | null = parent;
+    while (curr) {
+      if (curr.type === 'dir') {
+        curr.nDesc++;
       }
-      if (curr) _selectNode(curr);
+      curr = curr.parent;
     }
   }
-  function selectNode(node: Node) {
-    // O(n)
-    if (!keys.ctrl && !keys.shift) selectedNodeIds.value.clear();
-    _selectNode(node);
-  }
+  function selectNode(node: Node) {}
   function flatten(node: Node): Node[] {
     // O(n)
     const result: Node[] = [];
@@ -292,6 +295,13 @@
   .dir-container {
     white-space: nowrap;
     /* border: 1px solid orange; */
+  }
+
+  .dir-container.full-selected {
+    border: 2px solid green;
+  }
+  .dir-container.partial-selected {
+    border: 2px solid tomato;
   }
 
   input[type='text'] {
