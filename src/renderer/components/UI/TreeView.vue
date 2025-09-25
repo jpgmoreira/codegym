@@ -1,21 +1,28 @@
 <script lang="ts" setup>
   import { computed, reactive, useTemplateRef } from 'vue';
+  import AutoLengthInput from './AutoLengthInput.vue';
+  import { randomId } from '@common/utils/utils';
 
   // --- Types and structures: ---
 
   type Node =
     | {
+        id: string;
         type: 'dir';
         text: string;
+        depth: number;
         parent: Node | null;
         next: Node | null;
         prev: Node | null;
         head: Node | null;
         tail: Node | null;
+        open: boolean;
       }
     | {
+        id: string;
         type: 'file';
         text: string;
+        depth: number;
         parent: Node | null;
         next: Node | null;
         prev: Node | null;
@@ -59,10 +66,17 @@
     context['style'] = res;
   }
 
-  function showContext(type: ContextType, e: MouseEvent) {
+  function showContext(type: ContextType, e: MouseEvent, targetNode: Node | null) {
     context.type = type;
     context.visible = true;
     computeContextStyle(e.clientX, e.clientY);
+    if (type === 'root') {
+      context.targetNode = null;
+      context.targetDomElement = null;
+    } else {
+      context.targetNode = targetNode;
+      context.targetDomElement = e.currentTarget as HTMLInputElement;
+    }
   }
 
   function clearContext() {
@@ -75,21 +89,26 @@
 
   function _createDirNode(parent: Node | null): Node {
     const node = {
+      id: randomId(),
       type: 'dir',
       text: `Folder ${rootController.nextDir}`,
+      depth: 0,
       parent,
       next: null,
       prev: null,
       head: null,
       tail: null,
+      open: false,
     } as const;
     rootController.nextDir++;
     return node;
   }
   function _createFileNode(parent: Node | null): Node {
     const node = {
+      id: randomId(),
       type: 'file',
       text: `File ${rootController.nextFile}`,
+      depth: 0,
       parent,
       next: null,
       prev: null,
@@ -98,10 +117,12 @@
     return node;
   }
 
-  function createNode(type: NodeType, parent: Node | null) {
+  function createNode(type: NodeType) {
+    const parent = context.targetNode;
     if (parent && parent.type !== 'dir') return;
     const newNode = type === 'dir' ? _createDirNode(parent) : _createFileNode(parent);
     const control = parent || rootController;
+    newNode.depth = parent ? parent.depth + 1 : 0;
     if (!control.head || !control.tail) {
       control.head = newNode;
       control.tail = newNode;
@@ -132,19 +153,35 @@
   <div
     class="tree-container"
     ref="tree-container"
-    @click.right="(e) => showContext('root', e)"
+    @click.right="(e) => showContext('root', e, null)"
     @click="clearContext"
   >
     <!-- Context menu -->
     <div v-if="context.visible" class="context-container" :style="context.style">
       <div v-if="context.type === 'root'">
-        <div @click="createNode('file', null)">Create file</div>
-        <div @click="createNode('dir', null)">Create folder</div>
+        <div @click="createNode('file')">Create file</div>
+        <div @click="createNode('dir')">Create folder</div>
+      </div>
+      <div v-else-if="context.type === 'dir'">
+        <div @click="createNode('file')">Create file</div>
+        <div @click="createNode('dir')">Create folder</div>
+        <div>Rename</div>
+        <div>Delete</div>
       </div>
     </div>
     <!-- Tree -->
-    <div v-for="node in flattened" class="node-row">
-      {{ node.text }}
+    <div v-for="node in flattened" class="node-row" :key="node.id">
+      <div :style="{ paddingLeft: `${node.depth * 40}px` }">
+        <div v-if="node.type === 'dir'">
+          <span v-if="node.open">-</span>
+          <span v-else>+</span>
+          <AutoLengthInput
+            :value="node.text"
+            @click.right.stop="(e: MouseEvent) => showContext('dir', e, node)"
+          />
+        </div>
+        <AutoLengthInput v-else :value="node.text" />
+      </div>
     </div>
   </div>
 </template>
