@@ -234,11 +234,43 @@
       curr = curr.parent;
     }
   }
-  function selectNode(node: Node) {
+  function _deselectFileNode(node: Node) {
+    selectedNodeIds.value.delete(node.id);
+    let curr = node.parent;
+    let delta = 1;
+    while (curr) {
+      if (curr.type !== 'dir') break;
+      curr.nSelDesc -= delta;
+      if (selectedNodeIds.value.has(curr.id)) {
+        delta++;
+        selectedNodeIds.value.delete(curr.id);
+      }
+      curr = curr.parent;
+    }
+  }
+  function _deselectDirNode(node: Node) {}
+  function handleNodeSelection(node: Node) {
     // O(height + #subtree)
-    if (!keys.ctrl) clearSelection();
-    if (node.type === 'file') _selectFileNode(node);
-    else _selectDirNode(node);
+    const mustSelect = !selectedNodeIds.value.has(node.id);
+    let cleared = false;
+    if (!keys.ctrl) {
+      clearSelection();
+      cleared = true;
+    }
+    if (!mustSelect) {
+      if (document.activeElement instanceof HTMLElement) {
+        document.activeElement.blur();
+      }
+      if (cleared) return;
+      else {
+        if (node.type === 'file') _deselectFileNode(node);
+        else _deselectDirNode(node);
+      }
+    }
+    if (mustSelect) {
+      if (node.type === 'file') _selectFileNode(node);
+      else _selectDirNode(node);
+    }
   }
   function clearSelection() {
     // O(#selected + height)
@@ -315,6 +347,7 @@
         <div class="context-button" @click="startRename">Rename</div>
       </div>
     </div>
+    <div class="selected-nodes-badge">Selected nodes: {{ selectedNodeIds.size }}</div>
     <div class="node-row" v-for="node in flattened" :key="node.id">
       <div class="padding-container" :style="{ paddingLeft: `${node.depth * 20}px` }">
         <div class="dir-container" v-if="node.type === 'dir'">
@@ -325,7 +358,7 @@
             :readonly="renaming !== node"
             :value.trim="node.text"
             :class="{ selected: selectedNodeIds.has(node.id) }"
-            @click="selectNode(node)"
+            @click="handleNodeSelection(node)"
             @keydown.esc="renaming = null"
             @keydown.enter="(e: KeyboardEvent) => finishRename(node, e)"
             @blur="(e: FocusEvent) => finishRename(node, e)"
@@ -338,7 +371,7 @@
           :readonly="renaming !== node"
           :value.trim="node.text"
           :class="{ selected: selectedNodeIds.has(node.id) }"
-          @click="selectNode(node)"
+          @click="handleNodeSelection(node)"
           @keydown.esc="renaming = null"
           @keydown.enter="(e: KeyboardEvent) => finishRename(node, e)"
           @blur="(e: FocusEvent) => finishRename(node, e)"
