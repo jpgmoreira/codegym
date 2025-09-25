@@ -177,6 +177,7 @@
   }
   // Selection:
   function _selectFileNode(node: Node) {
+    // O(height)
     selectedNodeIds.value.add(node.id);
     let curr: Node | null = node.parent;
     let delta = 1;
@@ -191,6 +192,7 @@
     }
   }
   function _markSubtreeAsSelected(head: Node | null, tail: Node | null) {
+    // O(#subtree)
     if (!head || !tail) return;
     let curr: Node | null = head;
     while (curr !== tail) {
@@ -215,6 +217,7 @@
     }
   }
   function _selectDirNode(node: Node) {
+    // O(height + #subtree)
     if (node.type !== 'dir') return;
     selectedNodeIds.value.add(node.id);
     let delta = node.nDesc - node.nSelDesc + 1;
@@ -232,11 +235,26 @@
     }
   }
   function selectNode(node: Node) {
+    // O(height + #subtree)
     if (!keys.ctrl) clearSelection();
     if (node.type === 'file') _selectFileNode(node);
     else _selectDirNode(node);
   }
-  function clearSelection() {}
+  function clearSelection() {
+    // O(#selected + height)
+    for (const id of selectedNodeIds.value) {
+      const node = idToNode.get(id)!;
+      if (node.type === 'dir') node.nSelDesc = 0;
+      let curr = node.parent;
+      while (curr) {
+        if (curr.type !== 'dir') break;
+        if (curr.nSelDesc === 0) break;
+        curr.nSelDesc = 0;
+        curr = curr.parent;
+      }
+    }
+    selectedNodeIds.value.clear();
+  }
   // Flatten:
   function flatten(node: Node): Node[] {
     // O(n)
