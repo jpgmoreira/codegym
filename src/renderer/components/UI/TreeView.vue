@@ -55,6 +55,7 @@
   const renaming = ref<Node | null>(null);
   const selectedNodeIds = ref(new Set<string>());
   const idToNode = new Map<string, Node>();
+  const hoveredId = ref<string | null>(null);
 
   // - Functions:
   function resetContext() {
@@ -261,6 +262,7 @@
       if (document.activeElement instanceof HTMLElement) {
         document.activeElement.blur();
       }
+      hoveredId.value = null;
       if (cleared) return;
       else {
         if (node.type === 'file') _deselectFileNode(node);
@@ -357,12 +359,14 @@
             type="text"
             :readonly="renaming !== node"
             :value.trim="node.text"
-            :class="{ selected: selectedNodeIds.has(node.id) }"
+            :class="{ selected: selectedNodeIds.has(node.id), hover: hoveredId === node.id }"
             @click="handleNodeSelection(node)"
             @keydown.esc="renaming = null"
             @keydown.enter="(e: KeyboardEvent) => finishRename(node, e)"
             @blur="(e: FocusEvent) => finishRename(node, e)"
             @click.right.stop="(e: MouseEvent) => showDirContext(node, e)"
+            @mouseenter="hoveredId = node.id"
+            @mouseleave="hoveredId = null"
           />
         </div>
         <AutoLengthInput
@@ -370,12 +374,14 @@
           type="text"
           :readonly="renaming !== node"
           :value.trim="node.text"
-          :class="{ selected: selectedNodeIds.has(node.id) }"
+          :class="{ selected: selectedNodeIds.has(node.id), hover: hoveredId === node.id }"
           @click="handleNodeSelection(node)"
           @keydown.esc="renaming = null"
           @keydown.enter="(e: KeyboardEvent) => finishRename(node, e)"
           @blur="(e: FocusEvent) => finishRename(node, e)"
           @click.right.stop="(e: MouseEvent) => showFileContext(node, e)"
+          @mouseenter="hoveredId = node.id"
+          @mouseleave="hoveredId = null"
         />
       </div>
     </div>
@@ -433,7 +439,7 @@
   input[type='text'][readonly] {
     cursor: pointer;
   }
-  input[type='text'][readonly]:hover,
+  input[type='text'][readonly].hover,
   input[type='text'][readonly]:focus {
     background-color: #515151;
   }
