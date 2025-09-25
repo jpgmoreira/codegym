@@ -249,7 +249,42 @@
       curr = curr.parent;
     }
   }
-  function _deselectDirNode(node: Node) {}
+  function _deselectSubtree(head: Node | null, tail: Node | null) {
+    if (!head || !tail) return;
+    let curr = head;
+    while (curr !== tail) {
+      selectedNodeIds.value.delete(curr.id);
+      if (curr.type === 'dir') {
+        curr.nSelDesc = 0;
+        _deselectSubtree(curr.head, curr.tail);
+      }
+      curr = curr.next!;
+    }
+    if (!curr) return;
+    selectedNodeIds.value.delete(curr.id);
+    if (curr.type === 'dir') {
+      curr.nSelDesc = 0;
+      _deselectSubtree(curr.head, curr.tail);
+    }
+  }
+  function _deselectDirNode(node: Node) {
+    // deselect a dir node while pressing ctrl;
+    if (node.type !== 'dir') return;
+    selectedNodeIds.value.delete(node.id);
+    node.nSelDesc = 0;
+    _deselectSubtree(node.head, node.tail);
+    let delta = node.nDesc + 1;
+    let curr = node.parent;
+    while (curr) {
+      if (curr.type !== 'dir') break;
+      curr.nSelDesc -= delta;
+      if (selectedNodeIds.value.has(curr.id)) {
+        selectedNodeIds.value.delete(curr.id);
+        delta++;
+      }
+      curr = curr.parent;
+    }
+  }
   function handleNodeSelection(node: Node) {
     // O(height + #subtree)
     const mustSelect = !selectedNodeIds.value.has(node.id);
