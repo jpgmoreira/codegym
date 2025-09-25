@@ -13,6 +13,7 @@
         open: boolean;
         nDesc: number; // Total number of direct and indirect descendants, not including the node itself.
         nSelDesc: number; // Number of descendants selected, not including the node itself.
+        position: number;
         parent: Node | null;
         // Prev and next sibling:
         prev: Node | null;
@@ -26,6 +27,7 @@
         type: 'file';
         text: string;
         depth: number;
+        position: number;
         parent: Node | null;
         prev: Node | null;
         next: Node | null;
@@ -56,6 +58,7 @@
   const selectedNodeIds = ref(new Set<string>());
   const idToNode = new Map<string, Node>();
   const hoveredId = ref<string | null>(null);
+  const lastSelected = ref<Node | null>(null);
 
   // - Functions:
   function resetContext() {
@@ -107,6 +110,7 @@
       open: true,
       nDesc: 0,
       nSelDesc: 0,
+      position: 0,
       parent: null,
       head: null,
       tail: null,
@@ -123,6 +127,7 @@
       type: 'file',
       text: `File ${controller.nextFile}`,
       depth: 0,
+      position: 0,
       parent: null,
       prev: null,
       next: null,
@@ -146,6 +151,7 @@
       controller.tail = newNode;
     } else {
       controller.tail.next = newNode;
+      newNode.position = controller.tail.position + 1;
       newNode.prev = controller.tail;
       controller.tail = newNode;
     }
@@ -163,6 +169,7 @@
       parent.tail = newNode;
     } else {
       parent.tail.next = newNode;
+      newNode.position = parent.tail.position + 1;
       newNode.prev = parent.tail;
       parent.tail = newNode;
     }
@@ -285,15 +292,36 @@
       curr = curr.parent;
     }
   }
+  function _selectRange(source: Node, dest: Node) {
+    if (source.parent !== dest.parent) return;
+    let curr: Node | null = null;
+    let targ: Node | null = null;
+    if (source.position < dest.position) {
+      curr = source;
+      targ = dest;
+    } else {
+      curr = dest;
+      targ = source;
+    }
+    while (curr !== targ) {
+      if (curr.type === 'dir') _selectDirNode(curr);
+      else _selectFileNode(curr);
+      curr = curr.next!;
+    }
+    if (curr.type === 'dir') _selectDirNode(curr);
+    else _selectFileNode(curr);
+  }
   function handleNodeSelection(node: Node) {
     // O(height + #subtree)
     const mustSelect = !selectedNodeIds.value.has(node.id);
     let cleared = false;
-    if (!keys.ctrl) {
+    if (!keys.ctrl && !keys.shift) {
       clearSelection();
       cleared = true;
     }
+    if (!keys.shift) lastSelected.value = null;
     if (!mustSelect) {
+      lastSelected.value = null;
       if (document.activeElement instanceof HTMLElement) {
         document.activeElement.blur();
       }
@@ -307,6 +335,12 @@
     if (mustSelect) {
       if (node.type === 'file') _selectFileNode(node);
       else _selectDirNode(node);
+      if (keys.shift) {
+        if (lastSelected.value) {
+          _selectRange(lastSelected.value, node);
+        }
+      }
+      lastSelected.value = node;
     }
   }
   function clearSelection() {
