@@ -315,7 +315,7 @@
         <div class="context-button" @click="startRename">Rename</div>
       </div>
     </div>
-    <div class="node-row" v-for="node in flattened">
+    <div class="node-row" v-for="node in flattened" :key="node.id">
       <div class="padding-container" :style="{ paddingLeft: `${node.depth * 20}px` }">
         <div class="dir-container" v-if="node.type === 'dir'">
           <span v-if="node.open" @click="toggleDirOpen(node)">-</span>
