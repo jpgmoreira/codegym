@@ -195,7 +195,10 @@
     let curr: Node | null = head;
     while (curr !== tail) {
       if (!curr) break;
-      if (selectedNodeIds.value.has(curr.id)) continue;
+      if (selectedNodeIds.value.has(curr.id)) {
+        curr = curr.next;
+        continue;
+      }
       selectedNodeIds.value.add(curr.id);
       if (curr.type === 'dir') {
         curr.nSelDesc = curr.nDesc;
