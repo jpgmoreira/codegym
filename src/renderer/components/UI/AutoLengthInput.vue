@@ -1,18 +1,19 @@
 <script lang="ts" setup>
-  import { onMounted, ref as vueRef } from 'vue';
-  const inputRef = vueRef<HTMLInputElement | null>(null);
-  const measureSpan = document.createElement('span');
-  measureSpan.style.position = 'absolute';
-  measureSpan.style.left = '-99999px';
-  measureSpan.style.top = '0';
-  measureSpan.style.visibility = 'hidden';
-  measureSpan.style.whiteSpace = 'pre';
-  measureSpan.style.display = 'inline-block';
-  document.body.appendChild(measureSpan);
+  import { onMounted, useTemplateRef } from 'vue';
+  const inputRef = useTemplateRef('input-ref');
+  let style: CSSStyleDeclaration | null = null;
   function updateInputLength() {
     const input = inputRef.value;
     if (!input) return;
-    const style = getComputedStyle(input);
+    if (!style) style = getComputedStyle(input);
+    const measureSpan = document.createElement('span');
+    measureSpan.style.position = 'absolute';
+    measureSpan.style.left = '-99999px';
+    measureSpan.style.top = '0';
+    measureSpan.style.visibility = 'hidden';
+    measureSpan.style.whiteSpace = 'pre';
+    measureSpan.style.display = 'inline-block';
+    document.body.appendChild(measureSpan);
     measureSpan.style.font = style.font || `${style.fontSize} ${style.fontFamily}`;
     measureSpan.style.letterSpacing = style.letterSpacing;
     measureSpan.style.textTransform = style.textTransform;
@@ -26,10 +27,9 @@
     const paddingAndBorder = paddingLeft + paddingRight + borderLeft + borderRight;
     const boxSizing = style.boxSizing;
     let finalWidth = contentWidth;
-    if (boxSizing === 'border-box') {
-      finalWidth += paddingAndBorder;
-    }
+    if (boxSizing === 'border-box') finalWidth += paddingAndBorder;
     input.style.width = Math.max(Math.ceil(finalWidth + 2), 20) + 'px';
+    measureSpan.remove();
   }
   function handleBlur() {
     const input = inputRef.value;
@@ -44,5 +44,11 @@
 </script>
 
 <template>
-  <input ref="inputRef" type="text" @input="updateInputLength" @blur="handleBlur" v-bind="$attrs" />
+  <input
+    ref="input-ref"
+    type="text"
+    @input="updateInputLength"
+    @blur="handleBlur"
+    v-bind="$attrs"
+  />
 </template>
