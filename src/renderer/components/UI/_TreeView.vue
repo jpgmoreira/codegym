@@ -1,0 +1,508 @@
+<script lang="ts" setup>
+  import { randomId } from '@common/utils/utils';
+  import { reactive, computed, ref, onMounted, onBeforeUnmount } from 'vue';
+  import AutoLengthInput from './AutoLengthInput.vue';
+
+  // - Types:
+  type Node =
+    | {
+        id: string;
+        type: 'dir';
+        text: string;
+        depth: number;
+        open: boolean;
+        nDesc: number; // Total number of direct and indirect descendants, not including the node itself.
+        nSelDesc: number; // Number of descendants selected, not including the node itself.
+        parent: Node | null;
+        // Prev and next sibling:
+        prev: Node | null;
+        next: Node | null;
+        // Head and tail direct children:
+        head: Node | null;
+        tail: Node | null;
+      }
+    | {
+        id: string;
+        type: 'file';
+        text: string;
+        depth: number;
+        parent: Node | null;
+        prev: Node | null;
+        next: Node | null;
+      };
+  type ContextType = 'root' | 'dir' | 'file';
+  type NodeType = Node['type'];
+
+  // - Structures:
+  const controller = reactive({
+    nextDir: 1,
+    nextFile: 1,
+    head: null as Node | null,
+    tail: null as Node | null,
+  });
+  const context = reactive({
+    x: 0,
+    y: 0,
+    type: 'root' as ContextType,
+    visible: false,
+    // Node whose context menu is currently active:
+    targetNode: null as Node | null,
+    // DOM element corresponding to the node whose context menu is currently active:
+    targetDomElement: null as HTMLInputElement | null,
+  });
+  const keys = reactive({
+    ctrl: false,
+    shift: false,
+  });
+  const renaming = ref<Node | null>(null); // Node being renamed;
+  const selectedNodeIds = ref(new Set<string>());
+  const idToNode = new Map<string, Node>();
+  const hoveredId = ref<string | null>(null); // ID of node receiving mouse hover.
+  const lastSelected = ref<string | null>(null); // Last selected node.
+  const shiftStart = ref<string | null>(null); // Starting node on a shift-selection.
+
+  // - Functions:
+  function resetContext() {
+    context.visible = false;
+    context.targetNode = null;
+    context.targetDomElement = null;
+  }
+  function startRename() {
+    renaming.value = context.targetNode;
+    context.targetDomElement?.focus();
+    context.targetDomElement?.select();
+  }
+  function finishRename(node: Node, e: Event) {
+    const newName = (e.target as HTMLInputElement).value.trim();
+    renaming.value = null;
+    if (node.text !== newName) {
+      node.text = newName;
+      // update name here...
+    }
+  }
+  function showRootContext(e: MouseEvent) {
+    context.x = e.clientX;
+    context.y = e.clientY;
+    context.type = 'root';
+    context.visible = true;
+  }
+  function showDirContext(node: Node, e: MouseEvent) {
+    context.x = e.clientX;
+    context.y = e.clientY;
+    context.type = 'dir';
+    context.visible = true;
+    context.targetNode = node;
+    context.targetDomElement = e.currentTarget as HTMLInputElement;
+  }
+  function showFileContext(node: Node, e: MouseEvent) {
+    context.x = e.clientX;
+    context.y = e.clientY;
+    context.type = 'file';
+    context.visible = true;
+    context.targetNode = node;
+    context.targetDomElement = e.currentTarget as HTMLInputElement;
+  }
+  function getEmptyDir(): Node {
+    const result = {
+      id: randomId(),
+      type: 'dir',
+      text: `Folder ${controller.nextDir}`,
+      depth: 0,
+      open: true,
+      nDesc: 0,
+      nSelDesc: 0,
+      parent: null,
+      head: null,
+      tail: null,
+      prev: null,
+      next: null,
+    } as const;
+    idToNode.set(result.id, result);
+    controller.nextDir++;
+    return result;
+  }
+  function getEmptyFile(): Node {
+    const result = {
+      id: randomId(),
+      type: 'file',
+      text: `File ${controller.nextFile}`,
+      depth: 0,
+      parent: null,
+      prev: null,
+      next: null,
+    } as const;
+    idToNode.set(result.id, result);
+    controller.nextFile++;
+    return result;
+  }
+  function toggleDirOpen(node: Node) {
+    if (node.type !== 'dir') return;
+    node.open = !node.open;
+  }
+
+  // - Node creation:
+  function createRootNode(type: NodeType) {
+    const newNode = type === 'dir' ? getEmptyDir() : getEmptyFile();
+    if (!controller.tail) {
+      controller.head = newNode;
+      controller.tail = newNode;
+    } else {
+      controller.tail.next = newNode;
+      newNode.prev = controller.tail;
+      controller.tail = newNode;
+    }
+  }
+  function createDirNode(type: NodeType) {
+    const newNode = type === 'dir' ? getEmptyDir() : getEmptyFile();
+    const parent = context.targetNode;
+    if (!parent || parent.type !== 'dir') return;
+    newNode.parent = parent;
+    newNode.depth = parent.depth + 1;
+    parent.open = true;
+    if (!parent.tail) {
+      parent.head = newNode;
+      parent.tail = newNode;
+    } else {
+      parent.tail.next = newNode;
+      newNode.prev = parent.tail;
+      parent.tail = newNode;
+    }
+    const isParentSelected = selectedNodeIds.value.has(parent.id);
+    if (isParentSelected) selectedNodeIds.value.add(newNode.id);
+    let curr: Node | null = parent;
+    while (curr) {
+      if (curr.type !== 'dir') break; // Just to make TS happy.
+      curr.nDesc++;
+      if (isParentSelected) curr.nSelDesc++;
+      curr = curr.parent;
+    }
+  }
+
+  // - Node selection:
+  function _selectFileNode(node: Node) {
+    selectedNodeIds.value.add(node.id);
+    let curr: Node | null = node.parent;
+    let delta = 1;
+    while (curr) {
+      if (curr.type !== 'dir') break;
+      curr.nSelDesc += delta;
+      if (curr.nSelDesc === curr.nDesc) {
+        selectedNodeIds.value.add(curr.id);
+        delta++;
+      }
+      curr = curr.parent;
+    }
+  }
+  function _markSubtreeAsSelected(head: Node | null, tail: Node | null) {
+    if (!head || !tail) return;
+    let curr: Node | null = head;
+    while (curr !== tail) {
+      if (!curr) break;
+      if (selectedNodeIds.value.has(curr.id)) {
+        curr = curr.next;
+        continue;
+      }
+      selectedNodeIds.value.add(curr.id);
+      if (curr.type === 'dir') {
+        curr.nSelDesc = curr.nDesc;
+        _markSubtreeAsSelected(curr.head, curr.tail);
+      }
+      curr = curr.next;
+    }
+    if (!curr) return;
+    if (selectedNodeIds.value.has(curr.id)) return;
+    selectedNodeIds.value.add(curr.id);
+    if (curr.type === 'dir') {
+      curr.nSelDesc = curr.nDesc;
+      _markSubtreeAsSelected(curr.head, curr.tail);
+    }
+  }
+  function _selectDirNode(node: Node) {
+    if (node.type !== 'dir') return;
+    selectedNodeIds.value.add(node.id);
+    let delta = node.nDesc - node.nSelDesc + 1;
+    node.nSelDesc = node.nDesc;
+    _markSubtreeAsSelected(node.head, node.tail);
+    let curr = node.parent;
+    while (curr) {
+      if (curr.type !== 'dir') break;
+      curr.nSelDesc += delta;
+      if (curr.nSelDesc === curr.nDesc) {
+        selectedNodeIds.value.add(curr.id);
+        delta++;
+      }
+      curr = curr.parent;
+    }
+  }
+  function _deselectFileNode(node: Node) {
+    selectedNodeIds.value.delete(node.id);
+    let curr = node.parent;
+    let delta = 1;
+    while (curr) {
+      if (curr.type !== 'dir') break;
+      curr.nSelDesc -= delta;
+      if (selectedNodeIds.value.has(curr.id)) {
+        delta++;
+        selectedNodeIds.value.delete(curr.id);
+      }
+      curr = curr.parent;
+    }
+  }
+  function _deselectSubtree(head: Node | null, tail: Node | null) {
+    if (!head || !tail) return;
+    let curr = head;
+    while (curr !== tail) {
+      selectedNodeIds.value.delete(curr.id);
+      if (curr.type === 'dir') {
+        curr.nSelDesc = 0;
+        _deselectSubtree(curr.head, curr.tail);
+      }
+      curr = curr.next!;
+    }
+    if (!curr) return;
+    selectedNodeIds.value.delete(curr.id);
+    if (curr.type === 'dir') {
+      curr.nSelDesc = 0;
+      _deselectSubtree(curr.head, curr.tail);
+    }
+  }
+  function _deselectDirNode(node: Node) {
+    // deselect a dir node while pressing ctrl;
+    if (node.type !== 'dir') return;
+    selectedNodeIds.value.delete(node.id);
+    node.nSelDesc = 0;
+    _deselectSubtree(node.head, node.tail);
+    let delta = node.nDesc + 1;
+    let curr = node.parent;
+    while (curr) {
+      if (curr.type !== 'dir') break;
+      curr.nSelDesc -= delta;
+      if (selectedNodeIds.value.has(curr.id)) {
+        selectedNodeIds.value.delete(curr.id);
+        delta++;
+      }
+      curr = curr.parent;
+    }
+  }
+  function _selectRange(source: Node, dest: Node) {
+    if (source.parent !== dest.parent) return;
+    let curr: Node | null = null;
+    let targ: Node | null = null;
+    if (source.position < dest.position) {
+      curr = source;
+      targ = dest;
+    } else {
+      curr = dest;
+      targ = source;
+    }
+    while (curr !== targ) {
+      if (curr.type === 'dir') _selectDirNode(curr);
+      else _selectFileNode(curr);
+      curr = curr.next!;
+    }
+    if (curr.type === 'dir') _selectDirNode(curr);
+    else _selectFileNode(curr);
+  }
+  function handleNodeSelection(node: Node) {
+    const mustSelect = !selectedNodeIds.value.has(node.id);
+    let cleared = false;
+    if (!keys.ctrl && !keys.shift) {
+      clearSelection();
+      cleared = true;
+    }
+    if (!keys.shift) lastSelected.value = null;
+    if (!mustSelect) {
+      lastSelected.value = null;
+      if (document.activeElement instanceof HTMLElement) {
+        document.activeElement.blur();
+      }
+      hoveredId.value = null;
+      if (cleared) return;
+      else {
+        if (node.type === 'file') _deselectFileNode(node);
+        else _deselectDirNode(node);
+      }
+    }
+    if (mustSelect) {
+      if (node.type === 'file') _selectFileNode(node);
+      else _selectDirNode(node);
+      if (keys.shift) {
+        if (lastSelected.value) {
+          _selectRange(lastSelected.value, node);
+        }
+      }
+      lastSelected.value = node;
+    }
+  }
+  function clearSelection() {
+    for (const id of selectedNodeIds.value) {
+      const node = idToNode.get(id)!;
+      if (node.type === 'dir') node.nSelDesc = 0;
+      let curr = node.parent;
+      while (curr) {
+        if (curr.type !== 'dir') break;
+        if (curr.nSelDesc === 0) break;
+        curr.nSelDesc = 0;
+        curr = curr.parent;
+      }
+    }
+    selectedNodeIds.value.clear();
+  }
+  // Flatten:
+  function flatten(node: Node): Node[] {
+    // O(n)
+    const result: Node[] = [];
+    let iterator: Node | null = node;
+    while (iterator) {
+      result.push(iterator);
+      if (iterator.type === 'dir' && iterator.open && iterator.head) {
+        result.push(...flatten(iterator.head));
+      }
+      iterator = iterator.next;
+    }
+    return result;
+  }
+
+  // - Computed:
+  const flattened = computed<Node[]>(() =>
+    // O(n)
+    controller.head === null ? [] : flatten(controller.head)
+  );
+
+  // - Lifecycle hooks:
+  function windowKeyDown(e: KeyboardEvent) {
+    keys.ctrl = e.ctrlKey;
+    keys.shift = e.shiftKey;
+  }
+  function windowKeyUp(e: KeyboardEvent) {
+    keys.ctrl = e.ctrlKey;
+    keys.shift = e.shiftKey;
+  }
+  onMounted(() => {
+    window.addEventListener('keydown', windowKeyDown);
+    window.addEventListener('keyup', windowKeyUp);
+  });
+  onBeforeUnmount(() => {
+    window.removeEventListener('keydown', windowKeyDown);
+    window.removeEventListener('keyup', windowKeyUp);
+  });
+</script>
+
+<template>
+  <div class="tree-container" @click.right="(e) => showRootContext(e)" @click="resetContext">
+    <div
+      class="context"
+      v-if="context.visible"
+      :style="{ left: `${context.x}px`, top: `${context.y}px` }"
+    >
+      <div v-if="context.type === 'root'">
+        <div class="context-button" @click="createRootNode('file')">Create a new file</div>
+        <div class="context-button" @click="createRootNode('dir')">Create a new folder</div>
+      </div>
+      <div v-else-if="context.type === 'dir'">
+        <div class="context-button" @click="createDirNode('file')">Create a new xxfile</div>
+        <div class="context-button" @click="createDirNode('dir')">Create a new xxfolder</div>
+        <div class="context-button" @click="startRename">Rename</div>
+      </div>
+      <div v-else-if="context.type === 'file'">
+        <div class="context-button" @click="startRename">Rename</div>
+      </div>
+    </div>
+    <div class="selected-nodes-badge">Selected nodes: {{ selectedNodeIds.size }}</div>
+    <div class="node-row" v-for="node in flattened" :key="node.id">
+      <div class="padding-container" :style="{ paddingLeft: `${node.depth * 20}px` }">
+        <div class="dir-container" v-if="node.type === 'dir'">
+          <span v-if="node.open" @click="toggleDirOpen(node)">-</span>
+          <span v-else @click="toggleDirOpen(node)">+</span>
+          <AutoLengthInput
+            type="text"
+            :readonly="renaming !== node"
+            :value.trim="node.text"
+            :class="{ selected: selectedNodeIds.has(node.id), hover: hoveredId === node.id }"
+            @click="handleNodeSelection(node)"
+            @keydown.esc="renaming = null"
+            @keydown.enter="(e: KeyboardEvent) => finishRename(node, e)"
+            @blur="(e: FocusEvent) => finishRename(node, e)"
+            @click.right.stop="(e: MouseEvent) => showDirContext(node, e)"
+            @mouseenter="hoveredId = node.id"
+            @mouseleave="hoveredId = null"
+          />
+        </div>
+        <AutoLengthInput
+          v-else
+          type="text"
+          :readonly="renaming !== node"
+          :value.trim="node.text"
+          :class="{ selected: selectedNodeIds.has(node.id), hover: hoveredId === node.id }"
+          @click="handleNodeSelection(node)"
+          @keydown.esc="renaming = null"
+          @keydown.enter="(e: KeyboardEvent) => finishRename(node, e)"
+          @blur="(e: FocusEvent) => finishRename(node, e)"
+          @click.right.stop="(e: MouseEvent) => showFileContext(node, e)"
+          @mouseenter="hoveredId = node.id"
+          @mouseleave="hoveredId = null"
+        />
+      </div>
+    </div>
+  </div>
+</template>
+
+<style scoped>
+  .tree-container {
+    border: 1px solid red;
+    flex-grow: 1;
+    overflow: scroll auto;
+  }
+  .context {
+    background-color: #333;
+    display: inline-flex;
+    flex-direction: column;
+    border: 1px solid blue;
+    position: fixed;
+    white-space: nowrap;
+  }
+  .context-button {
+    padding: 5px;
+    cursor: pointer;
+  }
+  .context-button:hover {
+    background-color: #888;
+  }
+
+  .node-row {
+    /* border: 1px solid blue; */
+  }
+  .padding-container {
+    /* border: 1px solid aqua; */
+  }
+  .dir-container {
+    white-space: nowrap;
+    /* border: 1px solid orange; */
+  }
+
+  .dir-container.full-selected {
+    border: 2px solid green;
+  }
+  .dir-container.partial-selected {
+    border: 2px solid tomato;
+  }
+
+  input[type='text'] {
+    background-color: transparent;
+    line-height: 1rem;
+    /* border: 1px solid olive; */
+  }
+  input[type='text']:not([readonly]) {
+    background-color: #313131;
+  }
+  input[type='text'][readonly] {
+    cursor: pointer;
+  }
+  input[type='text'][readonly].hover,
+  input[type='text'][readonly]:focus {
+    background-color: #515151;
+  }
+  input[type='text'].selected {
+    background-color: #404040;
+  }
+</style>
