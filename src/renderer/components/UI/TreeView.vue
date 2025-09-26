@@ -145,6 +145,7 @@
       newNode.prev = control.tail;
       control.tail = newNode;
     }
+    // Creation of a node in a selected parent:
     if (parent && parent.selected) {
       newNode.selected = true;
       selectedNodes.value.add(newNode);
