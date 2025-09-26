@@ -160,7 +160,7 @@
     let curr: Node | null = head;
     while (curr) {
       result.push(curr);
-      if (curr.type === 'dir') result.push(...flatten(curr.head));
+      if (curr.type === 'dir' && curr.open) result.push(...flatten(curr.head));
       curr = curr.next;
     }
     return result;
@@ -197,8 +197,8 @@
     <div v-for="node in flattened" class="node-row" :key="node.id">
       <div :style="{ paddingLeft: `${node.depth * 40}px` }">
         <div v-if="node.type === 'dir'">
-          <span v-if="node.open">-</span>
-          <span v-else>+</span>
+          <span v-if="node.open" @click="node.open = false">-</span>
+          <span v-else @click="node.open = true">+</span>
           <AutoLengthInput
             :value.trim="node.text"
             :readonly="renamingNode !== node"
