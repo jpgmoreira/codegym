@@ -203,7 +203,7 @@
     selectedNodes.value.clear();
   }
 
-  function selectFileNoCtrlNoShift(node: Node) {
+  function selectFileViaClickNoCtrlNoShift(node: Node) {
     clearSelection();
     markNodeAsSelected(node);
     let delta = 1;
@@ -219,9 +219,19 @@
     }
   }
 
+  function deselectFileViaClickNoCtrlNoShift() {
+    clearSelection();
+    hoveredNodeId.value = null;
+    (document.activeElement as HTMLElement).blur();
+  }
+
   function handleSelection(node: Node) {
-    if (node.type === 'file' && !keys.ctrl && !keys.shift) {
-      selectFileNoCtrlNoShift(node);
+    if (!node.selected && node.type === 'file' && !keys.ctrl && !keys.shift) {
+      // Select a file node via click, without pressing CTRL nor SHIFT.
+      selectFileViaClickNoCtrlNoShift(node);
+    } else if (node.selected && node.type === 'file' && !keys.ctrl && !keys.shift) {
+      // Deselect a file node via click, without pressing CTRL nor SHIFT.
+      deselectFileViaClickNoCtrlNoShift();
     }
   }
 
