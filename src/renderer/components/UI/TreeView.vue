@@ -267,9 +267,8 @@
     }
   }
 
-  function selectDirViaClickNoCtrlNoShift(node: Node) {
+  function selectDirViaClickPressingCtrlIgnoreShift(node: Node) {
     if (node.type !== 'dir') return;
-    clearSelection();
     markNodeAsSelected(node);
     markSubtreeAsSelected(node.head);
     let delta = node.nDesc - node.nDescSel + 1;
@@ -284,6 +283,12 @@
       }
       curr = curr.parent;
     }
+  }
+
+  function selectDirViaClickNoCtrlNoShift(node: Node) {
+    if (node.type !== 'dir') return;
+    clearSelection();
+    selectDirViaClickPressingCtrlIgnoreShift(node);
   }
 
   function deselectDirViaClickNoCtrlNoShift() {
@@ -310,6 +315,9 @@
     } else if (node.selected && node.type === 'file' && keys.ctrl) {
       // Deselect a file node via click, pressing CTRL, SHIFT doesn't matter.
       deselectFileViaClickPressingCtrlIgnoreShift(node);
+    } else if (!node.selected && node.type === 'dir' && keys.ctrl) {
+      // Select a dir node via click, pressing CTRL, SHIFT doesn't matter.
+      selectDirViaClickPressingCtrlIgnoreShift(node);
     }
   }
 
