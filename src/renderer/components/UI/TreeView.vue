@@ -48,6 +48,8 @@
 
   const renamingNode = ref<Node | null>(null);
 
+  const hoveredNodeId = ref<string | null>(null);
+
   const treeContainerRef = useTemplateRef('tree-container');
 
   // --- Context menu: ---
@@ -202,20 +204,26 @@
           <AutoLengthInput
             :value.trim="node.text"
             :readonly="renamingNode !== node"
+            :class="{ hover: hoveredNodeId === node.id }"
             @click.right.stop="(e: MouseEvent) => showContext('dir', e, node)"
             @keydown.esc="renamingNode = null"
             @keydown.enter="(e: KeyboardEvent) => applyRenaming(e)"
             @blur="(e: FocusEvent) => applyRenaming(e)"
+            @mouseenter="hoveredNodeId = node.id"
+            @mouseleave="hoveredNodeId = null"
           />
         </div>
         <AutoLengthInput
           v-else
           :value.trim="node.text"
           :readonly="renamingNode !== node"
+          :class="{ hover: hoveredNodeId === node.id }"
           @click.right.stop="(e: MouseEvent) => showContext('file', e, node)"
           @keydown.esc="renamingNode = null"
           @keydown.enter="(e: KeyboardEvent) => applyRenaming(e)"
           @blur="(e: FocusEvent) => applyRenaming(e)"
+          @mouseenter="hoveredNodeId = node.id"
+          @mouseleave="hoveredNodeId = null"
         />
       </div>
     </div>
@@ -231,5 +239,22 @@
   .context-container {
     border: 1px solid blue;
     position: absolute;
+  }
+
+  /* Node inputs: */
+  input[type='text'] {
+    background-color: transparent;
+    line-height: 1rem;
+  }
+  input[type='text']:not([readonly]) {
+    background-color: #313131;
+  }
+  /*
+  I simulate hover via a class, because I want to remove
+  the hover state when the user de-selects a node via click.
+  */
+  input[type='text'][readonly].hover,
+  input[type='text'][readonly]:focus {
+    background-color: #515151;
   }
 </style>
