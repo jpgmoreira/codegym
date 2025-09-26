@@ -376,7 +376,11 @@
       }
       if (aux === 2) break;
       if (aux) {
-        if (node.type === 'file') selectFileViaClickPressingCtrlIgnoreShift(node);
+        const mustSelect = node.type === 'file' || (node.type === 'dir' && node.nDesc === 0);
+        if (mustSelect) {
+          if (node.type === 'file') selectFileViaClickPressingCtrlIgnoreShift(node);
+          else selectDirViaClickPressingCtrlIgnoreShift(node);
+        }
       }
     }
   }
