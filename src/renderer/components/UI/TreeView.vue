@@ -11,6 +11,9 @@
         type: 'dir';
         text: string;
         depth: number;
+        selected: boolean;
+        nDesc: number; // Total number of descendants, not including the node.
+        nDescSel: number; // Total number of selected descendants.
         parent: Node | null;
         next: Node | null;
         prev: Node | null;
@@ -23,6 +26,7 @@
         type: 'file';
         text: string;
         depth: number;
+        selected: boolean;
         parent: Node | null;
         next: Node | null;
         prev: Node | null;
@@ -49,6 +53,8 @@
   const renamingNode = ref<Node | null>(null);
 
   const hoveredNodeId = ref<string | null>(null);
+
+  const selectedNodes = ref<Set<Node>>(new Set());
 
   const treeContainerRef = useTemplateRef('tree-container');
 
@@ -97,6 +103,9 @@
       type: 'dir',
       text: `Folder ${rootController.nextDir}`,
       depth: 0,
+      selected: false,
+      nDesc: 0,
+      nDescSel: 0,
       parent,
       next: null,
       prev: null,
@@ -113,6 +122,7 @@
       type: 'file',
       text: `File ${rootController.nextFile}`,
       depth: 0,
+      selected: false,
       parent,
       next: null,
       prev: null,
@@ -154,6 +164,8 @@
       node.text = newName;
     }
   }
+
+  // --- Selection: ---
 
   // --- Tree flattening: ---
 
