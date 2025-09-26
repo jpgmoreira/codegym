@@ -69,6 +69,8 @@
 
   const treeContainerRef = useTemplateRef('tree-container');
 
+  const nTotalNodes = ref(0);
+
   // --- Context menu: ---
 
   function computeContextStyle(x: number, y: number) {
@@ -168,6 +170,7 @@
       curr.nDescSel += Number(newNode.selected);
       curr = curr.parent;
     }
+    nTotalNodes.value++;
   }
 
   // --- Node renaming: ---
@@ -425,6 +428,14 @@
     shiftSelectionAnchorNode.value = node;
   }
 
+  function toggleFullSelection() {
+    if (selectedNodes.value.size === nTotalNodes.value) {
+      clearSelection();
+    } else {
+      markSubtreeAsSelected(rootController.head);
+    }
+  }
+
   // --- Tree flattening: ---
 
   function flatten(head: Node | null): Node[] {
@@ -473,6 +484,7 @@
     ref="tree-container"
     @click.right="(e) => showContext('root', e, null)"
     @click="clearContext"
+    @dblclick="toggleFullSelection"
   >
     <!-- Context menu -->
     <div v-if="context.visible" class="context-container" :style="context.style">
