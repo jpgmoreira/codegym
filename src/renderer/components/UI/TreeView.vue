@@ -145,6 +145,17 @@
       newNode.prev = control.tail;
       control.tail = newNode;
     }
+    if (parent && parent.selected) {
+      newNode.selected = true;
+      selectedNodes.value.add(newNode);
+    }
+    let curr: Node | null = parent;
+    while (curr) {
+      if (curr.type !== 'dir') break;
+      curr.nDesc++;
+      curr.nDescSel += Number(newNode.selected);
+      curr = curr.parent;
+    }
   }
 
   // --- Node renaming: ---
