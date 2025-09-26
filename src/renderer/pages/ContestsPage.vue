@@ -5,5 +5,5 @@
 
 <template>
   <SettingsPageHeader />
-  <TreeView />
+  <TreeView :checkbox="true" />
 </template>

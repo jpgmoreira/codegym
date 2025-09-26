@@ -3,6 +3,10 @@
   import AutoLengthInput from './AutoLengthInput.vue';
   import { randomId } from '@common/utils/utils';
 
+  // --- Props: ---
+
+  const props = defineProps<{ checkbox: boolean }>();
+
   // --- Types and structures: ---
 
   type Node =
@@ -430,6 +434,13 @@
 
   const flattened = computed(() => flatten(rootController.head));
 
+  // --- UI auxiliary methods: ---
+
+  function isCheckIndeterminate(node: Node): boolean {
+    if (node.type !== 'dir') return false;
+    return node.nDescSel > 0 && node.nDesc !== node.nDescSel;
+  }
+
   // --- Hooks: ---
 
   function windowKeyDown(e: KeyboardEvent) {
@@ -480,12 +491,45 @@
         <div v-if="node.type === 'dir'">
           <span v-if="node.open" @click="node.open = false">-</span>
           <span v-else @click="node.open = true">+</span>
+          <div
+            class="checkbox-input-wrapper"
+            @click="handleSelection(node)"
+            :class="{ selected: node.selected, hover: hoveredNodeId === node.id }"
+          >
+            <input
+              v-if="props.checkbox"
+              type="checkbox"
+              :checked="node.selected"
+              :indeterminate="isCheckIndeterminate(node)"
+            />
+            <AutoLengthInput
+              :value.trim="node.text"
+              :readonly="renamingNode !== node"
+              @click.right.stop="(e: MouseEvent) => showContext('dir', e, node)"
+              @keydown.esc="renamingNode = null"
+              @keydown.enter="(e: KeyboardEvent) => applyRenaming(e)"
+              @blur="(e: FocusEvent) => applyRenaming(e)"
+              @mouseenter="hoveredNodeId = node.id"
+              @mouseleave="hoveredNodeId = null"
+            />
+          </div>
+        </div>
+        <div
+          v-else
+          class="checkbox-input-wrapper"
+          @click="handleSelection(node)"
+          :class="{ selected: node.selected, hover: hoveredNodeId === node.id }"
+        >
+          <input
+            v-if="props.checkbox"
+            type="checkbox"
+            :checked="node.selected"
+            :indeterminate="isCheckIndeterminate(node)"
+          />
           <AutoLengthInput
             :value.trim="node.text"
             :readonly="renamingNode !== node"
-            :class="{ selected: node.selected, hover: hoveredNodeId === node.id }"
-            @click="handleSelection(node)"
-            @click.right.stop="(e: MouseEvent) => showContext('dir', e, node)"
+            @click.right.stop="(e: MouseEvent) => showContext('file', e, node)"
             @keydown.esc="renamingNode = null"
             @keydown.enter="(e: KeyboardEvent) => applyRenaming(e)"
             @blur="(e: FocusEvent) => applyRenaming(e)"
@@ -493,19 +537,6 @@
             @mouseleave="hoveredNodeId = null"
           />
         </div>
-        <AutoLengthInput
-          v-else
-          :value.trim="node.text"
-          :readonly="renamingNode !== node"
-          :class="{ selected: node.selected, hover: hoveredNodeId === node.id }"
-          @click="handleSelection(node)"
-          @click.right.stop="(e: MouseEvent) => showContext('file', e, node)"
-          @keydown.esc="renamingNode = null"
-          @keydown.enter="(e: KeyboardEvent) => applyRenaming(e)"
-          @blur="(e: FocusEvent) => applyRenaming(e)"
-          @mouseenter="hoveredNodeId = node.id"
-          @mouseleave="hoveredNodeId = null"
-        />
       </div>
     </div>
   </div>
@@ -522,23 +553,31 @@
     position: absolute;
   }
 
+  .checkbox-input-wrapper {
+    display: inline-flex;
+    align-items: center;
+  }
+  /*
+  I simulate hover via a class, because I want to remove
+  the hover state when the user de-selects a node via click.
+  */
+  .checkbox-input-wrapper.hover {
+    background-color: #515151;
+  }
+  .checkbox-input-wrapper.selected {
+    outline: 1px solid #bbe624;
+  }
+
   /* Node inputs: */
   input[type='text'] {
+    padding: 2px;
     background-color: transparent;
     line-height: 1rem;
   }
   input[type='text']:not([readonly]) {
     background-color: #313131;
   }
-  /*
-  I simulate hover via a class, because I want to remove
-  the hover state when the user de-selects a node via click.
-  */
-  input[type='text'][readonly].hover,
   input[type='text'][readonly]:focus {
     background-color: #515151;
-  }
-  input[type='text'].selected {
-    outline: 1px solid #bbe624;
   }
 </style>
