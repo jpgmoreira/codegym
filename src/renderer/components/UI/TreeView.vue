@@ -225,6 +225,38 @@
     (document.activeElement as HTMLElement).blur();
   }
 
+  function markSubtreeAsSelected(head: Node | null) {
+    if (!head) return;
+    let curr: Node | null = head;
+    while (curr) {
+      markNodeAsSelected(curr);
+      if (curr.type === 'dir') {
+        curr.nDescSel = curr.nDesc;
+        markSubtreeAsSelected(curr.head);
+      }
+      curr = curr.next;
+    }
+  }
+
+  function selectDirViaClickNoCtrlNoShift(node: Node) {
+    if (node.type !== 'dir') return;
+    clearSelection();
+    markNodeAsSelected(node);
+    markSubtreeAsSelected(node.head);
+    let delta = node.nDesc - node.nDescSel + 1;
+    node.nDescSel = node.nDesc;
+    let curr = node.parent;
+    while (curr) {
+      if (curr.type !== 'dir') break;
+      curr.nDescSel += delta;
+      if (curr.nDesc === curr.nDescSel) {
+        markNodeAsSelected(curr);
+        delta++;
+      }
+      curr = curr.parent;
+    }
+  }
+
   function handleSelection(node: Node) {
     if (!node.selected && node.type === 'file' && !keys.ctrl && !keys.shift) {
       // Select a file node via click, without pressing CTRL nor SHIFT.
@@ -232,6 +264,8 @@
     } else if (node.selected && node.type === 'file' && !keys.ctrl && !keys.shift) {
       // Deselect a file node via click, without pressing CTRL nor SHIFT.
       deselectFileViaClickNoCtrlNoShift();
+    } else if (!node.selected && node.type === 'dir' && !keys.ctrl && !keys.shift) {
+      selectDirViaClickNoCtrlNoShift(node);
     }
   }
 
