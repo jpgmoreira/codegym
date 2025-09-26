@@ -379,18 +379,24 @@
   }
 
   function handleSelection(node: Node) {
+    // In checkbox mode, all selections happen as if the user had CTRL pressed.
+    const { checkbox } = props;
     if (!node.selected && node.type === 'file' && !keys.ctrl && !keys.shift) {
       // Select a file node via click, without pressing CTRL nor SHIFT.
-      selectFileViaClickNoCtrlNoShift(node);
+      if (!checkbox) selectFileViaClickNoCtrlNoShift(node);
+      else selectFileViaClickPressingCtrlIgnoreShift(node);
     } else if (node.selected && node.type === 'file' && !keys.ctrl && !keys.shift) {
       // Deselect a file node via click, without pressing CTRL nor SHIFT.
-      deselectFileViaClickNoCtrlNoShift(node);
+      if (!checkbox) deselectFileViaClickNoCtrlNoShift(node);
+      else deselectFileViaClickPressingCtrlIgnoreShift(node);
     } else if (!node.selected && node.type === 'dir' && !keys.ctrl && !keys.shift) {
       // Select a dir node via click, without pressing CTRL nor SHIFT.
-      selectDirViaClickNoCtrlNoShift(node);
+      if (!checkbox) selectDirViaClickNoCtrlNoShift(node);
+      else selectDirViaClickPressingCtrlIgnoreShift(node);
     } else if (node.selected && node.type === 'dir' && !keys.ctrl && !keys.shift) {
       // Deselect a dir node via click, without pressing CTRL nor SHIFT.
-      deselectDirViaClickNoCtrlNoShift(node);
+      if (!checkbox) deselectDirViaClickNoCtrlNoShift(node);
+      else deselectDirViaClickPressingCtrlIgnoreShift(node);
     } else if (!node.selected && node.type === 'file' && keys.ctrl) {
       // Select a file node via click, pressing CTRL, SHIFT doesn't matter.
       selectFileViaClickPressingCtrlIgnoreShift(node);
