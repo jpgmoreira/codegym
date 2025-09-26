@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-  import { computed, reactive, useTemplateRef } from 'vue';
+  import { ref, computed, reactive, useTemplateRef } from 'vue';
   import AutoLengthInput from './AutoLengthInput.vue';
   import { randomId } from '@common/utils/utils';
 
@@ -45,6 +45,8 @@
     head: null as Node | null,
     tail: null as Node | null,
   });
+
+  const renamingNode = ref<Node | null>(null);
 
   const treeContainerRef = useTemplateRef('tree-container');
 
@@ -133,6 +135,24 @@
     }
   }
 
+  // --- Node renaming: ---
+
+  function startRenaming() {
+    renamingNode.value = context.targetNode;
+    context.targetDomElement?.focus();
+    context.targetDomElement?.select();
+  }
+
+  function applyRenaming(e: Event) {
+    if (!renamingNode.value) return;
+    const newName = (e.target as HTMLInputElement).value.trim();
+    const node = renamingNode.value;
+    renamingNode.value = null;
+    if (node.text !== newName) {
+      node.text = newName;
+    }
+  }
+
   // --- Tree flattening: ---
 
   function flatten(head: Node | null): Node[] {
@@ -165,7 +185,11 @@
       <div v-else-if="context.type === 'dir'">
         <div @click="createNode('file')">Create file</div>
         <div @click="createNode('dir')">Create folder</div>
-        <div>Rename</div>
+        <div @click="startRenaming">Rename</div>
+        <div>Delete</div>
+      </div>
+      <div v-else>
+        <div @click="startRenaming">Rename</div>
         <div>Delete</div>
       </div>
     </div>
@@ -176,11 +200,23 @@
           <span v-if="node.open">-</span>
           <span v-else>+</span>
           <AutoLengthInput
-            :value="node.text"
+            :value.trim="node.text"
+            :readonly="renamingNode !== node"
             @click.right.stop="(e: MouseEvent) => showContext('dir', e, node)"
+            @keydown.esc="renamingNode = null"
+            @keydown.enter="(e: KeyboardEvent) => applyRenaming(e)"
+            @blur="(e: FocusEvent) => applyRenaming(e)"
           />
         </div>
-        <AutoLengthInput v-else :value="node.text" />
+        <AutoLengthInput
+          v-else
+          :value.trim="node.text"
+          :readonly="renamingNode !== node"
+          @click.right.stop="(e: MouseEvent) => showContext('file', e, node)"
+          @keydown.esc="renamingNode = null"
+          @keydown.enter="(e: KeyboardEvent) => applyRenaming(e)"
+          @blur="(e: FocusEvent) => applyRenaming(e)"
+        />
       </div>
     </div>
   </div>
