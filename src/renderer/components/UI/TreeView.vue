@@ -61,6 +61,8 @@
 
   const selectedNodes = ref<Set<Node>>(new Set());
 
+  const shiftSelectionAnchor = ref<Node | null>(null);
+
   const treeContainerRef = useTemplateRef('tree-container');
 
   // --- Context menu: ---
@@ -353,6 +355,10 @@
     } else if (node.selected && node.type === 'dir' && keys.ctrl) {
       // Deselect a dir node via click, pressing CTRL, SHIFT doesn't matter.
       deselectDirViaClickPressingCtrlIgnoreShift(node);
+    }
+
+    if (keys.ctrl || !keys.shift) {
+      shiftSelectionAnchor.value = node;
     }
   }
 
