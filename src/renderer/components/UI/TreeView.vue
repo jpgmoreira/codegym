@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-  import { ref, computed, reactive, useTemplateRef } from 'vue';
+  import { ref, computed, reactive, useTemplateRef, onMounted, onBeforeUnmount } from 'vue';
   import AutoLengthInput from './AutoLengthInput.vue';
   import { randomId } from '@common/utils/utils';
 
@@ -48,6 +48,11 @@
     nextDir: 1,
     head: null as Node | null,
     tail: null as Node | null,
+  });
+
+  const keys = reactive({
+    ctrl: false,
+    shift: false,
   });
 
   const renamingNode = ref<Node | null>(null);
@@ -147,8 +152,7 @@
     }
     // Creation of a node in a selected parent:
     if (parent && parent.selected) {
-      newNode.selected = true;
-      selectedNodes.value.add(newNode);
+      markNodeAsSelected(newNode);
     }
     let curr: Node | null = parent;
     while (curr) {
@@ -179,6 +183,11 @@
 
   // --- Selection: ---
 
+  function markNodeAsSelected(node: Node) {
+    node.selected = true;
+    selectedNodes.value.add(node);
+  }
+
   function clearSelection() {
     for (const node of selectedNodes.value) {
       node.selected = false;
@@ -191,6 +200,28 @@
       }
     }
     selectedNodes.value.clear();
+  }
+
+  function selectFileNoCtrlNoShift(node: Node) {
+    clearSelection();
+    markNodeAsSelected(node);
+    let delta = 1;
+    let curr = node.parent;
+    while (curr) {
+      if (curr.type !== 'dir') break;
+      curr.nDescSel += delta;
+      if (curr.nDesc === curr.nDescSel) {
+        markNodeAsSelected(curr);
+        delta++;
+      }
+      curr = curr.parent;
+    }
+  }
+
+  function handleSelection(node: Node) {
+    if (node.type === 'file' && !keys.ctrl && !keys.shift) {
+      selectFileNoCtrlNoShift(node);
+    }
   }
 
   // --- Tree flattening: ---
@@ -207,6 +238,25 @@
   }
 
   const flattened = computed(() => flatten(rootController.head));
+
+  // --- Hooks: ---
+
+  function windowKeyDown(e: KeyboardEvent) {
+    keys.ctrl = e.ctrlKey;
+    keys.shift = e.shiftKey;
+  }
+  function windowKeyUp(e: KeyboardEvent) {
+    keys.ctrl = e.ctrlKey;
+    keys.shift = e.shiftKey;
+  }
+  onMounted(() => {
+    window.addEventListener('keydown', windowKeyDown);
+    window.addEventListener('keyup', windowKeyUp);
+  });
+  onBeforeUnmount(() => {
+    window.removeEventListener('keydown', windowKeyDown);
+    window.removeEventListener('keyup', windowKeyUp);
+  });
 </script>
 
 <template>
@@ -243,6 +293,7 @@
             :value.trim="node.text"
             :readonly="renamingNode !== node"
             :class="{ selected: node.selected, hover: hoveredNodeId === node.id }"
+            @click="handleSelection(node)"
             @click.right.stop="(e: MouseEvent) => showContext('dir', e, node)"
             @keydown.esc="renamingNode = null"
             @keydown.enter="(e: KeyboardEvent) => applyRenaming(e)"
@@ -256,6 +307,7 @@
           :value.trim="node.text"
           :readonly="renamingNode !== node"
           :class="{ selected: node.selected, hover: hoveredNodeId === node.id }"
+          @click="handleSelection(node)"
           @click.right.stop="(e: MouseEvent) => showContext('file', e, node)"
           @keydown.esc="renamingNode = null"
           @keydown.enter="(e: KeyboardEvent) => applyRenaming(e)"
