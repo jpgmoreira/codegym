@@ -203,8 +203,7 @@
     selectedNodes.value.clear();
   }
 
-  function selectFileViaClickNoCtrlNoShift(node: Node) {
-    clearSelection();
+  function selectFileViaClickPressingCtrIgnoreShift(node: Node) {
     markNodeAsSelected(node);
     let delta = 1;
     let curr = node.parent;
@@ -217,6 +216,11 @@
       }
       curr = curr.parent;
     }
+  }
+
+  function selectFileViaClickNoCtrlNoShift(node: Node) {
+    clearSelection();
+    selectFileViaClickPressingCtrIgnoreShift(node);
   }
 
   function deselectFileViaClickNoCtrlNoShift() {
@@ -276,6 +280,9 @@
     } else if (node.selected && node.type === 'dir' && !keys.ctrl && !keys.shift) {
       // Deselect a dir node via click, without pressing CTRL nor SHIFT.
       deselectDirViaClickNoCtrlNoShift();
+    } else if (!node.selected && node.type === 'file' && keys.ctrl) {
+      // Select a file node via click, pressing CTRL, SHIFT doesn't matter.
+      selectFileViaClickPressingCtrIgnoreShift(node);
     }
   }
 
