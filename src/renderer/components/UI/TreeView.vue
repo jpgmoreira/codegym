@@ -433,7 +433,8 @@
   }
 
   function toggleFullSelection() {
-    if (selectedNodes.value.size === nTotalNodes.value) {
+    if (nTotalNodes.value === 0) return;
+    if (allNodesSelected.value) {
       clearSelection();
     } else {
       markSubtreeAsSelected(rootController.head);
@@ -455,12 +456,16 @@
 
   const flattened = computed(() => flatten(rootController.head));
 
-  // --- UI auxiliary methods: ---
+  // --- UI auxiliary: ---
 
   function isCheckIndeterminate(node: Node): boolean {
     if (node.type !== 'dir') return false;
     return node.nDescSel > 0 && node.nDesc !== node.nDescSel;
   }
+
+  const allNodesSelected = computed(
+    () => nTotalNodes.value > 0 && selectedNodes.value.size === nTotalNodes.value
+  );
 
   // --- Hooks: ---
 
@@ -495,6 +500,10 @@
       <div v-if="context.type === 'root'">
         <div @click="createNode('file')">Create file</div>
         <div @click="createNode('dir')">Create folder</div>
+        <div v-if="nTotalNodes && allNodesSelected" @click="toggleFullSelection">
+          Clear selection
+        </div>
+        <div v-if="nTotalNodes && !allNodesSelected" @click="toggleFullSelection">Select all</div>
       </div>
       <div v-else-if="context.type === 'dir'">
         <div @click="createNode('file')">Create sub-file</div>
