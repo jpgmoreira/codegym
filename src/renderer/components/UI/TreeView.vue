@@ -497,14 +497,14 @@
         <div @click="createNode('dir')">Create folder</div>
       </div>
       <div v-else-if="context.type === 'dir'">
-        <div @click="createNode('file')">Create file</div>
-        <div @click="createNode('dir')">Create folder</div>
-        <div @click="startRenaming">Rename</div>
-        <div>Delete</div>
+        <div @click="createNode('file')">Create sub-file</div>
+        <div @click="createNode('dir')">Create sub-folder</div>
+        <div @click="startRenaming">Rename item</div>
+        <div>Delete item</div>
       </div>
-      <div v-else>
-        <div @click="startRenaming">Rename</div>
-        <div>Delete</div>
+      <div v-else-if="context.type === 'file'">
+        <div @click="startRenaming">Rename item</div>
+        <div>Delete item</div>
       </div>
     </div>
     <!-- Tree -->
