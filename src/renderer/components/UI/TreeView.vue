@@ -61,7 +61,7 @@
 
   const selectedNodes = ref<Set<Node>>(new Set());
 
-  const shiftSelectionAnchor = ref<Node | null>(null);
+  const shiftSelectionAnchorNode = ref<Node | null>(null);
 
   const treeContainerRef = useTemplateRef('tree-container');
 
@@ -357,9 +357,7 @@
       deselectDirViaClickPressingCtrlIgnoreShift(node);
     }
 
-    if (keys.ctrl || !keys.shift) {
-      shiftSelectionAnchor.value = node;
-    }
+    shiftSelectionAnchorNode.value = node;
   }
 
   // --- Tree flattening: ---
