@@ -189,6 +189,16 @@
     selectedNodes.value.add(node);
   }
 
+  function unmarkNodeAsSelected(node: Node) {
+    node.selected = false;
+    selectedNodes.value.delete(node);
+  }
+
+  function blurHoveredNode() {
+    hoveredNodeId.value = null;
+    (document.activeElement as HTMLElement).blur();
+  }
+
   function clearSelection() {
     for (const node of selectedNodes.value) {
       node.selected = false;
@@ -218,6 +228,22 @@
     }
   }
 
+  function deselectFileViaClickPressingCtrlIgnoreShift(node: Node) {
+    unmarkNodeAsSelected(node);
+    let curr: Node | null = node.parent;
+    let delta = 1;
+    while (curr) {
+      if (curr.type !== 'dir') break;
+      curr.nDescSel -= delta;
+      if (curr.selected) {
+        unmarkNodeAsSelected(curr);
+        delta++;
+      }
+      curr = curr.parent;
+    }
+    blurHoveredNode();
+  }
+
   function selectFileViaClickNoCtrlNoShift(node: Node) {
     clearSelection();
     selectFileViaClickPressingCtrIgnoreShift(node);
@@ -225,8 +251,7 @@
 
   function deselectFileViaClickNoCtrlNoShift() {
     clearSelection();
-    hoveredNodeId.value = null;
-    (document.activeElement as HTMLElement).blur();
+    blurHoveredNode();
   }
 
   function markSubtreeAsSelected(head: Node | null) {
@@ -263,8 +288,7 @@
 
   function deselectDirViaClickNoCtrlNoShift() {
     clearSelection();
-    hoveredNodeId.value = null;
-    (document.activeElement as HTMLElement).blur();
+    blurHoveredNode();
   }
 
   function handleSelection(node: Node) {
@@ -283,6 +307,9 @@
     } else if (!node.selected && node.type === 'file' && keys.ctrl) {
       // Select a file node via click, pressing CTRL, SHIFT doesn't matter.
       selectFileViaClickPressingCtrIgnoreShift(node);
+    } else if (node.selected && node.type === 'file' && keys.ctrl) {
+      // Deselect a file node via click, pressing CTRL, SHIFT doesn't matter.
+      deselectFileViaClickPressingCtrlIgnoreShift(node);
     }
   }
 
