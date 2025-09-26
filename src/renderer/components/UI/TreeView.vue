@@ -219,7 +219,7 @@
     selectedNodes.value.clear();
   }
 
-  function selectFileViaClickPressingCtrIgnoreShift(node: Node) {
+  function selectFileViaClickPressingCtrlIgnoreShift(node: Node) {
     if (node.selected) return;
     markNodeAsSelected(node);
     let delta = 1;
@@ -255,7 +255,7 @@
   function selectFileViaClickNoCtrlNoShift(node: Node) {
     if (node.selected) return;
     clearSelection();
-    selectFileViaClickPressingCtrIgnoreShift(node);
+    selectFileViaClickPressingCtrlIgnoreShift(node);
   }
 
   function deselectFileViaClickNoCtrlNoShift(node: Node) {
@@ -367,13 +367,13 @@
     for (const node of flattened) {
       if (node === orig || node === dest) {
         aux++;
-        if (node.type === 'file') selectFileViaClickPressingCtrIgnoreShift(node);
+        if (node.type === 'file') selectFileViaClickPressingCtrlIgnoreShift(node);
         else selectDirViaClickPressingCtrlIgnoreShift(node);
         continue;
       }
       if (aux === 2) break;
       if (aux) {
-        if (node.type === 'file') selectFileViaClickPressingCtrIgnoreShift(node);
+        if (node.type === 'file') selectFileViaClickPressingCtrlIgnoreShift(node);
       }
     }
   }
@@ -393,7 +393,7 @@
       deselectDirViaClickNoCtrlNoShift(node);
     } else if (!node.selected && node.type === 'file' && keys.ctrl) {
       // Select a file node via click, pressing CTRL, SHIFT doesn't matter.
-      selectFileViaClickPressingCtrIgnoreShift(node);
+      selectFileViaClickPressingCtrlIgnoreShift(node);
     } else if (node.selected && node.type === 'file' && keys.ctrl) {
       // Deselect a file node via click, pressing CTRL, SHIFT doesn't matter.
       deselectFileViaClickPressingCtrlIgnoreShift(node);
@@ -407,7 +407,7 @@
       const anchor = shiftSelectionAnchorNode.value;
       if (node.type === 'file' && (!anchor || anchor === node)) {
         // Clicking a file node, pressing SHIFT, without an anchor.
-        selectFileViaClickPressingCtrIgnoreShift(node);
+        selectFileViaClickPressingCtrlIgnoreShift(node);
       } else if (node.type === 'dir' && (!anchor || anchor === node)) {
         // Clicking a dir node, pressing SHIFT, without an anchor.
         selectDirViaClickPressingCtrlIgnoreShift(node);
