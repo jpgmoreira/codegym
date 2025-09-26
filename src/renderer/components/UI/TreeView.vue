@@ -216,6 +216,7 @@
   }
 
   function selectFileViaClickPressingCtrIgnoreShift(node: Node) {
+    if (node.selected) return;
     markNodeAsSelected(node);
     let delta = 1;
     let curr = node.parent;
@@ -231,6 +232,7 @@
   }
 
   function deselectFileViaClickPressingCtrlIgnoreShift(node: Node) {
+    if (!node.selected) return;
     unmarkNodeAsSelected(node);
     let curr: Node | null = node.parent;
     let delta = 1;
@@ -247,11 +249,13 @@
   }
 
   function selectFileViaClickNoCtrlNoShift(node: Node) {
+    if (node.selected) return;
     clearSelection();
     selectFileViaClickPressingCtrIgnoreShift(node);
   }
 
-  function deselectFileViaClickNoCtrlNoShift() {
+  function deselectFileViaClickNoCtrlNoShift(node: Node) {
+    if (!node.selected) return;
     clearSelection();
     blurHoveredNode();
   }
@@ -283,6 +287,7 @@
   }
 
   function selectDirViaClickPressingCtrlIgnoreShift(node: Node) {
+    if (node.selected) return;
     if (node.type !== 'dir') return;
     markNodeAsSelected(node);
     markSubtreeAsSelected(node.head);
@@ -301,6 +306,7 @@
   }
 
   function deselectDirViaClickPressingCtrlIgnoreShift(node: Node) {
+    if (!node.selected) return;
     if (node.type !== 'dir') return;
     unmarkNodeAsSelected(node);
     node.nDescSel = 0;
@@ -320,14 +326,52 @@
   }
 
   function selectDirViaClickNoCtrlNoShift(node: Node) {
+    if (node.selected) return;
     if (node.type !== 'dir') return;
     clearSelection();
     selectDirViaClickPressingCtrlIgnoreShift(node);
   }
 
-  function deselectDirViaClickNoCtrlNoShift() {
+  function deselectDirViaClickNoCtrlNoShift(node: Node) {
+    if (!node.selected) return;
     clearSelection();
     blurHoveredNode();
+  }
+
+  function shiftSelectRange(orig: Node, dest: Node) {
+    // Orig !== dest.
+    // - Find lowest common ancestor:
+    let lca: Node | null = null;
+    const seen = new Set<Node>();
+    let curr = orig.parent;
+    while (curr) {
+      seen.add(curr);
+      curr = curr.parent;
+    }
+    curr = dest.parent;
+    while (curr) {
+      if (seen.has(curr)) {
+        lca = curr;
+        break;
+      }
+      curr = curr.parent;
+    }
+    if (lca && lca.type !== 'dir') return; // Make TS happy.
+    let head = lca ? lca.head : rootController.head;
+    const flattened = flatten(head);
+    let aux = 0;
+    for (const node of flattened) {
+      if (node === orig || node === dest) {
+        aux++;
+        if (node.type === 'file') selectFileViaClickPressingCtrIgnoreShift(node);
+        else selectDirViaClickPressingCtrlIgnoreShift(node);
+        continue;
+      }
+      if (aux === 2) break;
+      if (aux) {
+        if (node.type === 'file') selectFileViaClickPressingCtrIgnoreShift(node);
+      }
+    }
   }
 
   function handleSelection(node: Node) {
@@ -336,13 +380,13 @@
       selectFileViaClickNoCtrlNoShift(node);
     } else if (node.selected && node.type === 'file' && !keys.ctrl && !keys.shift) {
       // Deselect a file node via click, without pressing CTRL nor SHIFT.
-      deselectFileViaClickNoCtrlNoShift();
+      deselectFileViaClickNoCtrlNoShift(node);
     } else if (!node.selected && node.type === 'dir' && !keys.ctrl && !keys.shift) {
       // Select a dir node via click, without pressing CTRL nor SHIFT.
       selectDirViaClickNoCtrlNoShift(node);
     } else if (node.selected && node.type === 'dir' && !keys.ctrl && !keys.shift) {
       // Deselect a dir node via click, without pressing CTRL nor SHIFT.
-      deselectDirViaClickNoCtrlNoShift();
+      deselectDirViaClickNoCtrlNoShift(node);
     } else if (!node.selected && node.type === 'file' && keys.ctrl) {
       // Select a file node via click, pressing CTRL, SHIFT doesn't matter.
       selectFileViaClickPressingCtrIgnoreShift(node);
@@ -355,8 +399,19 @@
     } else if (node.selected && node.type === 'dir' && keys.ctrl) {
       // Deselect a dir node via click, pressing CTRL, SHIFT doesn't matter.
       deselectDirViaClickPressingCtrlIgnoreShift(node);
+    } else if (keys.shift) {
+      const anchor = shiftSelectionAnchorNode.value;
+      if (node.type === 'file' && (!anchor || anchor === node)) {
+        // Clicking a file node, pressing SHIFT, without an anchor.
+        selectFileViaClickPressingCtrIgnoreShift(node);
+      } else if (node.type === 'dir' && (!anchor || anchor === node)) {
+        // Clicking a dir node, pressing SHIFT, without an anchor.
+        selectDirViaClickPressingCtrlIgnoreShift(node);
+      } else if (anchor && anchor !== node) {
+        // Clicking a file or dir node, pressing SHIFT, with an anchor.
+        shiftSelectRange(node, anchor);
+      }
     }
-
     shiftSelectionAnchorNode.value = node;
   }
 
