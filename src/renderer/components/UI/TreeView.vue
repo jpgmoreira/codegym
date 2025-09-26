@@ -257,6 +257,12 @@
     }
   }
 
+  function deselectDirViaClickNoCtrlNoShift() {
+    clearSelection();
+    hoveredNodeId.value = null;
+    (document.activeElement as HTMLElement).blur();
+  }
+
   function handleSelection(node: Node) {
     if (!node.selected && node.type === 'file' && !keys.ctrl && !keys.shift) {
       // Select a file node via click, without pressing CTRL nor SHIFT.
@@ -265,7 +271,11 @@
       // Deselect a file node via click, without pressing CTRL nor SHIFT.
       deselectFileViaClickNoCtrlNoShift();
     } else if (!node.selected && node.type === 'dir' && !keys.ctrl && !keys.shift) {
+      // Select a dir node via click, without pressing CTRL nor SHIFT.
       selectDirViaClickNoCtrlNoShift(node);
+    } else if (node.selected && node.type === 'dir' && !keys.ctrl && !keys.shift) {
+      // Deselect a dir node via click, without pressing CTRL nor SHIFT.
+      deselectDirViaClickNoCtrlNoShift();
     }
   }
 
@@ -393,6 +403,6 @@
     background-color: #515151;
   }
   input[type='text'].selected {
-    border: 1px solid #bbe624;
+    outline: 1px solid #bbe624;
   }
 </style>
