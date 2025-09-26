@@ -179,6 +179,20 @@
 
   // --- Selection: ---
 
+  function clearSelection() {
+    for (const node of selectedNodes.value) {
+      node.selected = false;
+      let curr = node.parent;
+      while (curr) {
+        if (curr.type !== 'dir') break;
+        if (curr.nDescSel === 0) break;
+        curr.nDescSel = 0;
+        curr = curr.parent;
+      }
+    }
+    selectedNodes.value.clear();
+  }
+
   // --- Tree flattening: ---
 
   function flatten(head: Node | null): Node[] {
