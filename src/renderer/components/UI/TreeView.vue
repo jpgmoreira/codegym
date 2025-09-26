@@ -267,6 +267,19 @@
     }
   }
 
+  function unmarkSubtreeAsSelected(head: Node | null) {
+    if (!head) return;
+    let curr: Node | null = head;
+    while (curr) {
+      unmarkNodeAsSelected(curr);
+      if (curr.type === 'dir') {
+        curr.nDescSel = 0;
+        unmarkSubtreeAsSelected(curr.head);
+      }
+      curr = curr.next;
+    }
+  }
+
   function selectDirViaClickPressingCtrlIgnoreShift(node: Node) {
     if (node.type !== 'dir') return;
     markNodeAsSelected(node);
@@ -283,6 +296,25 @@
       }
       curr = curr.parent;
     }
+  }
+
+  function deselectDirViaClickPressingCtrlIgnoreShift(node: Node) {
+    if (node.type !== 'dir') return;
+    unmarkNodeAsSelected(node);
+    node.nDescSel = 0;
+    unmarkSubtreeAsSelected(node.head);
+    let delta = node.nDesc + 1;
+    let curr = node.parent;
+    while (curr) {
+      if (curr.type !== 'dir') break;
+      curr.nDescSel -= delta;
+      if (curr.selected) {
+        unmarkNodeAsSelected(curr);
+        delta++;
+      }
+      curr = curr.parent;
+    }
+    blurHoveredNode();
   }
 
   function selectDirViaClickNoCtrlNoShift(node: Node) {
@@ -318,6 +350,9 @@
     } else if (!node.selected && node.type === 'dir' && keys.ctrl) {
       // Select a dir node via click, pressing CTRL, SHIFT doesn't matter.
       selectDirViaClickPressingCtrlIgnoreShift(node);
+    } else if (node.selected && node.type === 'dir' && keys.ctrl) {
+      // Deselect a dir node via click, pressing CTRL, SHIFT doesn't matter.
+      deselectDirViaClickPressingCtrlIgnoreShift(node);
     }
   }
 
