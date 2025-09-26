@@ -142,6 +142,7 @@
     const newNode = type === 'dir' ? _createDirNode(parent) : _createFileNode(parent);
     const control = parent || rootController;
     newNode.depth = parent ? parent.depth + 1 : 0;
+    if (parent) parent.open = true;
     if (!control.head || !control.tail) {
       control.head = newNode;
       control.tail = newNode;
