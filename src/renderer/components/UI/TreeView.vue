@@ -242,7 +242,7 @@
           <AutoLengthInput
             :value.trim="node.text"
             :readonly="renamingNode !== node"
-            :class="{ hover: hoveredNodeId === node.id }"
+            :class="{ selected: node.selected, hover: hoveredNodeId === node.id }"
             @click.right.stop="(e: MouseEvent) => showContext('dir', e, node)"
             @keydown.esc="renamingNode = null"
             @keydown.enter="(e: KeyboardEvent) => applyRenaming(e)"
@@ -255,7 +255,7 @@
           v-else
           :value.trim="node.text"
           :readonly="renamingNode !== node"
-          :class="{ hover: hoveredNodeId === node.id }"
+          :class="{ selected: node.selected, hover: hoveredNodeId === node.id }"
           @click.right.stop="(e: MouseEvent) => showContext('file', e, node)"
           @keydown.esc="renamingNode = null"
           @keydown.enter="(e: KeyboardEvent) => applyRenaming(e)"
@@ -294,5 +294,8 @@
   input[type='text'][readonly].hover,
   input[type='text'][readonly]:focus {
     background-color: #515151;
+  }
+  input[type='text'].selected {
+    border: 1px solid #bbe624;
   }
 </style>
