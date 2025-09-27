@@ -22,8 +22,8 @@
         parent: Node | null;
         next: Node | null;
         prev: Node | null;
-        head: Node | null;
-        tail: Node | null;
+        subDirs: ControllerType['subDirs'];
+        subFiles: ControllerType['subFiles'];
         open: boolean;
       }
     | {
@@ -40,6 +40,10 @@
 
   type ContextType = 'root' | 'dir' | 'file';
   type NodeType = Node['type'];
+  type ControllerType = {
+    subDirs: { head: Node | null; tail: Node | null };
+    subFiles: { head: Node | null; tail: Node | null };
+  };
 
   const context = reactive({
     type: 'root' as ContextType,
@@ -52,8 +56,8 @@
   const rootController = reactive({
     nextFile: 1,
     nextDir: 1,
-    head: null as Node | null,
-    tail: null as Node | null,
+    subDirs: { head: null, tail: null } as ControllerType['subDirs'],
+    subFiles: { head: null, tail: null } as ControllerType['subFiles'],
   });
 
   const keys = reactive({
@@ -125,8 +129,8 @@
       parent,
       next: null,
       prev: null,
-      head: null,
-      tail: null,
+      subDirs: { head: null, tail: null },
+      subFiles: { head: null, tail: null },
       open: false,
     } as const;
     rootController.nextDir++;
@@ -163,20 +167,25 @@
     }
   }
 
+  function appendNode(node: Node, control: ControllerType) {
+    const sub = node.type === 'dir' ? control.subDirs : control.subFiles;
+    if (!sub.head || !sub.tail) {
+      sub.head = node;
+      sub.tail = node;
+    } else {
+      sub.tail.next = node;
+      node.prev = sub.tail;
+      sub.tail = node;
+    }
+  }
+
   function createNode(type: NodeType) {
     const parent = context.targetNode;
     if (parent && parent.type !== 'dir') return;
     const newNode = type === 'dir' ? _createDirNode(parent) : _createFileNode(parent);
     const control = parent || rootController;
     if (parent) parent.open = true;
-    if (!control.head || !control.tail) {
-      control.head = newNode;
-      control.tail = newNode;
-    } else {
-      control.tail.next = newNode;
-      newNode.prev = control.tail;
-      control.tail = newNode;
-    }
+    appendNode(newNode, control);
     updateNewNodeSelectionAndAncestors(newNode, parent);
     nTotalNodes.value++;
   }
@@ -191,7 +200,8 @@
     if (anchor.prev) anchor.prev.next = newNode;
     newNode.next = anchor;
     anchor.prev = newNode;
-    if (control.head === anchor) control.head = newNode;
+    const sub = type === 'dir' ? control.subDirs : control.subFiles;
+    if (sub.head === anchor) sub.head = newNode;
     updateNewNodeSelectionAndAncestors(newNode, parent);
     nTotalNodes.value++;
   }
@@ -206,7 +216,8 @@
     if (anchor.next) anchor.next.prev = newNode;
     newNode.prev = anchor;
     anchor.next = newNode;
-    if (control.tail === anchor) control.tail = newNode;
+    const sub = type === 'dir' ? control.subDirs : control.subFiles;
+    if (sub.tail === anchor) sub.tail = newNode;
     updateNewNodeSelectionAndAncestors(newNode, parent);
     nTotalNodes.value++;
   }
@@ -312,7 +323,8 @@
       markNodeAsSelected(curr);
       if (curr.type === 'dir') {
         curr.nDescSel = curr.nDesc;
-        markSubtreeAsSelected(curr.head);
+        markSubtreeAsSelected(curr.subDirs.head);
+        markSubtreeAsSelected(curr.subFiles.head);
       }
       curr = curr.next;
     }
@@ -325,7 +337,8 @@
       unmarkNodeAsSelected(curr);
       if (curr.type === 'dir') {
         curr.nDescSel = 0;
-        unmarkSubtreeAsSelected(curr.head);
+        unmarkSubtreeAsSelected(curr.subDirs.head);
+        unmarkSubtreeAsSelected(curr.subFiles.head);
       }
       curr = curr.next;
     }
@@ -335,7 +348,8 @@
     if (node.selected) return;
     if (node.type !== 'dir') return;
     markNodeAsSelected(node);
-    markSubtreeAsSelected(node.head);
+    markSubtreeAsSelected(node.subDirs.head);
+    markSubtreeAsSelected(node.subFiles.head);
     let delta = node.nDesc - node.nDescSel + 1;
     node.nDescSel = node.nDesc;
     let curr = node.parent;
@@ -355,7 +369,8 @@
     if (node.type !== 'dir') return;
     unmarkNodeAsSelected(node);
     node.nDescSel = 0;
-    unmarkSubtreeAsSelected(node.head);
+    unmarkSubtreeAsSelected(node.subDirs.head);
+    unmarkSubtreeAsSelected(node.subFiles.head);
     let delta = node.nDesc + 1;
     let curr = node.parent;
     while (curr) {
@@ -402,8 +417,8 @@
       curr = curr.parent;
     }
     if (lca && lca.type !== 'dir') return; // Make TS happy.
-    let head = lca ? lca.head : rootController.head;
-    const flattened = flatten(head);
+    let control = lca || rootController;
+    const flattened = [...flatten(control.subDirs.head), ...flatten(control.subFiles.head)];
     let aux = 0;
     for (const node of flattened) {
       if (node === orig || node === dest) {
@@ -475,7 +490,8 @@
     if (allNodesSelected.value) {
       clearSelection();
     } else {
-      markSubtreeAsSelected(rootController.head);
+      markSubtreeAsSelected(rootController.subDirs.head);
+      markSubtreeAsSelected(rootController.subFiles.head);
     }
   }
 
@@ -494,8 +510,9 @@
   function removeNodeFromTree(node: Node) {
     if (node.parent && node.parent.type !== 'dir') return; // Make TS happy.
     const control = node.parent || rootController;
-    if (node === control.head) control.head = node.next;
-    if (node === control.tail) control.tail = node.prev;
+    const sub = node.type === 'dir' ? control.subDirs : control.subFiles;
+    if (node === sub.head) sub.head = node.next;
+    if (node === sub.tail) sub.tail = node.prev;
     if (node.prev && node.next) {
       node.prev.next = node.next;
       node.next.prev = node.prev;
@@ -531,7 +548,7 @@
 
   function deleteDir(node: Node) {
     if (node.type !== 'dir') return;
-    const subtree = flatten(node.head);
+    const subtree = [...flatten(node.subDirs.head), ...flatten(node.subFiles.head)];
     for (const sub of subtree) {
       if (sub.selected) unmarkNodeAsSelected(sub);
       sub.deleted = true;
@@ -576,13 +593,17 @@
     let curr: Node | null = head;
     while (curr) {
       result.push(curr);
-      if (curr.type === 'dir' && curr.open) result.push(...flatten(curr.head));
+      if (curr.type === 'dir' && curr.open)
+        result.push(...flatten(curr.subDirs.head), ...flatten(curr.subFiles.head));
       curr = curr.next;
     }
     return result;
   }
 
-  const flattened = computed(() => flatten(rootController.head));
+  const flattened = computed(() => [
+    ...flatten(rootController.subDirs.head),
+    ...flatten(rootController.subFiles.head),
+  ]);
 
   // --- UI auxiliary: ---
 
@@ -644,8 +665,6 @@
           <div @click="deleteContextDir">Delete item</div>
         </template>
         <template v-else>
-          <div @click="createNodeAbove('file')">New file above</div>
-          <div @click="createNodeBelow('file')">New file below</div>
           <div @click="createNodeAbove('dir')">New folder above</div>
           <div @click="createNodeBelow('dir')">New folder below</div>
         </template>
@@ -658,8 +677,6 @@
         <template v-else>
           <div @click="createNodeAbove('file')">New file above</div>
           <div @click="createNodeBelow('file')">New file below</div>
-          <div @click="createNodeAbove('dir')">New folder above</div>
-          <div @click="createNodeBelow('dir')">New folder below</div>
         </template>
       </div>
     </div>
