@@ -441,6 +441,58 @@
     }
   }
 
+  // --- Deletion: ---
+
+  function deleteContextFile() {
+    const node = context.targetNode!;
+    deleteFile(node);
+  }
+
+  function deleteContextDir() {
+    const node = context.targetNode!;
+    deleteDir(node);
+  }
+
+  function removeNodeFromTree(node: Node) {
+    if (node.parent && node.parent.type !== 'dir') return; // Make TS happy.
+    const control = node.parent || rootController;
+    if (node === control.head) control.head = node.next;
+    if (node === control.tail) control.tail = node.prev;
+    if (node.prev && node.next) {
+      node.prev.next = node.next;
+      node.next.prev = node.prev;
+    } else if (node.prev) {
+      node.prev.next = null;
+    } else if (node.next) {
+      node.next.prev = null;
+    }
+  }
+
+  function deleteFile(node: Node) {
+    const wasSelected = node.selected;
+    if (wasSelected) unmarkNodeAsSelected(node);
+    let curr = node.parent;
+    let ancestorSelDelta = 0;
+    while (curr) {
+      if (curr.type !== 'dir') break;
+      curr.nDescSel += ancestorSelDelta;
+      curr.nDesc--;
+      if (wasSelected) curr.nDescSel--;
+      if (!curr.selected && curr.nDesc > 0 && curr.nDesc === curr.nDescSel) {
+        markNodeAsSelected(curr);
+        ancestorSelDelta++;
+      }
+      curr = curr.parent;
+    }
+    if (renamingNode.value === node) renamingNode.value = null;
+    if (hoveredNodeId.value === node.id) hoveredNodeId.value = null;
+    if (shiftSelectionAnchorNode.value === node) shiftSelectionAnchorNode.value = null;
+    nTotalNodes.value--;
+    removeNodeFromTree(node);
+  }
+
+  function deleteDir(node: Node) {}
+
   // --- Tree flattening: ---
 
   function flatten(head: Node | null): Node[] {
@@ -498,8 +550,8 @@
     <!-- Context menu -->
     <div v-if="context.visible" class="context-container" :style="context.style">
       <div v-if="context.type === 'root'">
-        <div @click="createNode('file')">Create file</div>
-        <div @click="createNode('dir')">Create folder</div>
+        <div @click="createNode('file')">New file</div>
+        <div @click="createNode('dir')">New folder</div>
         <div v-if="nTotalNodes && allNodesSelected" @click="toggleFullSelection">
           Clear selection
         </div>
@@ -507,14 +559,14 @@
         <div v-if="selectedNodes.size">Delete selection</div>
       </div>
       <div v-else-if="context.type === 'dir'">
-        <div @click="createNode('file')">Create sub-file</div>
-        <div @click="createNode('dir')">Create sub-folder</div>
+        <div @click="createNode('file')">New file</div>
+        <div @click="createNode('dir')">New folder</div>
         <div @click="startRenaming">Rename item</div>
-        <div>Delete item</div>
+        <div @click="deleteContextDir">Delete item</div>
       </div>
       <div v-else-if="context.type === 'file'">
         <div @click="startRenaming">Rename item</div>
-        <div>Delete item</div>
+        <div @click="deleteContextFile">Delete item</div>
       </div>
     </div>
     <!-- Tree -->
