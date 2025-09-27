@@ -418,7 +418,10 @@
     }
     if (lca && lca.type !== 'dir') return; // Make TS happy.
     let control = lca || rootController;
-    const flattened = [...flatten(control.subDirs.head), ...flatten(control.subFiles.head)];
+    const flattened = [
+      ...flatten(control.subDirs.head, true),
+      ...flatten(control.subFiles.head, true),
+    ];
     let aux = 0;
     for (const node of flattened) {
       if (node === orig || node === dest) {
@@ -548,7 +551,7 @@
 
   function deleteDir(node: Node) {
     if (node.type !== 'dir') return;
-    const subtree = [...flatten(node.subDirs.head), ...flatten(node.subFiles.head)];
+    const subtree = [...flatten(node.subDirs.head, true), ...flatten(node.subFiles.head, true)];
     for (const sub of subtree) {
       if (sub.selected) unmarkNodeAsSelected(sub);
       sub.deleted = true;
@@ -588,21 +591,24 @@
 
   // --- Tree flattening: ---
 
-  function flatten(head: Node | null): Node[] {
+  function flatten(head: Node | null, includeClosed: boolean): Node[] {
     const result: Node[] = [];
     let curr: Node | null = head;
     while (curr) {
       result.push(curr);
-      if (curr.type === 'dir' && curr.open)
-        result.push(...flatten(curr.subDirs.head), ...flatten(curr.subFiles.head));
+      if (curr.type === 'dir' && (curr.open || includeClosed))
+        result.push(
+          ...flatten(curr.subDirs.head, includeClosed),
+          ...flatten(curr.subFiles.head, includeClosed)
+        );
       curr = curr.next;
     }
     return result;
   }
 
   const flattened = computed(() => [
-    ...flatten(rootController.subDirs.head),
-    ...flatten(rootController.subFiles.head),
+    ...flatten(rootController.subDirs.head, false),
+    ...flatten(rootController.subFiles.head, false),
   ]);
 
   // --- UI auxiliary: ---
