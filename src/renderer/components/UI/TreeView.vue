@@ -16,6 +16,7 @@
         text: string;
         depth: number;
         selected: boolean;
+        deleted: boolean;
         nDesc: number; // Total number of descendants, not including the node.
         nDescSel: number; // Total number of selected descendants.
         parent: Node | null;
@@ -31,6 +32,7 @@
         text: string;
         depth: number;
         selected: boolean;
+        deleted: boolean;
         parent: Node | null;
         next: Node | null;
         prev: Node | null;
@@ -117,6 +119,7 @@
       text: `Folder ${rootController.nextDir}`,
       depth: 0,
       selected: false,
+      deleted: false,
       nDesc: 0,
       nDescSel: 0,
       parent,
@@ -136,6 +139,7 @@
       text: `File ${rootController.nextFile}`,
       depth: 0,
       selected: false,
+      deleted: false,
       parent,
       next: null,
       prev: null,
@@ -493,10 +497,15 @@
 
   function deleteDir(node: Node) {
     if (node.type !== 'dir') return;
-    unmarkSubtreeAsSelected(node.head);
+    const subtree = flatten(node.head);
+    for (const sub of subtree) {
+      if (sub.selected) unmarkNodeAsSelected(sub);
+      sub.deleted = true;
+    }
+    unmarkNodeAsSelected(node);
+    node.deleted = true;
     const nDescDec = node.nDesc + 1;
     let ancestorSelDelta = -(node.nDescSel + Number(node.selected));
-    unmarkNodeAsSelected(node);
     let curr = node.parent;
     while (curr) {
       if (curr.type !== 'dir') break;
@@ -513,6 +522,17 @@
     shiftSelectionAnchorNode.value = null;
     nTotalNodes.value -= nDescDec;
     removeNodeFromTree(node);
+  }
+
+  function deleteAllSelectedNodes() {
+    // Delete dirs first, since it potentially increases overall deletion efficiency.
+    const snapshot = Array.from(selectedNodes.value);
+    for (const node of snapshot) {
+      if (node.type === 'dir' && !node.deleted) deleteDir(node);
+    }
+    for (const node of snapshot) {
+      if (node.type === 'file' && !node.deleted) deleteFile(node);
+    }
   }
 
   // --- Tree flattening: ---
@@ -570,6 +590,7 @@
     @dblclick="toggleFullSelection"
   >
     <div>Selected nodes: {{ selectedNodes.size }}</div>
+    <div>Total nodes: {{ nTotalNodes }}</div>
     <!-- Context menu -->
     <div v-if="context.visible" class="context-container" :style="context.style">
       <div v-if="context.type === 'root'">
@@ -579,7 +600,7 @@
           Clear selection
         </div>
         <div v-if="nTotalNodes && !allNodesSelected" @click="toggleFullSelection">Select all</div>
-        <div v-if="selectedNodes.size">Delete selection</div>
+        <div v-if="selectedNodes.size" @click="deleteAllSelectedNodes">Delete selection</div>
       </div>
       <div v-else-if="context.type === 'dir'">
         <div @click="createNode('file')">New file</div>
