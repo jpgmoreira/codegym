@@ -502,10 +502,10 @@
       if (sub.selected) unmarkNodeAsSelected(sub);
       sub.deleted = true;
     }
-    unmarkNodeAsSelected(node);
-    node.deleted = true;
     const nDescDec = node.nDesc + 1;
     let ancestorSelDelta = -(node.nDescSel + Number(node.selected));
+    unmarkNodeAsSelected(node);
+    node.deleted = true;
     let curr = node.parent;
     while (curr) {
       if (curr.type !== 'dir') break;
