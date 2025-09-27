@@ -117,7 +117,7 @@
       id: randomId(),
       type: 'dir',
       text: `Folder ${rootController.nextDir}`,
-      depth: 0,
+      depth: parent ? parent.depth + 1 : 0,
       selected: false,
       deleted: false,
       nDesc: 0,
@@ -137,7 +137,7 @@
       id: randomId(),
       type: 'file',
       text: `File ${rootController.nextFile}`,
-      depth: 0,
+      depth: parent ? parent.depth + 1 : 0,
       selected: false,
       deleted: false,
       parent,
@@ -148,12 +148,26 @@
     return node;
   }
 
+  function updateNewNodeSelectionAndAncestors(node: Node, parent: Node | null) {
+    // Creation of a node in a selected parent:
+    if (parent && parent.selected) {
+      markNodeAsSelected(node);
+    }
+    // Update ancestors:
+    let curr: Node | null = parent;
+    while (curr) {
+      if (curr.type !== 'dir') break;
+      curr.nDesc++;
+      curr.nDescSel += Number(node.selected);
+      curr = curr.parent;
+    }
+  }
+
   function createNode(type: NodeType) {
     const parent = context.targetNode;
     if (parent && parent.type !== 'dir') return;
     const newNode = type === 'dir' ? _createDirNode(parent) : _createFileNode(parent);
     const control = parent || rootController;
-    newNode.depth = parent ? parent.depth + 1 : 0;
     if (parent) parent.open = true;
     if (!control.head || !control.tail) {
       control.head = newNode;
@@ -163,17 +177,37 @@
       newNode.prev = control.tail;
       control.tail = newNode;
     }
-    // Creation of a node in a selected parent:
-    if (parent && parent.selected) {
-      markNodeAsSelected(newNode);
-    }
-    let curr: Node | null = parent;
-    while (curr) {
-      if (curr.type !== 'dir') break;
-      curr.nDesc++;
-      curr.nDescSel += Number(newNode.selected);
-      curr = curr.parent;
-    }
+    updateNewNodeSelectionAndAncestors(newNode, parent);
+    nTotalNodes.value++;
+  }
+
+  function createNodeAbove(type: NodeType) {
+    const anchor = context.targetNode!;
+    const parent = anchor.parent;
+    if (parent && parent.type !== 'dir') return;
+    const newNode = type === 'dir' ? _createDirNode(parent) : _createFileNode(parent);
+    const control = parent || rootController;
+    newNode.prev = anchor.prev;
+    if (anchor.prev) anchor.prev.next = newNode;
+    newNode.next = anchor;
+    anchor.prev = newNode;
+    if (control.head === anchor) control.head = newNode;
+    updateNewNodeSelectionAndAncestors(newNode, parent);
+    nTotalNodes.value++;
+  }
+
+  function createNodeBelow(type: NodeType) {
+    const anchor = context.targetNode!;
+    const parent = anchor.parent;
+    if (parent && parent.type !== 'dir') return;
+    const newNode = type === 'dir' ? _createDirNode(parent) : _createFileNode(parent);
+    const control = parent || rootController;
+    newNode.next = anchor.next;
+    if (anchor.next) anchor.next.prev = newNode;
+    newNode.prev = anchor;
+    anchor.next = newNode;
+    if (control.tail === anchor) control.tail = newNode;
+    updateNewNodeSelectionAndAncestors(newNode, parent);
     nTotalNodes.value++;
   }
 
@@ -603,14 +637,30 @@
         <div v-if="selectedNodes.size" @click="deleteAllSelectedNodes">Delete selection</div>
       </div>
       <div v-else-if="context.type === 'dir'">
-        <div @click="createNode('file')">New file</div>
-        <div @click="createNode('dir')">New folder</div>
-        <div @click="startRenaming">Rename item</div>
-        <div @click="deleteContextDir">Delete item</div>
+        <template v-if="!keys.ctrl">
+          <div @click="createNode('file')">New file</div>
+          <div @click="createNode('dir')">New folder</div>
+          <div @click="startRenaming">Rename item</div>
+          <div @click="deleteContextDir">Delete item</div>
+        </template>
+        <template v-else>
+          <div @click="createNodeAbove('file')">New file above</div>
+          <div @click="createNodeBelow('file')">New file below</div>
+          <div @click="createNodeAbove('dir')">New folder above</div>
+          <div @click="createNodeBelow('dir')">New folder below</div>
+        </template>
       </div>
       <div v-else-if="context.type === 'file'">
-        <div @click="startRenaming">Rename item</div>
-        <div @click="deleteContextFile">Delete item</div>
+        <template v-if="!keys.ctrl">
+          <div @click="startRenaming">Rename item</div>
+          <div @click="deleteContextFile">Delete item</div>
+        </template>
+        <template v-else>
+          <div @click="createNodeAbove('file')">New file above</div>
+          <div @click="createNodeBelow('file')">New file below</div>
+          <div @click="createNodeAbove('dir')">New folder above</div>
+          <div @click="createNodeBelow('dir')">New folder below</div>
+        </template>
       </div>
     </div>
     <!-- Tree -->
