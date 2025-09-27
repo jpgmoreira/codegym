@@ -504,6 +504,7 @@
           Clear selection
         </div>
         <div v-if="nTotalNodes && !allNodesSelected" @click="toggleFullSelection">Select all</div>
+        <div v-if="selectedNodes.size">Delete selection</div>
       </div>
       <div v-else-if="context.type === 'dir'">
         <div @click="createNode('file')">Create sub-file</div>
