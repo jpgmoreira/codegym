@@ -484,14 +484,36 @@
       }
       curr = curr.parent;
     }
-    if (renamingNode.value === node) renamingNode.value = null;
-    if (hoveredNodeId.value === node.id) hoveredNodeId.value = null;
-    if (shiftSelectionAnchorNode.value === node) shiftSelectionAnchorNode.value = null;
+    renamingNode.value = null;
+    hoveredNodeId.value = null;
+    shiftSelectionAnchorNode.value = null;
     nTotalNodes.value--;
     removeNodeFromTree(node);
   }
 
-  function deleteDir(node: Node) {}
+  function deleteDir(node: Node) {
+    if (node.type !== 'dir') return;
+    unmarkSubtreeAsSelected(node.head);
+    const nDescDec = node.nDesc + 1;
+    let ancestorSelDelta = -(node.nDescSel + Number(node.selected));
+    unmarkNodeAsSelected(node);
+    let curr = node.parent;
+    while (curr) {
+      if (curr.type !== 'dir') break;
+      curr.nDesc -= nDescDec;
+      curr.nDescSel += ancestorSelDelta;
+      if (!curr.selected && curr.nDesc > 0 && curr.nDesc === curr.nDescSel) {
+        markNodeAsSelected(curr);
+        ancestorSelDelta++;
+      }
+      curr = curr.parent;
+    }
+    renamingNode.value = null;
+    hoveredNodeId.value = null;
+    shiftSelectionAnchorNode.value = null;
+    nTotalNodes.value -= nDescDec;
+    removeNodeFromTree(node);
+  }
 
   // --- Tree flattening: ---
 
@@ -547,6 +569,7 @@
     @click="clearContext"
     @dblclick="toggleFullSelection"
   >
+    <div>Selected nodes: {{ selectedNodes.size }}</div>
     <!-- Context menu -->
     <div v-if="context.visible" class="context-container" :style="context.style">
       <div v-if="context.type === 'root'">
