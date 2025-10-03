@@ -32,10 +32,21 @@ export type Node =
     };
 
 export type NodeType = Node['type'];
-export type ControllerList = { headId: string | null; tailId: string | null };
+
+export type ControllerList = {
+  headId: string | null;
+  tailId: string | null;
+};
+
 export type Controller = {
   subDirs: ControllerList;
   subFiles: ControllerList;
+};
+
+export type TreeState = {
+  visibleNodes: Node[];
+  nSelectedNodes: number;
+  nTotalNodes: number;
 };
 
 export type ModifierKeys = {

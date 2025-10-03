@@ -1,7 +1,8 @@
 <script lang="ts" setup>
   import { ref, computed, reactive, useTemplateRef, onMounted, onBeforeUnmount } from 'vue';
-  import { ModifierKeys, type Node } from '@common/types/tree';
+  import { ModifierKeys, NodeType, TreeState, type Node } from '@common/types/tree/treeTypes';
   import AutoLengthInput from './AutoLengthInput.vue';
+  import { TreeChannels } from '@common/types/tree/treeChannels';
 
   // --- Props: ---
 
@@ -27,6 +28,12 @@
   const renamingNode = ref<Node | null>(null);
 
   const hoveredNodeId = ref<string | null>(null);
+
+  const treeState = ref<TreeState>({
+    visibleNodes: [],
+    nSelectedNodes: 0,
+    nTotalNodes: 0,
+  });
 
   const treeContainerRef = useTemplateRef('tree-container');
 
@@ -75,67 +82,77 @@
     context.targetDomElement?.select();
   }
 
-  function applyRenaming(e: Event) {
+  async function applyRenaming(e: Event) {
     if (!renamingNode.value) return;
     const newName = (e.target as HTMLInputElement).value.trim();
     const node = renamingNode.value;
     renamingNode.value = null;
     if (newName && node.text !== newName) {
-      // Send to back-end here
+      treeState.value = await window.api.invoke(TreeChannels.renameNode, node.id, newName);
     }
   }
 
   // --- Selection: ---
 
-  function blurHoveredNode() {
-    hoveredNodeId.value = null;
-    (document.activeElement as HTMLElement).blur();
+  // function blurHoveredNode() {
+  //   hoveredNodeId.value = null;
+  //   (document.activeElement as HTMLElement).blur();
+  // }
+
+  // function deselectFileViaClickPressingCtrlIgnoreShift(node: Node) {
+  //   blurHoveredNode();
+  // }
+
+  // function deselectFileViaClickNoCtrlNoShift(node: Node) {
+  //   blurHoveredNode();
+  // }
+
+  // function deselectDirViaClickPressingCtrlIgnoreShift(node: Node) {
+  //   blurHoveredNode();
+  // }
+
+  // function deselectDirViaClickNoCtrlNoShift(node: Node) {
+  //   blurHoveredNode();
+  // }
+
+  async function toggleFullSelection() {
+    treeState.value = await window.api.invoke(TreeChannels.toggleFullSelection);
   }
 
-  function deselectFileViaClickPressingCtrlIgnoreShift(node: Node) {
-    blurHoveredNode();
+  async function createNode(type: NodeType) {
+    const parentId = context.targetNode ? context.targetNode.id : null;
+    treeState.value = await window.api.invoke(TreeChannels.createNode, type, parentId);
   }
 
-  function deselectFileViaClickNoCtrlNoShift(node: Node) {
-    blurHoveredNode();
-  }
-
-  function deselectDirViaClickPressingCtrlIgnoreShift(node: Node) {
-    blurHoveredNode();
-  }
-
-  function deselectDirViaClickNoCtrlNoShift(node: Node) {
-    blurHoveredNode();
+  async function handleSelection(node: Node) {
+    treeState.value = await window.api.invoke(
+      TreeChannels.handleSelection,
+      node.id,
+      props.checkbox,
+      keys
+    );
   }
 
   // --- Deletion: ---
 
-  function deleteContextFile() {
+  async function deleteContextFile() {
+    renamingNode.value = null;
+    hoveredNodeId.value = null;
     const node = context.targetNode!;
-    deleteFile(node);
+    treeState.value = await window.api.invoke(TreeChannels.deleteNode, 'file', node.id);
   }
 
-  function deleteContextDir() {
+  async function deleteContextDir() {
+    renamingNode.value = null;
+    hoveredNodeId.value = null;
     const node = context.targetNode!;
-    deleteDir(node);
+    treeState.value = await window.api.invoke(TreeChannels.deleteNode, 'dir', node.id);
   }
 
-  function deleteFile(node: Node) {
+  async function deleteAllSelectedNodes() {
     renamingNode.value = null;
     hoveredNodeId.value = null;
-    // send to back-end;
-  }
-
-  function deleteDir(node: Node) {
-    renamingNode.value = null;
-    hoveredNodeId.value = null;
-    // send to back-end.
-  }
-
-  function deleteAllSelectedNodes() {
-    renamingNode.value = null;
-    hoveredNodeId.value = null;
-    // send to back-end here;
+    treeState.value = await window.api.invoke(TreeChannels.deleteAllSelectedNodes);
   }
 
   // --- UI auxiliary: ---
@@ -144,6 +161,11 @@
     if (node.type !== 'dir') return false;
     return node.nDescSel > 0 && node.nDesc !== node.nDescSel;
   }
+
+  const allNodesSelected = computed(
+    () =>
+      treeState.value.nTotalNodes && treeState.value.nTotalNodes === treeState.value.nSelectedNodes
+  );
 
   // --- Hooks: ---
 
@@ -173,18 +195,17 @@
     @click="clearContext"
     @dblclick="toggleFullSelection"
   >
-    <div>Selected nodes: {{ selectedNodes.size }}</div>
-    <div>Total nodes: {{ nTotalNodes }}</div>
+    <div>Selected nodes: {{ treeState.nSelectedNodes }}</div>
     <!-- Context menu -->
     <div v-if="context.visible" class="context-container" :style="context.style">
       <div v-if="context.type === 'root'">
         <div @click="createNode('file')">New file</div>
         <div @click="createNode('dir')">New folder</div>
-        <div v-if="nTotalNodes && allNodesSelected" @click="toggleFullSelection">
-          Clear selection
+        <div v-if="allNodesSelected" @click="toggleFullSelection">Clear selection</div>
+        <div v-if="treeState.nTotalNodes && !allNodesSelected" @click="toggleFullSelection">
+          Select all
         </div>
-        <div v-if="nTotalNodes && !allNodesSelected" @click="toggleFullSelection">Select all</div>
-        <div v-if="selectedNodes.size" @click="deleteAllSelectedNodes">Delete selection</div>
+        <div v-if="treeState.nSelectedNodes" @click="deleteAllSelectedNodes">Delete selection</div>
       </div>
       <div v-else-if="context.type === 'dir'">
         <template v-if="!keys.ctrl">
@@ -193,24 +214,16 @@
           <div @click="startRenaming">Rename item</div>
           <div @click="deleteContextDir">Delete item</div>
         </template>
-        <template v-else>
-          <div @click="createNodeAbove('dir')">New folder above</div>
-          <div @click="createNodeBelow('dir')">New folder below</div>
-        </template>
       </div>
       <div v-else-if="context.type === 'file'">
         <template v-if="!keys.ctrl">
           <div @click="startRenaming">Rename item</div>
           <div @click="deleteContextFile">Delete item</div>
         </template>
-        <template v-else>
-          <div @click="createNodeAbove('file')">New file above</div>
-          <div @click="createNodeBelow('file')">New file below</div>
-        </template>
       </div>
     </div>
     <!-- Tree -->
-    <div v-for="node in flattened" class="node-row" :key="node.id">
+    <div v-for="node in treeState.visibleNodes" class="node-row" :key="node.id">
       <div :style="{ paddingLeft: `${node.depth * 40}px` }">
         <div v-if="node.type === 'dir'">
           <span v-if="node.open" @click="node.open = false">-</span>

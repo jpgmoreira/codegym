@@ -1,5 +1,12 @@
 import { randomId } from '@common/utils/utils';
-import { NodeType, ControllerList, Node, Controller, ModifierKeys } from '@common/types/tree';
+import {
+  NodeType,
+  ControllerList,
+  Node,
+  Controller,
+  ModifierKeys,
+  TreeState,
+} from '@common/types/tree/treeTypes';
 
 /**
  * Manager for the treeview component.
@@ -65,6 +72,9 @@ export class TreeManager {
   // --- Node creation: ---
 
   private createDirNode(parent: Node | null): Node {
+    /**
+     * O(1)
+     */
     const node = {
       id: randomId(),
       type: 'dir',
@@ -86,6 +96,9 @@ export class TreeManager {
   }
 
   private createFileNode(parent: Node | null): Node {
+    /**
+     * O(1)
+     */
     const node = {
       id: randomId(),
       type: 'file',
@@ -102,6 +115,9 @@ export class TreeManager {
   }
 
   private updateNewNodeSelectionAndAncestors(node: Node, parent: Node | null) {
+    /**
+     * O(depth of node)
+     */
     // Creation of a node in a selected parent:
     if (parent && parent.selected) {
       this.markNodeAsSelected(node);
@@ -117,6 +133,9 @@ export class TreeManager {
   }
 
   private appendNode(node: Node, control: Controller) {
+    /**
+     * O(1)
+     */
     const sub = node.type === 'dir' ? control.subDirs : control.subFiles;
     if (!sub.headId || !sub.tailId) {
       sub.headId = node.id;
@@ -129,9 +148,14 @@ export class TreeManager {
     }
   }
 
-  private createNode(type: NodeType, parent: Node | null) {
+  public createNode(type: NodeType, parentId: string | null) {
+    /**
+     * O(depth of node)
+     */
+    const parent = parentId ? this.idToNode[parentId] : null;
     if (parent && parent.type !== 'dir') return;
     const newNode = type === 'dir' ? this.createDirNode(parent) : this.createFileNode(parent);
+    this.idToNode[newNode.id] = newNode;
     const control = parent || this.rootController;
     if (parent) parent.open = true;
     this.appendNode(newNode, control);
@@ -141,7 +165,12 @@ export class TreeManager {
 
   // --- Node renaming: ---
 
-  private renameNode(node: Node, newName: string) {
+  public renameNode(nodeId: string, newName: string) {
+    /**
+     * O(1)
+     */
+    const node = this.idToNode[nodeId];
+    if (!node) return;
     newName = newName.trim();
     if (newName && node.text !== newName) {
       node.text = newName;
@@ -151,18 +180,27 @@ export class TreeManager {
   // --- Selection: ---
 
   private markNodeAsSelected(node: Node) {
+    /**
+     * O(1)
+     */
     if (!node) return;
     node.selected = true;
     this.selectedNodes.add(node);
   }
 
   private unmarkNodeAsSelected(node: Node) {
+    /**
+     * O(1)
+     */
     if (!node) return;
     node.selected = false;
     this.selectedNodes.delete(node);
   }
 
   private clearSelection() {
+    /**
+     * O(number of nodes in the tree induced by selected nodes)
+     */
     for (const node of this.selectedNodes) {
       node.selected = false;
       let curr = this.getParent(node);
@@ -177,6 +215,9 @@ export class TreeManager {
   }
 
   private selectFileViaClickPressingCtrlIgnoreShift(node: Node) {
+    /**
+     * O(depth of node)
+     */
     if (node.selected) return;
     this.markNodeAsSelected(node);
     let delta = 1;
@@ -193,6 +234,9 @@ export class TreeManager {
   }
 
   private deselectFileViaClickPressingCtrlIgnoreShift(node: Node) {
+    /**
+     * O(depth of node)
+     */
     if (!node.selected) return;
     this.unmarkNodeAsSelected(node);
     let curr = this.getParent(node);
@@ -209,17 +253,29 @@ export class TreeManager {
   }
 
   private selectFileViaClickNoCtrlNoShift(node: Node) {
+    /**
+     * O(
+     *  (number of nodes in the tree induced by selected nodes) +
+     *  (depth of node)
+     * )
+     */
     if (node.selected) return;
     this.clearSelection();
     this.selectFileViaClickPressingCtrlIgnoreShift(node);
   }
 
   private deselectFileViaClickNoCtrlNoShift(node: Node) {
+    /**
+     * O(number of nodes in the tree induced by selected nodes)
+     */
     if (!node.selected) return;
     this.clearSelection();
   }
 
   private markSubtreeAsSelected(head: Node | null) {
+    /**
+     * O(number of nodes in the subtree)
+     */
     if (!head) return;
     let curr: Node | null = head;
     while (curr) {
@@ -230,11 +286,14 @@ export class TreeManager {
         this.markSubtreeAsSelected(dirHead);
         this.markSubtreeAsSelected(fileHead);
       }
-      curr = this.getParent(curr);
+      curr = this.getNext(curr);
     }
   }
 
   private unmarkSubtreeAsSelected(head: Node | null) {
+    /**
+     * O(number of nodes in the subtree)
+     */
     if (!head) return;
     let curr: Node | null = head;
     while (curr) {
@@ -245,11 +304,17 @@ export class TreeManager {
         this.unmarkSubtreeAsSelected(dirHead);
         this.unmarkSubtreeAsSelected(fileHead);
       }
-      curr = this.getParent(curr);
+      curr = this.getNext(curr);
     }
   }
 
   private selectDirViaClickPressingCtrlIgnoreShift(node: Node) {
+    /**
+     * O(
+     *  (number of nodes in the subtree) +
+     *  (depth of node)
+     * )
+     */
     if (node.selected) return;
     if (node.type !== 'dir') return;
     this.markNodeAsSelected(node);
@@ -271,6 +336,12 @@ export class TreeManager {
   }
 
   private deselectDirViaClickPressingCtrlIgnoreShift(node: Node) {
+    /**
+     * O(
+     *  (number of nodes in the subtree) +
+     *  (depth of node)
+     * )
+     */
     if (!node.selected) return;
     if (node.type !== 'dir') return;
     this.unmarkNodeAsSelected(node);
@@ -292,6 +363,13 @@ export class TreeManager {
   }
 
   private selectDirViaClickNoCtrlNoShift(node: Node) {
+    /**
+     * O(
+     *  (number of nodes in the tree induced by selected nodes) +
+     *  (number of nodes in the subtree) +
+     *  (depth of node)
+     * )
+     */
     if (node.selected) return;
     if (node.type !== 'dir') return;
     this.clearSelection();
@@ -299,11 +377,24 @@ export class TreeManager {
   }
 
   private deselectDirViaClickNoCtrlNoShift(node: Node) {
+    /**
+     * O(number of nodes in the tree induced by selected nodes)
+     */
     if (!node.selected) return;
     this.clearSelection();
   }
 
   private shiftSelectRange(orig: Node, dest: Node) {
+    /**
+     * COULD BE OPTIMIZED TO ITERATE OVER JUST THE NODES BETWEEN orig AND dest WITHOUT FINDING THE LCA.
+     */
+
+    /**
+     * O(
+     *  (total number of nodes to be selected) * depth
+     * )
+     */
+
     // Orig !== dest.
     // - Find lowest common ancestor:
     let lca: Node | null = null;
@@ -391,6 +482,9 @@ export class TreeManager {
   }
 
   private toggleFullSelection() {
+    /**
+     * O(number of nodes in the tree)
+     */
     if (this.nTotalNodes === 0) return;
     if (this.allNodesSelected()) {
       this.clearSelection();
@@ -408,6 +502,9 @@ export class TreeManager {
   // --- Deletion: ---
 
   private removeNodeFromTree(node: Node) {
+    /**
+     * O(1)
+     */
     const parent = this.getParent(node);
     if (parent && parent.type !== 'dir') return; // Make TS happy.
     const control = parent || this.rootController;
@@ -426,6 +523,9 @@ export class TreeManager {
   }
 
   private deleteFile(node: Node) {
+    /**
+     * O(depth of node)
+     */
     const wasSelected = node.selected;
     if (wasSelected) this.unmarkNodeAsSelected(node);
     let curr = this.getParent(node);
@@ -443,10 +543,17 @@ export class TreeManager {
     }
     this.shiftSelectionAnchorNode = null;
     this.nTotalNodes--;
+    delete this.idToNode[node.id];
     this.removeNodeFromTree(node);
   }
 
   private deleteDir(node: Node) {
+    /**
+     * O(
+     *  (number of nodes in the subtree) +
+     *  (depth of node)
+     * )
+     */
     if (node.type !== 'dir') return;
     const { dirHead, fileHead } = this.extractControllerHead(node);
     const subtree = [...this.flatten(dirHead, true), ...this.flatten(fileHead, true)];
@@ -471,10 +578,16 @@ export class TreeManager {
     }
     this.shiftSelectionAnchorNode = null;
     this.nTotalNodes -= nDescDec;
+    delete this.idToNode[node.id];
     this.removeNodeFromTree(node);
   }
 
   private deleteAllSelectedNodes() {
+    /**
+     * O(
+     *  (total number of selected nodes) * depth
+     * )
+     */
     // Delete dirs first, since it potentially increases overall deletion efficiency.
     const snapshot = Array.from(this.selectedNodes);
     for (const node of snapshot) {
@@ -488,6 +601,9 @@ export class TreeManager {
   // --- Tree flattening: ---
 
   private flatten(head: Node | null, includeClosed: boolean): Node[] {
+    /**
+     * O(subtree)
+     */
     const result: Node[] = [];
     let curr: Node | null = head;
     while (curr) {
@@ -501,6 +617,20 @@ export class TreeManager {
       }
       curr = this.getNext(curr);
     }
+    return result;
+  }
+
+  // --- Build response to send to the Renderer Process: ---
+
+  public buildResponse(): TreeState {
+    /**
+     * COULD BE IMPROVED TO NOT CALL FLATTEN.
+     */
+    const result = {} as TreeState;
+    const { dirHead, fileHead } = this.extractControllerHead(this.rootController);
+    result.nSelectedNodes = this.selectedNodes.size;
+    result.nTotalNodes = this.nTotalNodes;
+    result.visibleNodes = [...this.flatten(dirHead, false), ...this.flatten(fileHead, false)];
     return result;
   }
 }
