@@ -137,18 +137,11 @@
 
   // --- Deletion: ---
 
-  async function deleteContextFile() {
+  async function deleteContextNode() {
     renamingNode.value = null;
     hoveredNodeId.value = null;
     const node = context.targetNode!;
-    treeState.value = await window.api.invoke(TreeChannels.deleteNode, 'file', node.id);
-  }
-
-  async function deleteContextDir() {
-    renamingNode.value = null;
-    hoveredNodeId.value = null;
-    const node = context.targetNode!;
-    treeState.value = await window.api.invoke(TreeChannels.deleteNode, 'dir', node.id);
+    treeState.value = await window.api.invoke(TreeChannels.deleteNode, node.id);
   }
 
   async function deleteAllSelectedNodes() {
@@ -214,13 +207,13 @@
           <div @click="createNode('file')">New file</div>
           <div @click="createNode('dir')">New folder</div>
           <div @click="startRenaming">Rename item</div>
-          <div @click="deleteContextDir">Delete item</div>
+          <div @click="deleteContextNode">Delete item</div>
         </template>
       </div>
       <div v-else-if="context.type === 'file'">
         <template v-if="!keys.ctrl">
           <div @click="startRenaming">Rename item</div>
-          <div @click="deleteContextFile">Delete item</div>
+          <div @click="deleteContextNode">Delete item</div>
         </template>
       </div>
     </div>

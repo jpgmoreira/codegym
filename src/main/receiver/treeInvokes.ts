@@ -40,3 +40,13 @@ ipcMain.handle(
     return TreeManager.instance.buildResponse();
   }
 );
+
+ipcMain.handle(TreeChannels.deleteNode, async (_: IpcMainInvokeEvent, nodeId: string) => {
+  TreeManager.instance.deleteNode(nodeId);
+  return TreeManager.instance.buildResponse();
+});
+
+ipcMain.handle(TreeChannels.deleteAllSelectedNodes, async () => {
+  TreeManager.instance.deleteAllSelectedNodes();
+  return TreeManager.instance.buildResponse();
+});

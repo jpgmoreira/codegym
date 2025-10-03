@@ -595,7 +595,14 @@ export class TreeManager {
     this.removeNodeFromTree(node);
   }
 
-  private deleteAllSelectedNodes() {
+  public deleteNode(nodeId: string) {
+    const node = this.idToNode[nodeId];
+    if (!node) return;
+    if (node.type === 'dir') this.deleteDir(node);
+    else this.deleteFile(node);
+  }
+
+  public deleteAllSelectedNodes() {
     /**
      * O(
      *  (total number of selected nodes) * depth
