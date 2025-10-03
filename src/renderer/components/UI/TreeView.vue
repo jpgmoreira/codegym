@@ -244,8 +244,8 @@
               :readonly="renamingNode !== node"
               @click.right.stop="(e: MouseEvent) => showContext('dir', e, node)"
               @keydown.esc="renamingNode = null"
-              @keydown.enter="(e: KeyboardEvent) => applyRenaming(e)"
-              @blur="(e: FocusEvent) => applyRenaming(e)"
+              @keydown.enter="applyRenaming"
+              @blur="applyRenaming"
               @mouseenter="hoveredNodeId = node.id"
               @mouseleave="hoveredNodeId = null"
             />
@@ -268,8 +268,8 @@
             :readonly="renamingNode !== node"
             @click.right.stop="(e: MouseEvent) => showContext('file', e, node)"
             @keydown.esc="renamingNode = null"
-            @keydown.enter="(e: KeyboardEvent) => applyRenaming(e)"
-            @blur="(e: FocusEvent) => applyRenaming(e)"
+            @keydown.enter="applyRenaming"
+            @blur="applyRenaming"
             @mouseenter="hoveredNodeId = node.id"
             @mouseleave="hoveredNodeId = null"
           />
