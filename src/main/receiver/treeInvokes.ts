@@ -1,7 +1,7 @@
 import { ipcMain, IpcMainInvokeEvent } from 'electron';
 import { TreeManager } from '@main/data/managers/treeManager';
 import { TreeChannels } from '@common/types/tree/treeChannels';
-import { NodeType } from '@common/types/tree/treeTypes';
+import { ModifierKeys, NodeType } from '@common/types/tree/treeTypes';
 
 /**
  * Communication for handling operations in the TreeView component.
@@ -32,3 +32,11 @@ ipcMain.handle(TreeChannels.toggleFullSelection, async () => {
   TreeManager.instance.toggleFullSelection();
   return TreeManager.instance.buildResponse();
 });
+
+ipcMain.handle(
+  TreeChannels.handleSelection,
+  async (_: IpcMainInvokeEvent, nodeId: string, checkbox: boolean, keys: ModifierKeys) => {
+    TreeManager.instance.handleSelection(nodeId, checkbox, keys);
+    return TreeManager.instance.buildResponse();
+  }
+);

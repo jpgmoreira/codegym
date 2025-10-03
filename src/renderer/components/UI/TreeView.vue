@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-  import { ref, computed, reactive, useTemplateRef, onMounted, onBeforeUnmount } from 'vue';
+  import { ref, computed, reactive, useTemplateRef, onMounted, onBeforeUnmount, toRaw } from 'vue';
   import { ModifierKeys, NodeType, TreeState, type Node } from '@common/types/tree/treeTypes';
   import AutoLengthInput from './AutoLengthInput.vue';
   import { TreeChannels } from '@common/types/tree/treeChannels';
@@ -75,6 +75,13 @@
     context.targetDomElement = null;
   }
 
+  // --- Node creation: ---
+
+  async function createNode(type: NodeType) {
+    const parentId = context.targetNode ? context.targetNode.id : null;
+    treeState.value = await window.api.invoke(TreeChannels.createNode, type, parentId);
+  }
+
   // --- Opening and closing: ---
 
   async function toggleDirOpen(node: Node) {
@@ -109,42 +116,22 @@
 
   // --- Selection: ---
 
-  // function blurHoveredNode() {
-  //   hoveredNodeId.value = null;
-  //   (document.activeElement as HTMLElement).blur();
-  // }
-
-  // function deselectFileViaClickPressingCtrlIgnoreShift(node: Node) {
-  //   blurHoveredNode();
-  // }
-
-  // function deselectFileViaClickNoCtrlNoShift(node: Node) {
-  //   blurHoveredNode();
-  // }
-
-  // function deselectDirViaClickPressingCtrlIgnoreShift(node: Node) {
-  //   blurHoveredNode();
-  // }
-
-  // function deselectDirViaClickNoCtrlNoShift(node: Node) {
-  //   blurHoveredNode();
-  // }
+  function blurHoveredNode() {
+    hoveredNodeId.value = null;
+    (document.activeElement as HTMLElement).blur();
+  }
 
   async function toggleFullSelection() {
     treeState.value = await window.api.invoke(TreeChannels.toggleFullSelection);
   }
 
-  async function createNode(type: NodeType) {
-    const parentId = context.targetNode ? context.targetNode.id : null;
-    treeState.value = await window.api.invoke(TreeChannels.createNode, type, parentId);
-  }
-
   async function handleSelection(node: Node) {
+    if (node.selected) blurHoveredNode();
     treeState.value = await window.api.invoke(
       TreeChannels.handleSelection,
       node.id,
       props.checkbox,
-      keys
+      toRaw(keys)
     );
   }
 

@@ -446,7 +446,9 @@ export class TreeManager {
     }
   }
 
-  private handleSelection(node: Node, checkbox: boolean, keys: ModifierKeys) {
+  public handleSelection(nodeId: string, checkbox: boolean, keys: ModifierKeys) {
+    const node = this.idToNode[nodeId];
+    if (!node) return;
     // In checkbox mode, all selections happen as if the user had CTRL pressed.
     if (!node.selected && node.type === 'file' && !keys.ctrl && !keys.shift) {
       // Select a file node via click, without pressing CTRL nor SHIFT.
