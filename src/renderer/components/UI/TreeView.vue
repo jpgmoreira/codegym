@@ -90,8 +90,7 @@
     const newName = (e.target as HTMLInputElement).value.trim();
     const node = renamingNode.value;
     renamingNode.value = null;
-    if (newName && node.text !== newName) {
-      // node.text = newName;  // Avoid flickering.
+    if (newName && originalNodeName !== newName) {
       treeState.value = await window.api.invoke(TreeChannels.renameNode, node.id, newName);
     }
   }
