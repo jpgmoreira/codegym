@@ -240,7 +240,7 @@
               :indeterminate="isCheckIndeterminate(node)"
             />
             <AutoLengthInput
-              :value.trim="node.text"
+              :value="node.text"
               :readonly="renamingNode !== node"
               @click.right.stop="(e: MouseEvent) => showContext('dir', e, node)"
               @keydown.esc="renamingNode = null"
@@ -264,7 +264,7 @@
             :indeterminate="isCheckIndeterminate(node)"
           />
           <AutoLengthInput
-            :value.trim="node.text"
+            :value="node.text"
             :readonly="renamingNode !== node"
             @click.right.stop="(e: MouseEvent) => showContext('file', e, node)"
             @keydown.esc="renamingNode = null"
