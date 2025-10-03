@@ -596,6 +596,12 @@ export class TreeManager {
   }
 
   public deleteNode(nodeId: string) {
+    /**
+     * O(
+     *  (number of nodes in the subtree) +
+     *  (depth of node)
+     * )
+     */
     const node = this.idToNode[nodeId];
     if (!node) return;
     if (node.type === 'dir') this.deleteDir(node);
