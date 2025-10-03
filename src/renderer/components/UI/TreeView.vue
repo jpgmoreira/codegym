@@ -1,7 +1,7 @@
 <script lang="ts" setup>
   import { ref, computed, reactive, useTemplateRef, onMounted, onBeforeUnmount } from 'vue';
+  import { ModifierKeys, type Node } from '@common/types/tree';
   import AutoLengthInput from './AutoLengthInput.vue';
-  import { randomId } from '@common/utils/utils';
 
   // --- Props: ---
 
@@ -9,41 +9,7 @@
 
   // --- Types and structures: ---
 
-  type Node =
-    | {
-        id: string;
-        type: 'dir';
-        text: string;
-        depth: number;
-        selected: boolean;
-        deleted: boolean;
-        nDesc: number; // Total number of descendants, not including the node.
-        nDescSel: number; // Total number of selected descendants.
-        parent: Node | null;
-        next: Node | null;
-        prev: Node | null;
-        subDirs: ControllerType['subDirs'];
-        subFiles: ControllerType['subFiles'];
-        open: boolean;
-      }
-    | {
-        id: string;
-        type: 'file';
-        text: string;
-        depth: number;
-        selected: boolean;
-        deleted: boolean;
-        parent: Node | null;
-        next: Node | null;
-        prev: Node | null;
-      };
-
   type ContextType = 'root' | 'dir' | 'file';
-  type NodeType = Node['type'];
-  type ControllerType = {
-    subDirs: { head: Node | null; tail: Node | null };
-    subFiles: { head: Node | null; tail: Node | null };
-  };
 
   const context = reactive({
     type: 'root' as ContextType,
@@ -53,14 +19,7 @@
     targetDomElement: null as HTMLInputElement | null,
   });
 
-  const rootController = reactive({
-    nextFile: 1,
-    nextDir: 1,
-    subDirs: { head: null, tail: null } as ControllerType['subDirs'],
-    subFiles: { head: null, tail: null } as ControllerType['subFiles'],
-  });
-
-  const keys = reactive({
+  const keys = reactive<ModifierKeys>({
     ctrl: false,
     shift: false,
   });
@@ -69,13 +28,7 @@
 
   const hoveredNodeId = ref<string | null>(null);
 
-  const selectedNodes = ref<Set<Node>>(new Set());
-
-  const shiftSelectionAnchorNode = ref<Node | null>(null);
-
   const treeContainerRef = useTemplateRef('tree-container');
-
-  const nTotalNodes = ref(0);
 
   // --- Context menu: ---
 
@@ -114,114 +67,6 @@
     context.targetDomElement = null;
   }
 
-  // --- Node creation: ---
-
-  function _createDirNode(parent: Node | null): Node {
-    const node = {
-      id: randomId(),
-      type: 'dir',
-      text: `Folder ${rootController.nextDir}`,
-      depth: parent ? parent.depth + 1 : 0,
-      selected: false,
-      deleted: false,
-      nDesc: 0,
-      nDescSel: 0,
-      parent,
-      next: null,
-      prev: null,
-      subDirs: { head: null, tail: null },
-      subFiles: { head: null, tail: null },
-      open: false,
-    } as const;
-    rootController.nextDir++;
-    return node;
-  }
-  function _createFileNode(parent: Node | null): Node {
-    const node = {
-      id: randomId(),
-      type: 'file',
-      text: `File ${rootController.nextFile}`,
-      depth: parent ? parent.depth + 1 : 0,
-      selected: false,
-      deleted: false,
-      parent,
-      next: null,
-      prev: null,
-    } as const;
-    rootController.nextFile++;
-    return node;
-  }
-
-  function updateNewNodeSelectionAndAncestors(node: Node, parent: Node | null) {
-    // Creation of a node in a selected parent:
-    if (parent && parent.selected) {
-      markNodeAsSelected(node);
-    }
-    // Update ancestors:
-    let curr: Node | null = parent;
-    while (curr) {
-      if (curr.type !== 'dir') break;
-      curr.nDesc++;
-      curr.nDescSel += Number(node.selected);
-      curr = curr.parent;
-    }
-  }
-
-  function appendNode(node: Node, control: ControllerType) {
-    const sub = node.type === 'dir' ? control.subDirs : control.subFiles;
-    if (!sub.head || !sub.tail) {
-      sub.head = node;
-      sub.tail = node;
-    } else {
-      sub.tail.next = node;
-      node.prev = sub.tail;
-      sub.tail = node;
-    }
-  }
-
-  function createNode(type: NodeType) {
-    const parent = context.targetNode;
-    if (parent && parent.type !== 'dir') return;
-    const newNode = type === 'dir' ? _createDirNode(parent) : _createFileNode(parent);
-    const control = parent || rootController;
-    if (parent) parent.open = true;
-    appendNode(newNode, control);
-    updateNewNodeSelectionAndAncestors(newNode, parent);
-    nTotalNodes.value++;
-  }
-
-  function createNodeAbove(type: NodeType) {
-    const anchor = context.targetNode!;
-    const parent = anchor.parent;
-    if (parent && parent.type !== 'dir') return;
-    const newNode = type === 'dir' ? _createDirNode(parent) : _createFileNode(parent);
-    const control = parent || rootController;
-    newNode.prev = anchor.prev;
-    if (anchor.prev) anchor.prev.next = newNode;
-    newNode.next = anchor;
-    anchor.prev = newNode;
-    const sub = type === 'dir' ? control.subDirs : control.subFiles;
-    if (sub.head === anchor) sub.head = newNode;
-    updateNewNodeSelectionAndAncestors(newNode, parent);
-    nTotalNodes.value++;
-  }
-
-  function createNodeBelow(type: NodeType) {
-    const anchor = context.targetNode!;
-    const parent = anchor.parent;
-    if (parent && parent.type !== 'dir') return;
-    const newNode = type === 'dir' ? _createDirNode(parent) : _createFileNode(parent);
-    const control = parent || rootController;
-    newNode.next = anchor.next;
-    if (anchor.next) anchor.next.prev = newNode;
-    newNode.prev = anchor;
-    anchor.next = newNode;
-    const sub = type === 'dir' ? control.subDirs : control.subFiles;
-    if (sub.tail === anchor) sub.tail = newNode;
-    updateNewNodeSelectionAndAncestors(newNode, parent);
-    nTotalNodes.value++;
-  }
-
   // --- Node renaming: ---
 
   function startRenaming() {
@@ -235,267 +80,32 @@
     const newName = (e.target as HTMLInputElement).value.trim();
     const node = renamingNode.value;
     renamingNode.value = null;
-    if (node.text !== newName) {
-      node.text = newName;
+    if (newName && node.text !== newName) {
+      // Send to back-end here
     }
   }
 
   // --- Selection: ---
-
-  function markNodeAsSelected(node: Node) {
-    node.selected = true;
-    selectedNodes.value.add(node);
-  }
-
-  function unmarkNodeAsSelected(node: Node) {
-    node.selected = false;
-    selectedNodes.value.delete(node);
-  }
 
   function blurHoveredNode() {
     hoveredNodeId.value = null;
     (document.activeElement as HTMLElement).blur();
   }
 
-  function clearSelection() {
-    for (const node of selectedNodes.value) {
-      node.selected = false;
-      let curr = node.parent;
-      while (curr) {
-        if (curr.type !== 'dir') break;
-        if (curr.nDescSel === 0) break;
-        curr.nDescSel = 0;
-        curr = curr.parent;
-      }
-    }
-    selectedNodes.value.clear();
-  }
-
-  function selectFileViaClickPressingCtrlIgnoreShift(node: Node) {
-    if (node.selected) return;
-    markNodeAsSelected(node);
-    let delta = 1;
-    let curr = node.parent;
-    while (curr) {
-      if (curr.type !== 'dir') break;
-      curr.nDescSel += delta;
-      if (curr.nDesc === curr.nDescSel) {
-        markNodeAsSelected(curr);
-        delta++;
-      }
-      curr = curr.parent;
-    }
-  }
-
   function deselectFileViaClickPressingCtrlIgnoreShift(node: Node) {
-    if (!node.selected) return;
-    unmarkNodeAsSelected(node);
-    let curr: Node | null = node.parent;
-    let delta = 1;
-    while (curr) {
-      if (curr.type !== 'dir') break;
-      curr.nDescSel -= delta;
-      if (curr.selected) {
-        unmarkNodeAsSelected(curr);
-        delta++;
-      }
-      curr = curr.parent;
-    }
     blurHoveredNode();
-  }
-
-  function selectFileViaClickNoCtrlNoShift(node: Node) {
-    if (node.selected) return;
-    clearSelection();
-    selectFileViaClickPressingCtrlIgnoreShift(node);
   }
 
   function deselectFileViaClickNoCtrlNoShift(node: Node) {
-    if (!node.selected) return;
-    clearSelection();
     blurHoveredNode();
-  }
-
-  function markSubtreeAsSelected(head: Node | null) {
-    if (!head) return;
-    let curr: Node | null = head;
-    while (curr) {
-      markNodeAsSelected(curr);
-      if (curr.type === 'dir') {
-        curr.nDescSel = curr.nDesc;
-        markSubtreeAsSelected(curr.subDirs.head);
-        markSubtreeAsSelected(curr.subFiles.head);
-      }
-      curr = curr.next;
-    }
-  }
-
-  function unmarkSubtreeAsSelected(head: Node | null) {
-    if (!head) return;
-    let curr: Node | null = head;
-    while (curr) {
-      unmarkNodeAsSelected(curr);
-      if (curr.type === 'dir') {
-        curr.nDescSel = 0;
-        unmarkSubtreeAsSelected(curr.subDirs.head);
-        unmarkSubtreeAsSelected(curr.subFiles.head);
-      }
-      curr = curr.next;
-    }
-  }
-
-  function selectDirViaClickPressingCtrlIgnoreShift(node: Node) {
-    if (node.selected) return;
-    if (node.type !== 'dir') return;
-    markNodeAsSelected(node);
-    markSubtreeAsSelected(node.subDirs.head);
-    markSubtreeAsSelected(node.subFiles.head);
-    let delta = node.nDesc - node.nDescSel + 1;
-    node.nDescSel = node.nDesc;
-    let curr = node.parent;
-    while (curr) {
-      if (curr.type !== 'dir') break;
-      curr.nDescSel += delta;
-      if (curr.nDesc === curr.nDescSel) {
-        markNodeAsSelected(curr);
-        delta++;
-      }
-      curr = curr.parent;
-    }
   }
 
   function deselectDirViaClickPressingCtrlIgnoreShift(node: Node) {
-    if (!node.selected) return;
-    if (node.type !== 'dir') return;
-    unmarkNodeAsSelected(node);
-    node.nDescSel = 0;
-    unmarkSubtreeAsSelected(node.subDirs.head);
-    unmarkSubtreeAsSelected(node.subFiles.head);
-    let delta = node.nDesc + 1;
-    let curr = node.parent;
-    while (curr) {
-      if (curr.type !== 'dir') break;
-      curr.nDescSel -= delta;
-      if (curr.selected) {
-        unmarkNodeAsSelected(curr);
-        delta++;
-      }
-      curr = curr.parent;
-    }
     blurHoveredNode();
-  }
-
-  function selectDirViaClickNoCtrlNoShift(node: Node) {
-    if (node.selected) return;
-    if (node.type !== 'dir') return;
-    clearSelection();
-    selectDirViaClickPressingCtrlIgnoreShift(node);
   }
 
   function deselectDirViaClickNoCtrlNoShift(node: Node) {
-    if (!node.selected) return;
-    clearSelection();
     blurHoveredNode();
-  }
-
-  function shiftSelectRange(orig: Node, dest: Node) {
-    // Orig !== dest.
-    // - Find lowest common ancestor:
-    let lca: Node | null = null;
-    const seen = new Set<Node>();
-    let curr = orig.parent;
-    while (curr) {
-      seen.add(curr);
-      curr = curr.parent;
-    }
-    curr = dest.parent;
-    while (curr) {
-      if (seen.has(curr)) {
-        lca = curr;
-        break;
-      }
-      curr = curr.parent;
-    }
-    if (lca && lca.type !== 'dir') return; // Make TS happy.
-    let control = lca || rootController;
-    const flattened = [
-      ...flatten(control.subDirs.head, true),
-      ...flatten(control.subFiles.head, true),
-    ];
-    let aux = 0;
-    for (const node of flattened) {
-      if (node === orig || node === dest) {
-        aux++;
-        if (node.type === 'file') selectFileViaClickPressingCtrlIgnoreShift(node);
-        else selectDirViaClickPressingCtrlIgnoreShift(node);
-        continue;
-      }
-      if (aux === 2) break;
-      if (aux) {
-        const mustSelect = node.type === 'file' || (node.type === 'dir' && node.nDesc === 0);
-        if (mustSelect) {
-          if (node.type === 'file') selectFileViaClickPressingCtrlIgnoreShift(node);
-          else selectDirViaClickPressingCtrlIgnoreShift(node);
-        }
-      }
-    }
-  }
-
-  function handleSelection(node: Node) {
-    // In checkbox mode, all selections happen as if the user had CTRL pressed.
-    const { checkbox } = props;
-    if (!node.selected && node.type === 'file' && !keys.ctrl && !keys.shift) {
-      // Select a file node via click, without pressing CTRL nor SHIFT.
-      if (!checkbox) selectFileViaClickNoCtrlNoShift(node);
-      else selectFileViaClickPressingCtrlIgnoreShift(node);
-    } else if (node.selected && node.type === 'file' && !keys.ctrl && !keys.shift) {
-      // Deselect a file node via click, without pressing CTRL nor SHIFT.
-      if (!checkbox) deselectFileViaClickNoCtrlNoShift(node);
-      else deselectFileViaClickPressingCtrlIgnoreShift(node);
-    } else if (!node.selected && node.type === 'dir' && !keys.ctrl && !keys.shift) {
-      // Select a dir node via click, without pressing CTRL nor SHIFT.
-      if (!checkbox) selectDirViaClickNoCtrlNoShift(node);
-      else selectDirViaClickPressingCtrlIgnoreShift(node);
-    } else if (node.selected && node.type === 'dir' && !keys.ctrl && !keys.shift) {
-      // Deselect a dir node via click, without pressing CTRL nor SHIFT.
-      if (!checkbox) deselectDirViaClickNoCtrlNoShift(node);
-      else deselectDirViaClickPressingCtrlIgnoreShift(node);
-    } else if (!node.selected && node.type === 'file' && keys.ctrl) {
-      // Select a file node via click, pressing CTRL, SHIFT doesn't matter.
-      selectFileViaClickPressingCtrlIgnoreShift(node);
-    } else if (node.selected && node.type === 'file' && keys.ctrl) {
-      // Deselect a file node via click, pressing CTRL, SHIFT doesn't matter.
-      deselectFileViaClickPressingCtrlIgnoreShift(node);
-    } else if (!node.selected && node.type === 'dir' && keys.ctrl) {
-      // Select a dir node via click, pressing CTRL, SHIFT doesn't matter.
-      selectDirViaClickPressingCtrlIgnoreShift(node);
-    } else if (node.selected && node.type === 'dir' && keys.ctrl) {
-      // Deselect a dir node via click, pressing CTRL, SHIFT doesn't matter.
-      deselectDirViaClickPressingCtrlIgnoreShift(node);
-    } else if (keys.shift) {
-      const anchor = shiftSelectionAnchorNode.value;
-      if (node.type === 'file' && (!anchor || anchor === node)) {
-        // Clicking a file node, pressing SHIFT, without an anchor.
-        selectFileViaClickPressingCtrlIgnoreShift(node);
-      } else if (node.type === 'dir' && (!anchor || anchor === node)) {
-        // Clicking a dir node, pressing SHIFT, without an anchor.
-        selectDirViaClickPressingCtrlIgnoreShift(node);
-      } else if (anchor && anchor !== node) {
-        // Clicking a file or dir node, pressing SHIFT, with an anchor.
-        shiftSelectRange(node, anchor);
-      }
-    }
-    shiftSelectionAnchorNode.value = node;
-  }
-
-  function toggleFullSelection() {
-    if (nTotalNodes.value === 0) return;
-    if (allNodesSelected.value) {
-      clearSelection();
-    } else {
-      markSubtreeAsSelected(rootController.subDirs.head);
-      markSubtreeAsSelected(rootController.subFiles.head);
-    }
   }
 
   // --- Deletion: ---
@@ -510,106 +120,23 @@
     deleteDir(node);
   }
 
-  function removeNodeFromTree(node: Node) {
-    if (node.parent && node.parent.type !== 'dir') return; // Make TS happy.
-    const control = node.parent || rootController;
-    const sub = node.type === 'dir' ? control.subDirs : control.subFiles;
-    if (node === sub.head) sub.head = node.next;
-    if (node === sub.tail) sub.tail = node.prev;
-    if (node.prev && node.next) {
-      node.prev.next = node.next;
-      node.next.prev = node.prev;
-    } else if (node.prev) {
-      node.prev.next = null;
-    } else if (node.next) {
-      node.next.prev = null;
-    }
-  }
-
   function deleteFile(node: Node) {
-    const wasSelected = node.selected;
-    if (wasSelected) unmarkNodeAsSelected(node);
-    let curr = node.parent;
-    let ancestorSelDelta = 0;
-    while (curr) {
-      if (curr.type !== 'dir') break;
-      curr.nDescSel += ancestorSelDelta;
-      curr.nDesc--;
-      if (wasSelected) curr.nDescSel--;
-      if (!curr.selected && curr.nDesc > 0 && curr.nDesc === curr.nDescSel) {
-        markNodeAsSelected(curr);
-        ancestorSelDelta++;
-      }
-      curr = curr.parent;
-    }
     renamingNode.value = null;
     hoveredNodeId.value = null;
-    shiftSelectionAnchorNode.value = null;
-    nTotalNodes.value--;
-    removeNodeFromTree(node);
+    // send to back-end;
   }
 
   function deleteDir(node: Node) {
-    if (node.type !== 'dir') return;
-    const subtree = [...flatten(node.subDirs.head, true), ...flatten(node.subFiles.head, true)];
-    for (const sub of subtree) {
-      if (sub.selected) unmarkNodeAsSelected(sub);
-      sub.deleted = true;
-    }
-    const nDescDec = node.nDesc + 1;
-    let ancestorSelDelta = -(node.nDescSel + Number(node.selected));
-    unmarkNodeAsSelected(node);
-    node.deleted = true;
-    let curr = node.parent;
-    while (curr) {
-      if (curr.type !== 'dir') break;
-      curr.nDesc -= nDescDec;
-      curr.nDescSel += ancestorSelDelta;
-      if (!curr.selected && curr.nDesc > 0 && curr.nDesc === curr.nDescSel) {
-        markNodeAsSelected(curr);
-        ancestorSelDelta++;
-      }
-      curr = curr.parent;
-    }
     renamingNode.value = null;
     hoveredNodeId.value = null;
-    shiftSelectionAnchorNode.value = null;
-    nTotalNodes.value -= nDescDec;
-    removeNodeFromTree(node);
+    // send to back-end.
   }
 
   function deleteAllSelectedNodes() {
-    // Delete dirs first, since it potentially increases overall deletion efficiency.
-    const snapshot = Array.from(selectedNodes.value);
-    for (const node of snapshot) {
-      if (node.type === 'dir' && !node.deleted) deleteDir(node);
-    }
-    for (const node of snapshot) {
-      if (node.type === 'file' && !node.deleted) deleteFile(node);
-    }
+    renamingNode.value = null;
+    hoveredNodeId.value = null;
+    // send to back-end here;
   }
-
-  // --- Tree flattening: ---
-
-  function flatten(head: Node | null, includeClosed: boolean): Node[] {
-    const result: Node[] = [];
-    let curr: Node | null = head;
-    while (curr) {
-      result.push(curr);
-      if (curr.type === 'dir' && (curr.open || includeClosed))
-        result.push(
-          ...flatten(curr.subDirs.head, includeClosed),
-          ...flatten(curr.subFiles.head, includeClosed)
-        );
-      curr = curr.next;
-    }
-    return result;
-  }
-
-  const flattened = computed(() => [
-    ...flatten(rootController.subDirs.head, false),
-    ...flatten(rootController.subFiles.head, false),
-  ]);
 
   // --- UI auxiliary: ---
 
@@ -617,10 +144,6 @@
     if (node.type !== 'dir') return false;
     return node.nDescSel > 0 && node.nDesc !== node.nDescSel;
   }
-
-  const allNodesSelected = computed(
-    () => nTotalNodes.value > 0 && selectedNodes.value.size === nTotalNodes.value
-  );
 
   // --- Hooks: ---
 
