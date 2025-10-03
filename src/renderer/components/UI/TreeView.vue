@@ -75,6 +75,12 @@
     context.targetDomElement = null;
   }
 
+  // --- Opening and closing: ---
+
+  async function toggleDirOpen(node: Node) {
+    treeState.value = await window.api.invoke(TreeChannels.toggleDirOpen, node.id);
+  }
+
   // --- Node renaming: ---
 
   function startRenaming() {
@@ -235,8 +241,8 @@
     <div v-for="node in treeState.visibleNodes" class="node-row" :key="node.id">
       <div :style="{ paddingLeft: `${node.depth * 40}px` }">
         <div v-if="node.type === 'dir'">
-          <span v-if="node.open" @click="node.open = false">-</span>
-          <span v-else @click="node.open = true">+</span>
+          <span v-if="node.open" @click="toggleDirOpen(node)">-</span>
+          <span v-else @click="toggleDirOpen(node)">+</span>
           <div
             class="checkbox-input-wrapper"
             @click="handleSelection(node)"

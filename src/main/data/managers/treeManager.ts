@@ -163,6 +163,17 @@ export class TreeManager {
     this.nTotalNodes++;
   }
 
+  // --- Opening and closing: ---
+
+  public toggleDirOpen(nodeId: string) {
+    /**
+     * O(1)
+     */
+    const node = this.idToNode[nodeId];
+    if (!node || node.type !== 'dir') return;
+    node.open = !node.open;
+  }
+
   // --- Node renaming: ---
 
   public renameNode(nodeId: string, newName: string) {

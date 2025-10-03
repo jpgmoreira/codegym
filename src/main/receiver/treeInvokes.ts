@@ -15,6 +15,11 @@ ipcMain.handle(
   }
 );
 
+ipcMain.handle(TreeChannels.toggleDirOpen, async (_: IpcMainInvokeEvent, nodeId: string) => {
+  TreeManager.instance.toggleDirOpen(nodeId);
+  return TreeManager.instance.buildResponse();
+});
+
 ipcMain.handle(
   TreeChannels.createNode,
   async (_: IpcMainInvokeEvent, type: NodeType, parentId: string | null) => {
