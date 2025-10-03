@@ -26,6 +26,7 @@
   });
 
   const renamingNode = ref<Node | null>(null);
+  let originalNodeName = '';
 
   const hoveredNodeId = ref<string | null>(null);
 
@@ -77,7 +78,9 @@
   // --- Node renaming: ---
 
   function startRenaming() {
+    if (!context.targetNode) return;
     renamingNode.value = context.targetNode;
+    originalNodeName = context.targetNode.text;
     context.targetDomElement?.focus();
     context.targetDomElement?.select();
   }
@@ -88,8 +91,15 @@
     const node = renamingNode.value;
     renamingNode.value = null;
     if (newName && node.text !== newName) {
+      // node.text = newName;  // Avoid flickering.
       treeState.value = await window.api.invoke(TreeChannels.renameNode, node.id, newName);
     }
+  }
+
+  function undoRenaming() {
+    if (!renamingNode.value) return;
+    renamingNode.value.text = originalNodeName;
+    renamingNode.value = null;
   }
 
   // --- Selection: ---
@@ -240,10 +250,10 @@
               :indeterminate="isCheckIndeterminate(node)"
             />
             <AutoLengthInput
-              :value="node.text"
+              v-model.trim="node.text"
               :readonly="renamingNode !== node"
               @click.right.stop="(e: MouseEvent) => showContext('dir', e, node)"
-              @keydown.esc="renamingNode = null"
+              @keydown.esc="undoRenaming"
               @keydown.enter="applyRenaming"
               @blur="applyRenaming"
               @mouseenter="hoveredNodeId = node.id"
@@ -264,10 +274,10 @@
             :indeterminate="isCheckIndeterminate(node)"
           />
           <AutoLengthInput
-            :value="node.text"
+            v-model.trim="node.text"
             :readonly="renamingNode !== node"
             @click.right.stop="(e: MouseEvent) => showContext('file', e, node)"
-            @keydown.esc="renamingNode = null"
+            @keydown.esc="undoRenaming"
             @keydown.enter="applyRenaming"
             @blur="applyRenaming"
             @mouseenter="hoveredNodeId = node.id"
