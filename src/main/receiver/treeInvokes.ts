@@ -27,3 +27,8 @@ ipcMain.handle(
     return TreeManager.instance.buildResponse();
   }
 );
+
+ipcMain.handle(TreeChannels.toggleFullSelection, async () => {
+  TreeManager.instance.toggleFullSelection();
+  return TreeManager.instance.buildResponse();
+});

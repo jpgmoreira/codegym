@@ -492,7 +492,7 @@ export class TreeManager {
     this.shiftSelectionAnchorNode = node;
   }
 
-  private toggleFullSelection() {
+  public toggleFullSelection() {
     /**
      * O(number of nodes in the tree)
      */
