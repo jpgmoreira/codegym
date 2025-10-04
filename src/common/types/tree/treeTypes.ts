@@ -3,13 +3,24 @@
  * The treeview has logic implemented in both the main and renderer processes.
  */
 
-type Node = {
+type BaseNode = {
   id: number;
   txt: string;
   sel: boolean;
   par: number;
-  opn: boolean;
 };
+
+export type FileNode = BaseNode & {
+  type: 'file';
+};
+
+export type DirNode = BaseNode & {
+  type: 'dir';
+};
+
+export type Node = FileNode | DirNode;
+
+export type NodeType = Node['type'];
 
 export type TreeState = {
   visibleNodes: Node[];

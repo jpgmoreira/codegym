@@ -28,15 +28,20 @@ ipcMain.handle(
   }
 );
 
-ipcMain.handle(TreeChannels.toggleFullSelection, async () => {
-  TreeManager.instance.toggleFullSelection();
+ipcMain.handle(TreeChannels.selectAll, async () => {
+  TreeManager.instance.selectAll();
+  return TreeManager.instance.buildResponse();
+});
+
+ipcMain.handle(TreeChannels.deselectAll, async () => {
+  TreeManager.instance.deselectAll();
   return TreeManager.instance.buildResponse();
 });
 
 ipcMain.handle(
   TreeChannels.handleSelection,
-  async (_: IpcMainInvokeEvent, nodeId: string, checkbox: boolean, keys: ModifierKeys) => {
-    TreeManager.instance.handleSelection(nodeId, checkbox, keys);
+  async (_: IpcMainInvokeEvent, nodeId: string, keys: ModifierKeys) => {
+    TreeManager.instance.handleSelection(nodeId, keys);
     return TreeManager.instance.buildResponse();
   }
 );
