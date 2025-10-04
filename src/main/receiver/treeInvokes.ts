@@ -1,5 +1,5 @@
 import { ipcMain, IpcMainInvokeEvent } from 'electron';
-import { TreeManager } from '@main/data/managers/treeManager';
+import { TreeManager } from '@main/data/managers/tree/TreeManager';
 import { TreeChannels } from '@common/types/tree/treeChannels';
 import { ModifierKeys, NodeType } from '@common/types/tree/treeTypes';
 

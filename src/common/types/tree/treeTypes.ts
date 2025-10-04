@@ -16,6 +16,9 @@ export type FileNode = BaseNode & {
 
 export type DirNode = BaseNode & {
   type: 'dir';
+  // Will not exist only in the disk:
+  nDesc?: number;
+  nSelDesc?: number;
 };
 
 export type Node = FileNode | DirNode;
