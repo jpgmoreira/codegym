@@ -13,8 +13,12 @@ export type Node =
       nDesc: number; // Total number of descendants, not including the node.
       nDescSel: number; // Total number of selected descendants.
       parentId: string | null;
-      nextId: string | null;
-      prevId: string | null;
+      // Next and previous siblings from the same parent:
+      nextSiblingId: string | null;
+      prevSiblingId: string | null;
+      // Next and previous nodes in the flattened tree:
+      nextFlattenId: string | null;
+      prevFlattenId: string | null;
       subDirs: ControllerList;
       subFiles: ControllerList;
       open: boolean;
@@ -27,8 +31,10 @@ export type Node =
       selected: boolean;
       deleted: boolean;
       parentId: string | null;
-      nextId: string | null;
-      prevId: string | null;
+      nextSiblingId: string | null;
+      prevSiblingId: string | null;
+      nextFlattenId: string | null;
+      prevFlattenId: string | null;
     };
 
 export type NodeType = Node['type'];

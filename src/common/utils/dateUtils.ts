@@ -18,8 +18,8 @@ function padZero(n: number): string {
 }
 
 /**
- * @param date Date in the format YYYYMMDD.
- * @returns [day, month, year]. Month is [1, 12].
+ * @param date Numeric date in the format YYYYMMDD.
+ * @returns Array of numbers containing [day, month, year]. Month is in the range (1 - 12).
  */
 function dmy(date: number): [number, number, number] {
   const day = date % 100;
@@ -79,7 +79,7 @@ export function parseNumericDate(date: number): string {
 }
 
 /**
- * Adds one day to the date.
+ * Add one day to the date.
  * @param date Date in the format YYYYMMDD (number).
  * @returns Date in the same format, 1 day ahead (number).
  */

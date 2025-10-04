@@ -46,27 +46,44 @@ export class TreeManager {
     return node.parentId ? this.idToNode[node.parentId] : null;
   }
 
-  private getNext(node: Node): Node | null {
-    return node.nextId ? this.idToNode[node.nextId] : null;
+  private getNextSibling(node: Node): Node | null {
+    return node.nextSiblingId ? this.idToNode[node.nextSiblingId] : null;
   }
 
-  private getPrev(node: Node): Node | null {
-    return node.prevId ? this.idToNode[node.prevId] : null;
+  private getPrevSibling(node: Node): Node | null {
+    return node.prevSiblingId ? this.idToNode[node.prevSiblingId] : null;
   }
 
-  private getSiblings(node: Node) {
+  private getNextFlatten(node: Node): Node | null {
+    return node.nextFlattenId ? this.idToNode[node.nextFlattenId] : null;
+  }
+
+  private getPrevFlatten(node: Node): Node | null {
+    return node.prevFlattenId ? this.idToNode[node.prevFlattenId] : null;
+  }
+
+  private getFamily(node: Node) {
     return {
-      next: this.getNext(node),
-      prev: this.getPrev(node),
+      parent: this.getParent(node),
+      nextSibling: this.getNextSibling(node),
+      prevSibling: this.getPrevSibling(node),
+      nextFlatten: this.getNextFlatten(node),
+      prevFlatten: this.getPrevFlatten(node),
     };
   }
 
-  private extractControllerHead(control: Controller) {
+  private extractControllerReferences(control: Controller) {
+    // head:
     const dirHeadId = control.subDirs.headId;
     const fileHeadId = control.subFiles.headId;
     const dirHead = dirHeadId ? this.idToNode[dirHeadId] : null;
     const fileHead = fileHeadId ? this.idToNode[fileHeadId] : null;
-    return { dirHead, fileHead };
+    // tail:
+    const dirTailId = control.subDirs.tailId;
+    const fileTailId = control.subFiles.tailId;
+    const dirTail = dirTailId ? this.idToNode[dirTailId] : null;
+    const fileTail = fileTailId ? this.idToNode[fileTailId] : null;
+    return { dirHead, fileHead, dirTail, fileTail };
   }
 
   // --- Node creation: ---
@@ -85,8 +102,10 @@ export class TreeManager {
       nDesc: 0,
       nDescSel: 0,
       parentId: parent ? parent.id : null,
-      nextId: null,
-      prevId: null,
+      nextSiblingId: null,
+      prevSiblingId: null,
+      nextFlattenId: null,
+      prevFlattenId: null,
       subDirs: { headId: null, tailId: null },
       subFiles: { headId: null, tailId: null },
       open: false,
@@ -107,8 +126,10 @@ export class TreeManager {
       selected: false,
       deleted: false,
       parentId: parent ? parent.id : null,
-      nextId: null,
-      prevId: null,
+      nextSiblingId: null,
+      prevSiblingId: null,
+      nextFlattenId: null,
+      prevFlattenId: null,
     } as const;
     this.rootController.nextFile++;
     return node;
@@ -132,19 +153,149 @@ export class TreeManager {
     }
   }
 
-  private appendNode(node: Node, control: Controller) {
+  private appendNode(node: Node, parent: Node | null) {
     /**
      * O(1)
      */
-    const sub = node.type === 'dir' ? control.subDirs : control.subFiles;
-    if (!sub.headId || !sub.tailId) {
-      sub.headId = node.id;
-      sub.tailId = node.id;
+    if (parent && parent.type !== 'dir') return; // Make TS happy!!! :D
+    const control = parent || this.rootController;
+    const { dirHead, fileHead, dirTail, fileTail } = this.extractControllerReferences(control);
+    const parentFamily = parent ? this.getFamily(parent) : null;
+
+    if (!parent) {
+      // Creation of node in the root.
+      if (node.type === 'dir') {
+        // Create dir in the root.
+        if (!dirHead || !dirTail) {
+          // First dir in the root.
+          control.subDirs.headId = node.id;
+          control.subDirs.tailId = node.id;
+          if (fileHead) {
+            node.nextFlattenId = fileHead.id;
+            node.nextSiblingId = fileHead.id;
+            fileHead.prevFlattenId = node.id;
+            fileHead.prevSiblingId = node.id;
+          }
+        } else {
+          // Not first dir in the root.
+          node.prevSiblingId = dirTail.id;
+          node.prevFlattenId = dirTail.id;
+          dirTail.nextSiblingId = node.id;
+          dirTail.nextFlattenId = node.id;
+          if (fileHead) {
+            node.nextSiblingId = fileHead.id;
+            node.nextFlattenId = fileHead.id;
+            fileHead.prevSiblingId = node.id;
+            fileHead.prevFlattenId = node.id;
+          }
+          control.subDirs.tailId = node.id;
+        }
+      } else {
+        // Create file in the root.
+        if (!fileHead || !fileTail) {
+          // First file in the root.
+          control.subFiles.headId = node.id;
+          control.subFiles.tailId = node.id;
+          if (dirTail) {
+            node.prevSiblingId = dirTail.id;
+            node.prevFlattenId = dirTail.id;
+            dirTail.nextSiblingId = node.id;
+            dirTail.nextFlattenId = node.id;
+          }
+        } else {
+          // Not first file in the root.
+          node.prevSiblingId = fileTail.id;
+          node.prevFlattenId = fileTail.id;
+          fileTail.nextSiblingId = node.id;
+          fileTail.nextFlattenId = node.id;
+          control.subFiles.tailId = node.id;
+        }
+      }
     } else {
-      const tail = this.idToNode[sub.tailId];
-      tail.nextId = node.id;
-      node.prevId = tail.id;
-      sub.tailId = node.id;
+      // Creation of a node inside of a dir.
+      if (node.type === 'dir') {
+        // Creation of a dir inside of a dir.
+        if (!dirHead || !dirTail) {
+          // First dir inside of this dir.
+          control.subDirs.headId = node.id;
+          control.subDirs.tailId = node.id;
+          if (fileHead) {
+            node.nextSiblingId = fileHead.id;
+            node.nextFlattenId = fileHead.id;
+            fileHead.prevSiblingId = node.id;
+            fileHead.prevFlattenId = node.id;
+          } else {
+            node.nextFlattenId = parent.nextFlattenId;
+            if (parentFamily?.nextFlatten) {
+              parentFamily.nextFlatten.prevFlattenId = node.id;
+            }
+          }
+          node.prevFlattenId = parent.id;
+          parent.nextFlattenId = node.id;
+        } else {
+          // Not first dir inside of this dir.
+          dirTail.nextSiblingId = node.id;
+          node.prevSiblingId = dirTail.id;
+          if (fileHead) {
+            node.nextSiblingId = fileHead.id;
+            node.nextFlattenId = fileHead.id;
+            fileHead.prevSiblingId = node.id;
+            fileHead.prevFlattenId = node.id;
+          } else {
+            node.nextFlattenId = dirTail.nextFlattenId;
+            if (dirTail.nextFlattenId) {
+              const nextFlatten = this.idToNode[dirTail.nextFlattenId];
+              if (nextFlatten) {
+                nextFlatten.prevFlattenId = node.id;
+              }
+            }
+          }
+          dirTail.nextFlattenId = node.id;
+          node.prevFlattenId = dirTail.id;
+          control.subDirs.tailId = node.id;
+        }
+      } else {
+        // Creation of a file inside of a dir.
+        if (!fileHead || !fileTail) {
+          // First file inside of this dir.
+          control.subFiles.headId = node.id;
+          control.subFiles.tailId = node.id;
+          if (dirTail) {
+            node.prevFlattenId = dirTail.id;
+            node.prevSiblingId = dirTail.id;
+            dirTail.nextSiblingId = node.id;
+            if (dirTail.nextFlattenId) {
+              const nextFlatten = this.idToNode[dirTail.nextFlattenId];
+              if (nextFlatten) {
+                nextFlatten.prevFlattenId = node.id;
+                node.nextFlattenId = nextFlatten.id;
+              }
+            }
+            dirTail.nextFlattenId = node.id;
+          } else {
+            node.prevFlattenId = parent.id;
+            if (parentFamily?.nextFlatten) {
+              node.nextFlattenId = parentFamily.nextFlatten.id;
+              parentFamily.nextFlatten.prevFlattenId = node.id;
+            }
+            parent.nextFlattenId = node.id;
+          }
+        } else {
+          // Not first file inside of this dir.
+          control.subFiles.tailId = node.id;
+          node.prevSiblingId = fileTail.id;
+          node.prevFlattenId = fileTail.id;
+          fileTail.nextSiblingId = node.id;
+          if (fileTail.nextFlattenId) {
+            const nextFlatten = this.idToNode[fileTail.nextFlattenId];
+            if (nextFlatten) {
+              nextFlatten.prevFlattenId = node.id;
+              node.nextFlattenId = nextFlatten.id;
+            }
+          }
+          fileTail.nextFlattenId = node.id;
+        }
+      }
     }
   }
 
@@ -156,9 +307,8 @@ export class TreeManager {
     if (parent && parent.type !== 'dir') return;
     const newNode = type === 'dir' ? this.createDirNode(parent) : this.createFileNode(parent);
     this.idToNode[newNode.id] = newNode;
-    const control = parent || this.rootController;
     if (parent) parent.open = true;
-    this.appendNode(newNode, control);
+    this.appendNode(newNode, parent);
     this.updateNewNodeSelectionAndAncestors(newNode, parent);
     this.nTotalNodes++;
   }
@@ -293,11 +443,11 @@ export class TreeManager {
       this.markNodeAsSelected(curr);
       if (curr.type === 'dir') {
         curr.nDescSel = curr.nDesc;
-        const { dirHead, fileHead } = this.extractControllerHead(curr);
+        const { dirHead, fileHead } = this.extractControllerReferences(curr);
         this.markSubtreeAsSelected(dirHead);
         this.markSubtreeAsSelected(fileHead);
       }
-      curr = this.getNext(curr);
+      curr = this.getNextSibling(curr);
     }
   }
 
@@ -311,11 +461,11 @@ export class TreeManager {
       this.unmarkNodeAsSelected(curr);
       if (curr.type === 'dir') {
         curr.nDescSel = 0;
-        const { dirHead, fileHead } = this.extractControllerHead(curr);
+        const { dirHead, fileHead } = this.extractControllerReferences(curr);
         this.unmarkSubtreeAsSelected(dirHead);
         this.unmarkSubtreeAsSelected(fileHead);
       }
-      curr = this.getNext(curr);
+      curr = this.getNextSibling(curr);
     }
   }
 
@@ -329,7 +479,7 @@ export class TreeManager {
     if (node.selected) return;
     if (node.type !== 'dir') return;
     this.markNodeAsSelected(node);
-    const { dirHead, fileHead } = this.extractControllerHead(node);
+    const { dirHead, fileHead } = this.extractControllerReferences(node);
     this.markSubtreeAsSelected(dirHead);
     this.markSubtreeAsSelected(fileHead);
     let delta = node.nDesc - node.nDescSel + 1;
@@ -357,7 +507,7 @@ export class TreeManager {
     if (node.type !== 'dir') return;
     this.unmarkNodeAsSelected(node);
     node.nDescSel = 0;
-    const { dirHead, fileHead } = this.extractControllerHead(node);
+    const { dirHead, fileHead } = this.extractControllerReferences(node);
     this.unmarkSubtreeAsSelected(dirHead);
     this.unmarkSubtreeAsSelected(fileHead);
     let delta = node.nDesc + 1;
@@ -395,6 +545,9 @@ export class TreeManager {
     this.clearSelection();
   }
 
+  /**
+   * REDO
+   */
   private shiftSelectRange(orig: Node, dest: Node) {
     /**
      * COULD BE OPTIMIZED TO ITERATE OVER JUST THE NODES BETWEEN orig AND dest WITHOUT FINDING THE LCA.
@@ -425,7 +578,7 @@ export class TreeManager {
     }
     if (lca && lca.type !== 'dir') return; // Make TS happy.
     let control = lca || this.rootController;
-    const { dirHead, fileHead } = this.extractControllerHead(control);
+    const { dirHead, fileHead } = this.extractControllerReferences(control);
     const flattened = [...this.flatten(dirHead, true), ...this.flatten(fileHead, true)];
     let aux = 0;
     for (const node of flattened) {
@@ -502,7 +655,7 @@ export class TreeManager {
     if (this.allNodesSelected()) {
       this.clearSelection();
     } else {
-      const { dirHead, fileHead } = this.extractControllerHead(this.rootController);
+      const { dirHead, fileHead } = this.extractControllerReferences(this.rootController);
       this.markSubtreeAsSelected(dirHead);
       this.markSubtreeAsSelected(fileHead);
     }
@@ -522,9 +675,13 @@ export class TreeManager {
     if (parent && parent.type !== 'dir') return; // Make TS happy.
     const control = parent || this.rootController;
     const sub = node.type === 'dir' ? control.subDirs : control.subFiles;
-    const { next, prev } = this.getSiblings(node);
-    if (node.id === sub.headId) sub.headId = next ? next.id : null;
-    if (node.id === sub.tailId) sub.tailId = prev ? prev.id : null;
+    const { next, prev } = this.getSiblings(node, false);
+    if (node.id === sub.headId) {
+      sub.headId = next && next.parentId === node.parentId ? next.id : null;
+    }
+    if (node.id === sub.tailId) {
+      sub.tailId = prev && prev.parentId === node.parentId ? prev.id : null;
+    }
     if (prev && next) {
       prev.nextId = next.id;
       next.prevId = prev.id;
@@ -568,17 +725,18 @@ export class TreeManager {
      * )
      */
     if (node.type !== 'dir') return;
-    const { dirHead, fileHead } = this.extractControllerHead(node);
-    const subtree = [...this.flatten(dirHead, true), ...this.flatten(fileHead, true)];
-    for (const sub of subtree) {
-      if (sub.selected) this.unmarkNodeAsSelected(sub);
-      sub.deleted = true;
+    const { dirHead, fileHead } = this.extractControllerReferences(node);
+    let curr = dirHead || fileHead;
+    while (curr && curr.depth > node.depth) {
+      if (curr.selected) this.unmarkNodeAsSelected(curr);
+      curr.deleted = true;
+      curr = this.getNextFlatten(curr);
     }
     const nDescDec = node.nDesc + 1;
     let ancestorSelDelta = -(node.nDescSel + Number(node.selected));
     this.unmarkNodeAsSelected(node);
     node.deleted = true;
-    let curr = this.getParent(node);
+    curr = this.getParent(node);
     while (curr) {
       if (curr.type !== 'dir') break;
       curr.nDesc -= nDescDec;
@@ -624,39 +782,29 @@ export class TreeManager {
     }
   }
 
-  // --- Tree flattening: ---
-
-  private flatten(head: Node | null, includeClosed: boolean): Node[] {
-    /**
-     * O(subtree)
-     */
-    const result: Node[] = [];
-    let curr: Node | null = head;
-    while (curr) {
-      result.push(curr);
-      if (curr.type === 'dir' && (curr.open || includeClosed)) {
-        const { dirHead, fileHead } = this.extractControllerHead(curr);
-        result.push(
-          ...this.flatten(dirHead, includeClosed),
-          ...this.flatten(fileHead, includeClosed)
-        );
-      }
-      curr = this.getNext(curr);
-    }
-    return result;
-  }
-
   // --- Build response to send to the Renderer Process: ---
 
   public buildResponse(): TreeState {
     /**
-     * COULD BE IMPROVED TO NOT CALL FLATTEN.
+     * O(number of nodes in the visible nodes window)
      */
     const result = {} as TreeState;
-    const { dirHead, fileHead } = this.extractControllerHead(this.rootController);
+    const { dirHead, fileHead } = this.extractControllerReferences(this.rootController);
     result.nSelectedNodes = this.selectedNodes.size;
     result.nTotalNodes = this.nTotalNodes;
-    result.visibleNodes = [...this.flatten(dirHead, false), ...this.flatten(fileHead, false)];
+    result.visibleNodes = [];
+    let curr = dirHead || fileHead;
+    while (curr) {
+      result.visibleNodes.push(curr);
+      if (curr.type === 'dir' && !curr.open) {
+        const { dirTail, fileTail } = this.extractControllerReferences(curr);
+        if (fileTail) curr = this.getNextFlatten(fileTail);
+        else if (dirTail) curr = this.getNextFlatten(dirTail);
+        else curr = this.getNextFlatten(curr);
+      } else {
+        curr = this.getNextFlatten(curr);
+      }
+    }
     return result;
   }
 }
