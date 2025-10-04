@@ -22,9 +22,6 @@
         ],
       },
     });
-    $(tree.value).on('select_node.jstree', (e: any, data: any) => {
-      console.log('Selecionado:', data.node.text);
-    });
   });
 </script>
 
@@ -36,7 +33,6 @@
 
 <style scoped>
   .tree-container {
-    width: 300px;
-    padding: 8px;
+    border: 2px solid red;
   }
 </style>
