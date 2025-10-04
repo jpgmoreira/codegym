@@ -1,8 +1,10 @@
 <script lang="ts" setup>
   import { onMounted, ref } from 'vue';
+  import { useContestsStore } from '@renderer/store/contests.js';
   import './lib/jquery-3.7.1.min.js';
   import './lib/jstree.min.js';
   import './lib/themes/default-dark/style.min.css';
+  const contestsStore = useContestsStore();
 
   const tree = ref<HTMLDivElement | null>(null);
 
@@ -16,10 +18,7 @@
           dots: true,
           icons: true,
         },
-        data: [
-          { text: 'Pasta A', children: [{ text: 'Arquivo 1' }, { text: 'Arquivo 2' }] },
-          { text: 'Pasta B', children: [{ text: 'Arquivo 3' }] },
-        ],
+        data: contestsStore.contestsTree.data,
       },
     });
   });
