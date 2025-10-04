@@ -1,10 +1,15 @@
 <script lang="ts" setup>
-  import { ref, onMounted, onUnmounted } from 'vue';
+  import { ref, onMounted, onUnmounted, computed } from 'vue';
   import SettingsPageHeader from '@renderer/components/Header/custom/SettingsPageHeader.vue';
   import TreeView from '@renderer/components/UI/TreeView/TreeView.vue';
+  import { useContestsStore } from '@renderer/store/contests';
+  const contestsStore = useContestsStore();
 
   const treeViewWidth = ref(200);
   const isResizing = ref(false);
+
+  const contest = computed(() => contestsStore.currContest);
+  const tree = computed(() => contestsStore.contestsTree);
 
   function windowMouseMove(e: MouseEvent) {
     if (!isResizing.value) return;
@@ -25,14 +30,28 @@
 
 <template>
   <SettingsPageHeader />
-  <div class="grow flex border-2 border-orange-400">
+  <div class="grow flex border-2 border-orange-400 overflow-hidden">
     <div
-      class="resize-container border-2 border-emerald-300"
+      class="resize-container border-2 border-emerald-300 flex relative overflow-hidden"
       :style="{ width: `${treeViewWidth}px` }"
     >
-      <TreeView />
+      <TreeView class="grow" v-if="tree.data.length" />
+      <div
+        v-else
+        class="absolute top-1/2 left-1/2 translate-x-[-50%] translate-y-[-50%] text-lg opacity-70"
+      >
+        Right-click here
+      </div>
     </div>
     <div class="resizer" @mousedown="isResizing = true"></div>
+    <div class="border-2 border-cyan-300 grow flex relative overflow-hidden">
+      <div
+        v-if="!contest"
+        class="absolute top-1/2 left-1/2 translate-x-[-50%] translate-y-[-50%] text-2xl opacity-70"
+      >
+        Create or select a contest
+      </div>
+    </div>
   </div>
 </template>
 
