@@ -1,4 +1,8 @@
 <script lang="ts" setup>
+  /**
+   * Auto-length text input.
+   * Can be used with v-model.
+   */
   import { onMounted, useTemplateRef } from 'vue';
 
   const modelValue = defineModel<string>({ default: '' });
