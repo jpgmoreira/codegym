@@ -29,7 +29,9 @@ export async function loadStartupData(): Promise<StartupData> {
     }
     ContestsManager.instance.loadProfile(currProfile);
     contestsTree = ContestsManager.instance.getTree();
-    currContest = ContestsManager.instance.getContest();
+    if (currProfile.currContestId) {
+      currContest = ContestsManager.instance.getContest();
+    }
   }
   const result = {
     ojMeta,
