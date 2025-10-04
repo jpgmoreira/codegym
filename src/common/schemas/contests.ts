@@ -24,4 +24,18 @@ export type ContestsTreeNode = {
   };
 };
 
-export type ContestsTree = ContestsTreeNode[];
+export type ContestsTree = {
+  data: ContestsTreeNode[];
+};
+
+export function getEmptyContestsTree(): ContestsTree {
+  return { data: [] };
+}
+
+export function getEmptyContest(id: string): Contest {
+  return {
+    id,
+    notes: '',
+    problems: [],
+  };
+}
