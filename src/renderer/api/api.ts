@@ -18,7 +18,8 @@ export const allowedInvokeChannels = Object.freeze([
   Channels.fetchHistoryPage,
   Channels.renameCurrProfile,
   // Tree operations:
-  TreeChannels.toggleFullSelection,
+  TreeChannels.selectAll,
+  TreeChannels.deselectAll,
   TreeChannels.createNode,
   TreeChannels.handleSelection,
   TreeChannels.renameNode,
