@@ -3,6 +3,7 @@ import { OjMeta } from './ojMeta';
 import { Profile, ProfileRegistry } from './profile';
 import { OjProblem } from './problems';
 import { GraphRecord } from './graph';
+import { Contest, ContestsTree } from './contests';
 
 export type FirstHistoryPages = { [K in Oj]: OjProblem[K][] };
 
@@ -12,6 +13,8 @@ export type StartupData = {
   profileRegistry: ProfileRegistry;
   firstHistoryPages: FirstHistoryPages;
   graphData: GraphRecord[];
+  contestsTree: ContestsTree;
+  currContest: Contest | null;
 };
 
 export function getEmptyFirstHistoryPages(): FirstHistoryPages {

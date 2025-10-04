@@ -7,6 +7,7 @@ export type Profile = {
   name: string;
   page: AuthPage;
   currOj: Oj;
+  currContestId: string | null;
   ojContext: OjContext;
 };
 
@@ -34,6 +35,7 @@ export function getEmptyProfile(id: string, name: string): Profile {
     name,
     page: '/problems',
     currOj: 'cf',
+    currContestId: null,
     ojContext: getEmptyOjContext(),
   };
 }
