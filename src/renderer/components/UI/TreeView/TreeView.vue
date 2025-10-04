@@ -1,8 +1,8 @@
 <script lang="ts" setup>
   import { onMounted, ref } from 'vue';
-  import './jquery-3.7.1.min.js';
-  import './dist/jstree.min.js';
-  import './dist/themes/default-dark/style.min.css';
+  import './lib/jquery-3.7.1.min.js';
+  import './lib/jstree.min.js';
+  import './lib/themes/default-dark/style.min.css';
 
   const tree = ref<HTMLDivElement | null>(null);
 
