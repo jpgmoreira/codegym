@@ -40,10 +40,13 @@
       context.currNode = '#';
       context.type = 'root';
     }
-    context.style = {
+    const windowHeight = window.innerHeight;
+    const style: Record<string, string> = {
       left: `${e.clientX}px`,
-      top: `${e.clientY}px`,
     };
+    if (e.clientY < windowHeight - 150) style.top = `${e.clientY}px`;
+    else style.bottom = `${windowHeight - e.clientY}px`;
+    context.style = style;
     context.visible = true;
   }
 
@@ -104,11 +107,10 @@
 
 <template>
   <div
-    class="tree-container grow flex overflow-auto select-none"
+    class="tree-container grow flex select-none overflow-hidden"
     ref="tree-container"
     @click.right="handleContext"
     @click="context.visible = false"
-    @scroll="context.visible = false"
   >
     <!-- Context menu -->
     <div
@@ -129,7 +131,7 @@
       </div>
     </div>
     <!-- Tree -->
-    <div ref="tree" v-show="treeState === 'not-empty'"></div>
+    <div ref="tree" v-show="treeState === 'not-empty'" @scroll="context.visible = false"></div>
     <!-- Placeholder -->
     <div v-if="treeState === 'empty'" class="grow overflow-hidden relative">
       <div
@@ -159,5 +161,10 @@
   }
   .placeholder {
     z-index: 0;
+  }
+  .jstree {
+    flex-grow: 1;
+    overflow: auto;
+    padding-bottom: 100px;
   }
 </style>
