@@ -126,7 +126,7 @@
 
 <template>
   <div
-    class="tree-container flex relative overflow-auto"
+    class="tree-container flex relative overflow-auto select-none"
     ref="tree-container"
     @click.right="handleRightClick"
     @click="context.visible = false"
