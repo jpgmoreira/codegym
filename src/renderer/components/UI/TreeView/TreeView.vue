@@ -16,6 +16,7 @@
   const counters = computed(() => contestsStore.contestsTree.counters);
   const jstree = ref<any>(null);
   const treeState = ref<TreeState>('loading');
+  const selectionTimer = ref<NodeJS.Timeout | undefined>(undefined);
 
   // --- Context menu: ---
 
@@ -53,29 +54,45 @@
   // --- Node creation: ---
 
   function createNode(type: ContestNodeType, parent: string) {
+    const parentNode = jstree.value.get_node(parent);
     const newNode: Partial<ContestsTreeNode> = {
       id: randomId(),
       type,
       parent,
-      state: { selected: false },
+      state: { selected: parentNode.state.selected },
     };
     if (type === 'dir') {
       newNode.state!.opened = false;
       newNode.text = `Folder ${counters.value.nextDir}`;
-      contestsStore.contestsTree.counters.nextDir++;
     } else {
       newNode.text = `Contest ${counters.value.nextContest}`;
-      contestsStore.contestsTree.counters.nextContest++;
     }
-    const parentNode = jstree.value.get_node(parent);
-    const success = jstree.value.create_node(parent, newNode);
-    if (success) {
-      if (parentNode.type === 'dir') jstree.value.open_node(parentNode);
-      treeState.value = 'not-empty';
-    }
+    jstree.value.create_node(parent, newNode);
+    contestsStore.createNode(newNode as ContestsTreeNode);
+    if (parentNode.type === 'dir') jstree.value.open_node(parentNode);
+    treeState.value = 'not-empty';
   }
 
   // --- Hooks: ---
+
+  function registerCallbacks($tree: any) {
+    $tree.on(
+      'select_node.jstree deselect_node.jstree select_all.jstree deselect_all.jstree',
+      (e: any, data: any) => {
+        const newSelection = jstree.value.get_bottom_selected(true).map((node: any) => node.id);
+        clearTimeout(selectionTimer.value);
+        setTimeout(() => contestsStore.setSelection(newSelection), 100);
+        const eventType = e.type as string;
+        let isSelect = true;
+        if (eventType === 'deselect_node') isSelect = false;
+        if (data.node.type === 'dir') {
+          const children = jstree.value.get_node(data.node).children_d;
+          if (isSelect) jstree.value.select_node(children);
+          else jstree.value.deselect_node(children);
+        }
+      }
+    );
+  }
 
   onMounted(() => {
     const $ = (window as any).jQuery;
@@ -101,6 +118,7 @@
       jstree.value = $tree.jstree(true);
       const root = jstree.value.get_node('#');
       treeState.value = root.children.length === 0 ? 'empty' : 'not-empty';
+      registerCallbacks($tree);
     });
   });
 </script>
