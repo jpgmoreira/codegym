@@ -14,9 +14,11 @@ export type Contest = {
   problems: ContestProblem[];
 };
 
+export type ContestNodeType = 'contest' | 'dir';
+
 export type ContestsTreeNode = {
   id: string;
-  type: 'contest' | 'dir';
+  type: ContestNodeType;
   parent: string;
   text: string;
   state: {

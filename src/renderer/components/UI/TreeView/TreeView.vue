@@ -1,7 +1,7 @@
 <script lang="ts" setup>
   import { computed, onMounted, useTemplateRef, reactive, ref } from 'vue';
   import { useContestsStore } from '@renderer/store/contests.js';
-  import { ContestsTreeNode } from '@common/schemas/contests.js';
+  import { ContestNodeType, ContestsTreeNode } from '@common/schemas/contests.js';
   import { randomId } from '@common/utils/utils.js';
   import './lib/jquery-3.7.1.min.js';
   import './lib/jstree.min.js';
@@ -24,7 +24,6 @@
 
   // --- Context menu: ---
 
-  type NodeType = 'contest' | 'dir';
   type ContextType = 'root' | 'dir' | 'contest';
 
   const context = reactive({
@@ -55,9 +54,22 @@
     context.visible = true;
   }
 
+  function handleRightClick(e: MouseEvent) {
+    const target = e.target as HTMLElement;
+    if (target.classList.contains('jstree-anchor')) {
+      // Click in a node.
+      const li = target.closest('li');
+      if (!li) return;
+      const node = jstree.value.get_node(li.id);
+      showContext(node.type, e);
+    } else {
+      showContext('root', e);
+    }
+  }
+
   // --- Node creation: ---
 
-  function createNode(type: NodeType, parent: string) {
+  function createNode(type: ContestNodeType, parent: string) {
     const newNode: Partial<ContestsTreeNode> = {
       id: randomId(),
       type,
@@ -92,6 +104,11 @@
         data: contestsStore.contestsTree.data,
         check_callback: true,
       },
+      types: {
+        dir: { icon: 'jstree-folder', valid_children: ['dir', 'contest'] },
+        contest: { icon: 'jstree-file', valid_children: [] },
+      },
+      plugins: ['types'],
     });
     $tree.on('loaded.jstree', () => {
       jstree.value = $tree.jstree(true);
@@ -106,7 +123,7 @@
   <div
     class="tree-container flex relative overflow-auto"
     ref="tree-container"
-    @click.right="(e) => showContext('root', e)"
+    @click.right="handleRightClick"
     @click="context.visible = false"
   >
     <!-- Context menu -->
@@ -119,6 +136,8 @@
         <div class="context-option" @click="createNode('contest', '#')">New contest</div>
         <div class="context-option" @click="createNode('dir', '#')">New folder</div>
       </div>
+      <div v-if="context.type === 'contest'">CONTEST CONTEXT</div>
+      <div v-if="context.type === 'dir'">DIR CONTEXT</div>
     </div>
     <!-- Tree -->
     <div ref="tree" v-show="!isTreeEmpty"></div>
