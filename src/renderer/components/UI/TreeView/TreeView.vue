@@ -15,12 +15,8 @@
   const counters = computed(() => contestsStore.contestsTree.counters);
   const jstree = ref<any>(null);
   const treeVersion = ref(0);
-  const isTreeEmpty = computed(() => {
-    treeVersion.value;
-    if (!jstree.value) return true;
-    const root = jstree.value.get_node('#');
-    return root.children.length === 0;
-  });
+  const hasTreeLoaded = ref(false);
+  const isTreeEmpty = ref(false);
 
   // --- Context menu: ---
 
@@ -92,6 +88,7 @@
     const parentNode = jstree.value.get_node(parent);
     jstree.value.create_node(parent, newNode);
     if (parentNode.type === 'dir') jstree.value.open_node(parentNode);
+    isTreeEmpty.value = false;
   }
 
   // --- Hooks: ---
@@ -120,6 +117,9 @@
       $tree.on('create_node.jstree', () => {
         treeVersion.value++;
       });
+      const root = jstree.value.get_node('#');
+      isTreeEmpty.value = root.children.length === 0;
+      hasTreeLoaded.value = true;
     });
   });
 </script>
@@ -150,9 +150,9 @@
       </div>
     </div>
     <!-- Tree -->
-    <div ref="tree" v-show="!isTreeEmpty"></div>
+    <div ref="tree" v-show="hasTreeLoaded && !isTreeEmpty"></div>
     <!-- Placeholder -->
-    <div v-if="isTreeEmpty" class="grow overflow-hidden relative">
+    <div v-if="hasTreeLoaded && isTreeEmpty" class="grow overflow-hidden relative">
       <div
         class="placeholder absolute top-1/2 left-1/2 translate-x-[-50%] translate-y-[-50%] text-lg opacity-70 whitespace-nowrap select-none"
       >
