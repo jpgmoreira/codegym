@@ -16,20 +16,31 @@ export type Contest = {
 
 export type ContestsTreeNode = {
   id: string;
+  type: 'contest' | 'dir';
   parent: string;
   text: string;
   state: {
-    opened: boolean;
+    opened?: boolean;
     selected: boolean;
   };
 };
 
 export type ContestsTree = {
+  counters: {
+    nextContest: number;
+    nextDir: number;
+  };
   data: ContestsTreeNode[];
 };
 
 export function getEmptyContestsTree(): ContestsTree {
-  return { data: [] };
+  return {
+    counters: {
+      nextContest: 1,
+      nextDir: 1,
+    },
+    data: [],
+  };
 }
 
 export function getEmptyContest(id: string): Contest {

@@ -36,21 +36,23 @@
 </script>
 
 <template>
-  <SettingsPageHeader />
-  <div class="grow flex border-2 border-orange-400 overflow-hidden">
-    <!-- TreeView area -->
-    <div class="flex" :style="{ width: `${treeViewWidth}px` }">
-      <TreeView class="grow" />
-    </div>
-    <div class="resizer" @mousedown="isResizing = true" :class="{ hover: isResizing }"></div>
-    <!-- Contest area -->
-    <div class="border-2 border-cyan-300 grow flex">
-      <div v-if="contest">CONTEST!</div>
-      <div v-else class="grow overflow-hidden relative">
-        <div
-          class="absolute top-1/2 left-1/2 translate-x-[-50%] translate-y-[-50%] text-2xl opacity-70 whitespace-nowrap select-none"
-        >
-          Create or select a contest
+  <div class="h-[100vh] flex flex-col">
+    <SettingsPageHeader />
+    <div class="grow flex border-2 border-orange-400 overflow-hidden">
+      <!-- TreeView area -->
+      <div class="flex" :style="{ width: `${treeViewWidth}px` }">
+        <TreeView class="grow" />
+      </div>
+      <div class="resizer" @mousedown="isResizing = true" :class="{ hover: isResizing }"></div>
+      <!-- Contest area -->
+      <div class="border-2 border-cyan-300 grow flex">
+        <div v-if="contest">CONTEST!</div>
+        <div v-else class="grow overflow-hidden relative">
+          <div
+            class="absolute top-1/2 left-1/2 translate-x-[-50%] translate-y-[-50%] text-2xl opacity-70 whitespace-nowrap select-none"
+          >
+            Create or select a contest
+          </div>
         </div>
       </div>
     </div>
