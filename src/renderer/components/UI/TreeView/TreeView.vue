@@ -65,9 +65,11 @@
       contestsStore.contestsTree.counters.nextContest++;
     }
     const parentNode = jstree.value.get_node(parent);
-    jstree.value.create_node(parent, newNode);
-    if (parentNode.type === 'dir') jstree.value.open_node(parentNode);
-    treeState.value = 'not-empty';
+    const success = jstree.value.create_node(parent, newNode);
+    if (success) {
+      if (parentNode.type === 'dir') jstree.value.open_node(parentNode);
+      treeState.value = 'not-empty';
+    }
   }
 
   // --- Hooks: ---
@@ -83,6 +85,7 @@
           icons: true,
         },
         data: contestsStore.contestsTree.data,
+        restore_focus: false,
         check_callback: true,
       },
       types: {
@@ -105,6 +108,7 @@
     ref="tree-container"
     @click.right="handleContext"
     @click="context.visible = false"
+    @scroll="context.visible = false"
   >
     <!-- Context menu -->
     <div
