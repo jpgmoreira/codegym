@@ -30,6 +30,7 @@
     style: {} as Record<string, string>,
     visible: false,
     type: 'root' as ContextType,
+    currNode: '#',
   });
 
   function computeContextStyle(x: number, y: number) {
@@ -61,8 +62,10 @@
       const li = target.closest('li');
       if (!li) return;
       const node = jstree.value.get_node(li.id);
+      context.currNode = li.id;
       showContext(node.type, e);
     } else {
+      context.currNode = '#';
       showContext('root', e);
     }
   }
@@ -86,7 +89,9 @@
       newNode.text = `Contest ${counters.value.nextContest}`;
       contestsStore.contestsTree.counters.nextContest++;
     }
+    const parentNode = jstree.value.get_node(parent);
     jstree.value.create_node(parent, newNode);
+    if (parentNode.type === 'dir') jstree.value.open_node(parentNode);
   }
 
   // --- Hooks: ---
@@ -137,7 +142,12 @@
         <div class="context-option" @click="createNode('dir', '#')">New folder</div>
       </div>
       <div v-if="context.type === 'contest'">CONTEST CONTEXT</div>
-      <div v-if="context.type === 'dir'">DIR CONTEXT</div>
+      <div v-if="context.type === 'dir'">
+        <div class="context-option" @click="createNode('contest', context.currNode)">
+          New contest
+        </div>
+        <div class="context-option" @click="createNode('dir', context.currNode)">New folder</div>
+      </div>
     </div>
     <!-- Tree -->
     <div ref="tree" v-show="!isTreeEmpty"></div>
