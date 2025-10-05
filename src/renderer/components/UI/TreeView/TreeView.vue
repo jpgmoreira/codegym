@@ -9,14 +9,13 @@
 
   // --- Variables: ---
 
+  type TreeState = 'loading' | 'empty' | 'not-empty';
+
   const contestsStore = useContestsStore();
   const treeRef = useTemplateRef('tree');
-  const treeContainerRef = useTemplateRef('tree-container');
   const counters = computed(() => contestsStore.contestsTree.counters);
   const jstree = ref<any>(null);
-  const treeVersion = ref(0);
-  const hasTreeLoaded = ref(false);
-  const isTreeEmpty = ref(false);
+  const treeState = ref<TreeState>('loading');
 
   // --- Context menu: ---
 
@@ -29,41 +28,23 @@
     currNode: '#',
   });
 
-  function computeContextStyle(x: number, y: number) {
-    const treeContainer = treeContainerRef.value;
-    if (!treeContainer) return;
-    const MENU_WIDTH = 100;
-    const MENU_HEIGHT = 100;
-    const rect = treeContainer.getBoundingClientRect();
-    const left = x - rect.left;
-    const top = y - rect.top;
-    const res = {} as (typeof context)['style'];
-    if (left + MENU_WIDTH > rect.width) res['right'] = `${rect.width - left}px`;
-    else res['left'] = `${left}px`;
-    if (top + MENU_HEIGHT > rect.height) res['bottom'] = `${rect.height - top}px`;
-    else res['top'] = `${top}px`;
-    context['style'] = res;
-  }
-
-  function showContext(type: ContextType, e: MouseEvent) {
-    computeContextStyle(e.clientX, e.clientY);
-    context.type = type;
-    context.visible = true;
-  }
-
-  function handleRightClick(e: MouseEvent) {
+  function handleContext(e: MouseEvent) {
     const target = e.target as HTMLElement;
     if (target.classList.contains('jstree-anchor')) {
-      // Click in a node.
       const li = target.closest('li');
       if (!li) return;
       const node = jstree.value.get_node(li.id);
       context.currNode = li.id;
-      showContext(node.type, e);
+      context.type = node.type;
     } else {
       context.currNode = '#';
-      showContext('root', e);
+      context.type = 'root';
     }
+    context.style = {
+      left: `${e.clientX}px`,
+      top: `${e.clientY}px`,
+    };
+    context.visible = true;
   }
 
   // --- Node creation: ---
@@ -73,9 +54,7 @@
       id: randomId(),
       type,
       parent,
-      state: {
-        selected: false,
-      },
+      state: { selected: false },
     };
     if (type === 'dir') {
       newNode.state!.opened = false;
@@ -88,7 +67,7 @@
     const parentNode = jstree.value.get_node(parent);
     jstree.value.create_node(parent, newNode);
     if (parentNode.type === 'dir') jstree.value.open_node(parentNode);
-    isTreeEmpty.value = false;
+    treeState.value = 'not-empty';
   }
 
   // --- Hooks: ---
@@ -114,27 +93,23 @@
     });
     $tree.on('loaded.jstree', () => {
       jstree.value = $tree.jstree(true);
-      $tree.on('create_node.jstree', () => {
-        treeVersion.value++;
-      });
       const root = jstree.value.get_node('#');
-      isTreeEmpty.value = root.children.length === 0;
-      hasTreeLoaded.value = true;
+      treeState.value = root.children.length === 0 ? 'empty' : 'not-empty';
     });
   });
 </script>
 
 <template>
   <div
-    class="tree-container grow flex relative overflow-auto select-none"
+    class="tree-container grow flex overflow-auto select-none"
     ref="tree-container"
-    @click.right="handleRightClick"
+    @click.right="handleContext"
     @click="context.visible = false"
   >
     <!-- Context menu -->
     <div
       v-if="context.visible"
-      class="context-container absolute whitespace-nowrap"
+      class="context-container fixed whitespace-nowrap"
       :style="context.style"
     >
       <div v-if="context.type === 'root'">
@@ -150,9 +125,9 @@
       </div>
     </div>
     <!-- Tree -->
-    <div ref="tree" v-show="hasTreeLoaded && !isTreeEmpty"></div>
+    <div ref="tree" v-show="treeState === 'not-empty'"></div>
     <!-- Placeholder -->
-    <div v-if="hasTreeLoaded && isTreeEmpty" class="grow overflow-hidden relative">
+    <div v-if="treeState === 'empty'" class="grow overflow-hidden relative">
       <div
         class="placeholder absolute top-1/2 left-1/2 translate-x-[-50%] translate-y-[-50%] text-lg opacity-70 whitespace-nowrap select-none"
       >
