@@ -31,25 +31,25 @@
 <template>
   <SettingsPageHeader />
   <div class="grow flex border-2 border-orange-400 overflow-hidden">
-    <div
-      class="resize-container border-2 border-emerald-300 flex relative overflow-hidden"
-      :style="{ width: `${treeViewWidth}px` }"
-    >
+    <div class="border-2 border-emerald-300 flex" :style="{ width: `${treeViewWidth}px` }">
       <TreeView class="grow" v-if="tree.data.length" />
-      <div
-        v-else
-        class="absolute top-1/2 left-1/2 translate-x-[-50%] translate-y-[-50%] text-lg opacity-70"
-      >
-        Right-click here
+      <div v-else class="grow overflow-hidden relative">
+        <div
+          class="absolute top-1/2 left-1/2 translate-x-[-50%] translate-y-[-50%] text-lg opacity-70 whitespace-nowrap select-none"
+        >
+          Right-click here
+        </div>
       </div>
     </div>
     <div class="resizer" @mousedown="isResizing = true"></div>
-    <div class="border-2 border-cyan-300 grow flex relative overflow-hidden">
-      <div
-        v-if="!contest"
-        class="absolute top-1/2 left-1/2 translate-x-[-50%] translate-y-[-50%] text-2xl opacity-70"
-      >
-        Create or select a contest
+    <div class="border-2 border-cyan-300 grow flex">
+      <div v-if="contest">CONTEST!</div>
+      <div v-else class="grow overflow-hidden relative">
+        <div
+          class="absolute top-1/2 left-1/2 translate-x-[-50%] translate-y-[-50%] text-2xl opacity-70 whitespace-nowrap select-none"
+        >
+          Create or select a contest
+        </div>
       </div>
     </div>
   </div>
