@@ -88,7 +88,7 @@
       <div v-if="!problems.length" class="absolute-center text-xl opacity-70">
         No history for this Online Judge
       </div>
-      <div v-else class="relative overflow-hidden">
+      <div v-else class="relative">
         <table class="header-table sticky top-0 w-full table-fixed">
           <thead>
             <tr>
