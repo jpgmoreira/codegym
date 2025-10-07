@@ -8,7 +8,7 @@
   import { handleProblemClick } from '@renderer/utils/utils';
   import { useRouter } from 'vue-router';
   import { parseTimestamp } from '@common/utils/dateUtils';
-  import { ref, onMounted, computed, watch } from 'vue';
+  import { ref, onMounted, computed, watch, useTemplateRef } from 'vue';
 
   const router = useRouter();
   const profileStore = useProfileStore();
@@ -17,7 +17,11 @@
   const top = ref(0);
   const loaded = ref(false);
 
+  const scrollContainer = useTemplateRef('scroll-container');
+
   const currOj = computed(() => profileStore.currProfile!.currOj);
+
+  const tableContainerStyle = computed(() => ({ height: `${total.value * 40}px` }));
 
   async function fetchHistory() {
     const result = await window.api.invoke<FetchHistoryPageResponseDTO<typeof currOj.value>>(
@@ -35,7 +39,12 @@
     router.replace('/problems');
   }
 
-  const tableContainerStyle = computed(() => ({ height: `${total.value * 40}px` }));
+  function handleScroll() {
+    const container = scrollContainer.value;
+    if (!container) return;
+    const scrollTop = container.scrollTop;
+    console.log(scrollTop);
+  }
 
   onMounted(async () => {
     await fetchHistory();
@@ -48,7 +57,12 @@
 <template>
   <div class="flex flex-col h-[100vh]">
     <ProblemsPageHeader />
-    <div v-if="loaded" class="grow relative">
+    <div
+      v-if="loaded"
+      ref="scroll-container"
+      class="grow relative overflow-y-auto"
+      @scroll="handleScroll"
+    >
       <div v-if="!problems.length" class="absolute-center text-xl opacity-70">
         No history for this Online Judge
       </div>
