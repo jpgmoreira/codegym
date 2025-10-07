@@ -46,8 +46,10 @@
 <template>
   <div class="flex flex-col h-[100vh]">
     <ProblemsPageHeader />
-    <div v-if="loaded">
-      <div v-if="!problems.length">No history for this Online Judge</div>
+    <div v-if="loaded" class="grow relative">
+      <div v-if="!problems.length" class="absolute-center text-xl opacity-70">
+        No history for this Online Judge
+      </div>
       <table class="w-full" v-else>
         <thead class="sticky top-0">
           <tr>
