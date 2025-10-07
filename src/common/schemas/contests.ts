@@ -14,37 +14,6 @@ export type Contest = {
   problems: ContestProblem[];
 };
 
-export type ContestNodeType = 'contest' | 'dir';
-
-export type ContestsTreeNode = {
-  id: string;
-  type: ContestNodeType;
-  parent: string;
-  text: string;
-  state: {
-    opened?: boolean;
-    selected: boolean;
-  };
-};
-
-export type ContestsTree = {
-  counters: {
-    nextContest: number;
-    nextDir: number;
-  };
-  data: ContestsTreeNode[];
-};
-
-export function getEmptyContestsTree(): ContestsTree {
-  return {
-    counters: {
-      nextContest: 1,
-      nextDir: 1,
-    },
-    data: [],
-  };
-}
-
 export function getEmptyContest(id: string): Contest {
   return {
     id,
