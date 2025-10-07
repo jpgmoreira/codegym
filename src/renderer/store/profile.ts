@@ -7,7 +7,6 @@ import { Channels } from '@common/types/channels';
 import { CreateProfileResponseDTO } from '@common/dto/createProfileResponseDTO';
 import { useOjStatusStore } from './ojStatus';
 import { useOjMetaStore } from './ojMeta';
-import { useHistoryStore } from './history';
 import { useGraphStore } from './graph';
 import { GetOjProblemResponseDTO } from '@common/dto/getOjProblemResponseDTO';
 import { getTodayDate } from '@common/utils/dateUtils';
@@ -83,7 +82,6 @@ export const useProfileStore = defineStore('profile', {
       const oj = this.currProfile!.currOj;
       const ojStatusStore = useOjStatusStore();
       const ojMetaStore = useOjMetaStore();
-      const historyStore = useHistoryStore();
       let result: GetOjProblemResponseDTO<typeof oj>;
       if (!ojMetaStore.ojMeta[oj].lastCacheUpdate) {
         try {
@@ -101,9 +99,6 @@ export const useProfileStore = defineStore('profile', {
       const { ojContext } = this.currProfile!;
       ojContext[oj].matched = matched;
       ojContext[oj].snapshot = snapshot;
-      if (snapshot) {
-        historyStore.insertRecord(oj, snapshot);
-      }
     },
     setCurrSnapshotSolved(value: boolean) {
       const graphStore = useGraphStore();
