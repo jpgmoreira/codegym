@@ -1,6 +1,6 @@
 import { OjProblem } from '@common/schemas/problems';
 import { DATA_DIR } from '../constants';
-import { HISTORY_MAX_SIZE, HISTORY_PAGE_SIZE } from '@common/constants';
+import { HISTORY_MAX_SIZE, HISTORY_PAGE_SIZE } from '../constants';
 import { Oj } from '@common/types/oj';
 import { EventEmitter } from '@common/helpers/eventEmitter';
 import { Events } from '@main/events/events';
