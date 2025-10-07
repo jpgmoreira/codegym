@@ -7,8 +7,6 @@ import { OjList } from '@common/types/oj';
 import { getEmptyFirstHistoryPages, StartupData } from '@common/schemas/startup';
 import { OjProblem } from '@common/schemas/problems';
 import { CacheManager } from './managers/cacheManager';
-import { ContestsManager } from './managers/contestsManager';
-import { Contest, ContestsTree, getEmptyContestsTree } from '@common/schemas/contests';
 
 export async function loadStartupData(): Promise<StartupData> {
   CacheManager.instance; // Forces cache load at startup to avoid slow loading of the first problem.
@@ -16,8 +14,6 @@ export async function loadStartupData(): Promise<StartupData> {
   const currProfile = ProfileManager.instance.getCurrProfile();
   const profileRegistry = ProfileManager.instance.getProfileRegistry();
   let firstHistoryPages = getEmptyFirstHistoryPages();
-  let contestsTree: ContestsTree = getEmptyContestsTree();
-  let currContest: Contest | null = null;
   let graphData: GraphRecord[] = [];
   if (currProfile) {
     GraphManager.instance.loadGraph(currProfile.id);
@@ -27,11 +23,6 @@ export async function loadStartupData(): Promise<StartupData> {
       const page = await HistoryManager.instance.fetchHistoryPage(oj, 1);
       (firstHistoryPages[oj] as OjProblem[typeof oj][]) = page;
     }
-    ContestsManager.instance.loadProfile(currProfile);
-    contestsTree = ContestsManager.instance.getTree();
-    if (currProfile.currContestId) {
-      currContest = ContestsManager.instance.getContest();
-    }
   }
   const result = {
     ojMeta,
@@ -39,8 +30,6 @@ export async function loadStartupData(): Promise<StartupData> {
     profileRegistry,
     firstHistoryPages,
     graphData,
-    contestsTree,
-    currContest,
   };
   return result;
 }
