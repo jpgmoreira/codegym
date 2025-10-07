@@ -37,9 +37,9 @@ ipcMain.handle(
 );
 
 ipcMain.handle(
-  Channels.fetchHistoryPage,
-  <T extends Oj>(_: IpcMainInvokeEvent, oj: T, page: number): Promise<OjProblem[T][]> =>
-    HistoryManager.instance.fetchHistoryPage(oj, page)
+  Channels.fetchHistoryRecords,
+  <T extends Oj>(_: IpcMainInvokeEvent, oj: T, anchor: number): Promise<OjProblem[T][]> =>
+    HistoryManager.instance.fetchHistoryRecords(oj, anchor)
 );
 
 ipcMain.handle(

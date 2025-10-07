@@ -14,7 +14,7 @@ export const allowedInvokeChannels = Object.freeze([
   Channels.updateOjCache,
   Channels.getOjProblem,
   Channels.login,
-  Channels.fetchHistoryPage,
+  Channels.fetchHistoryRecords,
   Channels.renameCurrProfile,
 ] as const);
 export const allowedOnChannels = Object.freeze([Channels.loadStartupData] as const);
