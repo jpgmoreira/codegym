@@ -35,6 +35,8 @@
     router.replace('/problems');
   }
 
+  const tableContainerStyle = computed(() => ({ height: `${total.value * 40}px` }));
+
   onMounted(async () => {
     await fetchHistory();
     loaded.value = true;
@@ -50,34 +52,41 @@
       <div v-if="!problems.length" class="absolute-center text-xl opacity-70">
         No history for this Online Judge
       </div>
-      <table class="w-full" v-else>
-        <thead class="sticky top-0">
-          <tr>
-            <th>#</th>
-            <th>Problem</th>
-            <th>Date</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="(problem, index) in problems" :key="problem.id">
-            <td>{{ index + top + 1 }}</td>
-            <td>
-              <a href="#" @click="handleClick(problem)">
-                {{ problem.name || '\<no name available\>' }}
-              </a>
-              <span
-                v-if="problem.solvedDate !== null"
-                class="alert success inline-flex text-xs font-bold ml-2 px-1 py-0.5 rounded-md select-none"
-              >
-                Solved
-              </span>
-            </td>
-            <td>{{ parseTimestamp(problem.timestamp!) }}</td>
-          </tr>
-        </tbody>
-      </table>
+      <div v-else :style="tableContainerStyle">
+        <table class="w-full">
+          <thead class="sticky top-0">
+            <tr>
+              <th>#</th>
+              <th>Problem</th>
+              <th>Date</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="(problem, index) in problems" :key="problem.id">
+              <td>{{ index + top + 1 }}</td>
+              <td>
+                <a href="#" @click="handleClick(problem)">
+                  {{ problem.name || '\<no name available\>' }}
+                </a>
+                <span
+                  v-if="problem.solvedDate !== null"
+                  class="alert success inline-flex text-xs font-bold ml-2 px-1 py-0.5 rounded-md select-none"
+                >
+                  Solved
+                </span>
+              </td>
+              <td>{{ parseTimestamp(problem.timestamp!) }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
 </template>
 
-<style scoped></style>
+<style scoped>
+  tr {
+    white-space: nowrap;
+    height: 40px;
+  }
+</style>

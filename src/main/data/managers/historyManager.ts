@@ -51,7 +51,7 @@ export class HistoryManager {
       .sort({ timestamp: -1 })
       .skip(top)
       .limit(HISTORY_PAGE_SIZE);
-    const total = await this.db.countAsync({});
+    const total = await this.db.countAsync({ oj });
     return { data, total };
   }
 
