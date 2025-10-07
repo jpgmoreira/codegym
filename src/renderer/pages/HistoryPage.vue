@@ -16,12 +16,14 @@
   const total = ref(0);
   const top = ref(0);
   const loaded = ref(false);
+  const scrollTimer = ref<NodeJS.Timeout | undefined>(undefined);
 
   const scrollContainer = useTemplateRef('scroll-container');
 
   const currOj = computed(() => profileStore.currProfile!.currOj);
 
   const tableContainerStyle = computed(() => ({ height: `${total.value * 40}px` }));
+  const tableStyle = computed(() => ({ transform: `translateY(${top.value * 40}px)` }));
 
   async function fetchHistory() {
     const result = await window.api.invoke<FetchHistoryPageResponseDTO<typeof currOj.value>>(
@@ -40,10 +42,14 @@
   }
 
   function handleScroll() {
-    const container = scrollContainer.value;
-    if (!container) return;
-    const scrollTop = container.scrollTop;
-    console.log(scrollTop);
+    clearTimeout(scrollTimer.value);
+    scrollTimer.value = setTimeout(() => {
+      const container = scrollContainer.value;
+      if (!container) return;
+      const scrollTop = container.scrollTop;
+      top.value = Math.floor(scrollTop / 40);
+      fetchHistory();
+    }, 100);
   }
 
   onMounted(async () => {
@@ -67,14 +73,7 @@
         No history for this Online Judge
       </div>
       <div v-else :style="tableContainerStyle">
-        <table class="w-full">
-          <thead class="sticky top-0">
-            <tr>
-              <th>#</th>
-              <th>Problem</th>
-              <th>Date</th>
-            </tr>
-          </thead>
+        <table class="w-full" :style="tableStyle">
           <tbody>
             <tr v-for="(problem, index) in problems" :key="problem.id">
               <td>{{ index + top + 1 }}</td>
