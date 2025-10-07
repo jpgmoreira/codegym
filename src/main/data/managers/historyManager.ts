@@ -6,6 +6,7 @@ import { EventEmitter } from '@common/helpers/eventEmitter';
 import { Events } from '@main/events/events';
 import Datastore from '@seald-io/nedb';
 import path from 'path';
+import { FetchHistoryPageResponseDTO } from '@common/dto/fetchHistoryPageResponseDTO';
 
 EventEmitter.instance.on(Events.clearProfileData, () => {
   HistoryManager.instance.clear();
@@ -36,15 +37,22 @@ export class HistoryManager {
     this.db.ensureIndex({ fieldName: ['oj', 'timestamp'] });
   }
 
-  public async fetchHistoryPage<T extends Oj>(oj: T, page: number): Promise<OjProblem[T][]> {
-    if (!this.db) return [];
-    const skip = (page - 1) * HISTORY_PAGE_SIZE;
-    const results = await this.db
+  public async fetchHistoryPage<T extends Oj>(
+    oj: T,
+    top: number
+  ): Promise<FetchHistoryPageResponseDTO<T>> {
+    const result: FetchHistoryPageResponseDTO<T> = {
+      data: [],
+      total: 0,
+    };
+    if (!this.db) return result;
+    const data = await this.db
       .findAsync<OjProblem[T]>({ oj }, { _id: 0 })
       .sort({ timestamp: -1 })
-      .skip(skip)
+      .skip(top)
       .limit(HISTORY_PAGE_SIZE);
-    return results;
+    const total = await this.db.countAsync({});
+    return { data, total };
   }
 
   public async insertIntoHistory(problem: OjProblem[Oj]) {

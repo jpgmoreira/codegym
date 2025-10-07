@@ -9,9 +9,9 @@ import { GetOjProblemResponseDTO } from '@common/dto/getOjProblemResponseDTO';
 import { OjPoolManager } from '@main/data/managers/ojPoolManager';
 import { StartupData } from '@common/schemas/startup';
 import { loadStartupData } from '@main/data/startup';
-import { OjProblem } from '@common/schemas/problems';
 import { HistoryManager } from '@main/data/managers/historyManager';
 import { GenericResponseDTO } from '@common/dto/genericResponseDTO';
+import { FetchHistoryPageResponseDTO } from '@common/dto/fetchHistoryPageResponseDTO';
 
 ipcMain.handle(
   Channels.createProfile,
@@ -37,9 +37,12 @@ ipcMain.handle(
 );
 
 ipcMain.handle(
-  Channels.fetchHistoryRecords,
-  <T extends Oj>(_: IpcMainInvokeEvent, oj: T, anchor: number): Promise<OjProblem[T][]> =>
-    HistoryManager.instance.fetchHistoryRecords(oj, anchor)
+  Channels.fetchHistoryPage,
+  <T extends Oj>(
+    _: IpcMainInvokeEvent,
+    oj: T,
+    top: number
+  ): Promise<FetchHistoryPageResponseDTO<T>> => HistoryManager.instance.fetchHistoryPage(oj, top)
 );
 
 ipcMain.handle(

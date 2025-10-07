@@ -12,7 +12,7 @@ export enum Channels {
   getOjProblem = 'get-oj-problem',
   setCurrSnapshotSolvedDate = 'set-curr-snapshot-solved-date',
   updateOjFilters = 'update-oj-filters',
-  fetchHistoryRecords = 'fetch-history-records',
+  fetchHistoryPage = 'fetch-history-records',
   setCurrOjSnapshot = 'set-curr-oj-snapshot',
   renameCurrProfile = 'rename-curr-profile',
   deleteCurrProfile = 'delete-curr-profile',
