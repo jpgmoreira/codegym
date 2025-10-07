@@ -21,12 +21,15 @@
   const top = ref(0);
   const key = ref(0);
 
+  const paddingBottom = 100;
+  const rowHeight = 40;
+
   const scrollContainer = useTemplateRef('scroll-container');
 
   const currOj = computed(() => profileStore.currProfile!.currOj);
 
-  const ghostStyle = computed(() => ({ height: `${total.value * 40}px` }));
-  const tableStyle = computed(() => ({ transform: `translateY(${top.value * 40}px)` }));
+  const ghostStyle = computed(() => ({ height: `${total.value * rowHeight + paddingBottom}px` }));
+  const tableStyle = computed(() => ({ transform: `translateY(${top.value * rowHeight}px)` }));
 
   async function fetchHistory(newTop: number) {
     const seq = ++fetchSeq.value;
@@ -54,7 +57,7 @@
       const container = scrollContainer.value;
       if (!container) return;
       const scrollTop = container.scrollTop;
-      const newTop = Math.floor(scrollTop / 40);
+      const newTop = Math.max(0, Math.floor(scrollTop / rowHeight) - 30);
       fetchHistory(newTop);
     }, 40);
   }
@@ -85,13 +88,26 @@
       <div v-if="!problems.length" class="absolute-center text-xl opacity-70">
         No history for this Online Judge
       </div>
-      <div v-else class="relative">
-        <div :style="ghostStyle"></div>
-        <table class="w-full absolute top-0 left-0 table-fixed" :style="tableStyle" :key="key">
+      <div v-else class="relative overflow-hidden">
+        <table class="header-table sticky top-0 w-full table-fixed">
+          <thead>
+            <tr>
+              <th class="first-col">#</th>
+              <th>Problem</th>
+              <th class="last-col">Date</th>
+            </tr>
+          </thead>
+        </table>
+        <div class="ghost" :style="ghostStyle"></div>
+        <table
+          class="problems-table w-full absolute left-0 table-fixed"
+          :style="tableStyle"
+          :key="key"
+        >
           <tbody>
             <tr v-for="(problem, index) in problems" :key="problem.id">
-              <td>{{ index + top + 1 }}</td>
-              <td>
+              <td class="first-col">{{ index + top + 1 }}</td>
+              <td class="overflow-hidden">
                 <a href="#" @click="handleClick(problem)">
                   {{ problem.name || '\<no name available\>' }}
                 </a>
@@ -102,7 +118,7 @@
                   Solved
                 </span>
               </td>
-              <td>{{ parseTimestamp(problem.timestamp!) }}</td>
+              <td class="last-col">{{ parseTimestamp(problem.timestamp!) }}</td>
             </tr>
           </tbody>
         </table>
@@ -115,5 +131,24 @@
   tr {
     white-space: nowrap;
     height: 40px;
+  }
+  .ghost {
+    z-index: 1;
+  }
+  .header-table {
+    height: 40px;
+    z-index: 3;
+  }
+  .problems-table {
+    z-index: 2;
+    top: 41px;
+    will-change: transform;
+  }
+  .first-col {
+    width: 90px;
+    padding-left: 35px;
+  }
+  .last-col {
+    width: 220px;
   }
 </style>
