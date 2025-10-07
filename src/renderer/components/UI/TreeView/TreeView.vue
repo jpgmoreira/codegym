@@ -81,15 +81,17 @@
       (e: any, data: any) => {
         const newSelection = jstree.value.get_bottom_selected(true).map((node: any) => node.id);
         clearTimeout(selectionTimer.value);
-        setTimeout(() => contestsStore.setSelection(newSelection), 100);
-        const eventType = e.type as string;
-        let isSelect = true;
-        if (eventType === 'deselect_node') isSelect = false;
-        if (data.node.type === 'dir') {
-          const children = jstree.value.get_node(data.node).children_d;
-          if (isSelect) jstree.value.select_node(children);
-          else jstree.value.deselect_node(children);
-        }
+        setTimeout(() => {
+          const eventType = e.type as string;
+          let isSelect = true;
+          if (eventType === 'deselect_node') isSelect = false;
+          if (data.node.type === 'dir') {
+            const children = jstree.value.get_node(data.node).children_d;
+            if (isSelect) jstree.value.select_node(children);
+            else jstree.value.deselect_node(children);
+          }
+          contestsStore.setSelection(newSelection);
+        }, 20);
       }
     );
   }
@@ -112,7 +114,7 @@
         dir: { icon: 'jstree-folder', valid_children: ['dir', 'contest'] },
         contest: { icon: 'jstree-file', valid_children: [] },
       },
-      plugins: ['types'],
+      plugins: ['types', 'dnd'],
     });
     $tree.on('loaded.jstree', () => {
       jstree.value = $tree.jstree(true);
