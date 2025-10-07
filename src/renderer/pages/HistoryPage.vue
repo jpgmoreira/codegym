@@ -13,26 +13,33 @@
   const router = useRouter();
   const profileStore = useProfileStore();
   const problems = ref<OjProblem[Oj][]>([]);
+  const loaded = ref(false);
+
+  const scrollTimer = ref<NodeJS.Timeout | undefined>(undefined);
+  const fetchSeq = ref(0);
   const total = ref(0);
   const top = ref(0);
-  const loaded = ref(false);
-  const scrollTimer = ref<NodeJS.Timeout | undefined>(undefined);
+  const key = ref(0);
 
   const scrollContainer = useTemplateRef('scroll-container');
 
   const currOj = computed(() => profileStore.currProfile!.currOj);
 
-  const tableContainerStyle = computed(() => ({ height: `${total.value * 40}px` }));
+  const ghostStyle = computed(() => ({ height: `${total.value * 40}px` }));
   const tableStyle = computed(() => ({ transform: `translateY(${top.value * 40}px)` }));
 
-  async function fetchHistory() {
+  async function fetchHistory(newTop: number) {
+    const seq = ++fetchSeq.value;
     const result = await window.api.invoke<FetchHistoryPageResponseDTO<typeof currOj.value>>(
       Channels.fetchHistoryPage,
       currOj.value,
-      top.value
+      newTop
     );
+    if (seq !== fetchSeq.value) return;
     problems.value = result.data;
     total.value = result.total;
+    key.value++;
+    top.value = newTop;
   }
 
   function handleClick(problem: OjProblem[Oj]) {
@@ -47,17 +54,23 @@
       const container = scrollContainer.value;
       if (!container) return;
       const scrollTop = container.scrollTop;
-      top.value = Math.floor(scrollTop / 40);
-      fetchHistory();
-    }, 100);
+      const newTop = Math.floor(scrollTop / 40);
+      fetchHistory(newTop);
+    }, 40);
   }
 
   onMounted(async () => {
-    await fetchHistory();
+    await fetchHistory(0);
     loaded.value = true;
   });
 
-  watch(currOj, fetchHistory, { immediate: true });
+  watch(
+    currOj,
+    () => {
+      fetchHistory(0);
+    },
+    { immediate: true }
+  );
 </script>
 
 <template>
@@ -72,8 +85,9 @@
       <div v-if="!problems.length" class="absolute-center text-xl opacity-70">
         No history for this Online Judge
       </div>
-      <div v-else :style="tableContainerStyle">
-        <table class="w-full" :style="tableStyle">
+      <div v-else class="relative">
+        <div :style="ghostStyle"></div>
+        <table class="w-full absolute top-0 left-0 table-fixed" :style="tableStyle" :key="key">
           <tbody>
             <tr v-for="(problem, index) in problems" :key="problem.id">
               <td>{{ index + top + 1 }}</td>
