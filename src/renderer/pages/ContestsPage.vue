@@ -27,7 +27,7 @@
 
 <template>
   <div
-    class="container flex flex-col h-[100vh] border-2 border-red-500"
+    class="main-container flex flex-col h-[100vh] border-2 border-red-500"
     :class="{ resizing: isResizing }"
   >
     <SettingsPageHeader />
@@ -42,7 +42,7 @@
 </template>
 
 <style scoped>
-  .container.resizing {
+  .main-container.resizing {
     cursor: ew-resize;
   }
   .separator {
