@@ -44,17 +44,17 @@
 
 <template>
   <div
-    class="border-2 border-violet-500 relative overflow-auto h-full"
+    class="border-2 border-violet-500 relative overflow-auto h-full z-0"
     @click.right="(e) => showContextMenu('root', null, e)"
   >
-    <ContextMenu :tree="tree" v-bind="contextState" @create-node="createNode" />
+    <ContextMenu class="z-20" :tree="tree" v-bind="contextState" @create-node="createNode" />
     <div
       v-if="!tree?.visibleNodes.length"
       class="absolute-center whitespace-nowrap text-lg opacity-70"
     >
       Right-click here
     </div>
-    <div v-else class="absolute top-0 left-0 w-full">
+    <div v-else class="absolute top-0 left-0 w-full z-10">
       <div
         v-for="node in tree.visibleNodes"
         :style="{ paddingLeft: `${node.depth * 20}px` }"
