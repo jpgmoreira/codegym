@@ -68,7 +68,7 @@ export class TreeManager {
       fileTail: null as Node | null,
     };
     if (node.type === 'dir') {
-      const pointers = this.extractController(node);
+      const pointers = this.extractController(node, asProxy);
       Object.assign(result, pointers);
     }
     return result;

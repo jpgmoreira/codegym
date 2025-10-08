@@ -60,7 +60,12 @@
   async function applyRenaming() {
     const node = renamingNode.value;
     if (!node) return;
-    const result = await window.api.invoke<GenericResponseDTO>(TreeChannels.renameNode, node.id);
+    const newName = node.text.trim();
+    const result = await window.api.invoke<GenericResponseDTO>(
+      TreeChannels.renameNode,
+      node.id,
+      newName
+    );
     if (result.status === 'error') {
       uiStore.showToast(result.errorMsg, 'error');
       node.text = originalName.value;
