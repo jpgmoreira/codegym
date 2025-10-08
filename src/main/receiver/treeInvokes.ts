@@ -24,3 +24,11 @@ ipcMain.handle(
     return TreeManager.instance.buildResult(anchor);
   }
 );
+
+ipcMain.handle(
+  TreeChannels.toggleDirOpen,
+  (_: IpcMainInvokeEvent, anchor: number, nodeId: string): TreeOperationResponseDTO => {
+    TreeManager.instance.toggleDirOpen(nodeId);
+    return TreeManager.instance.buildResult(anchor);
+  }
+);

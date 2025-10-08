@@ -78,14 +78,17 @@ export class TreeManager {
 
   // --- Result and flattening: ---
 
-  private flatten(node: Node | null): Node[] {
+  private flatten(node: Node | null, expandClosed: boolean): Node[] {
     const result: Node[] = [];
     let curr = node;
     while (curr) {
       const { dirHead, fileHead, next } = this.getFamily(curr, false);
       result.push(curr);
-      if (curr.type === 'dir') {
-        result.push(...this.flatten(dirHead), ...this.flatten(fileHead));
+      if (curr.type === 'dir' && (curr.open || expandClosed)) {
+        result.push(
+          ...this.flatten(dirHead, expandClosed),
+          ...this.flatten(fileHead, expandClosed)
+        );
       }
       curr = next;
     }
@@ -97,7 +100,7 @@ export class TreeManager {
     const fileHeadId = this.px.rootController.files.headId;
     const dirHead = dirHeadId ? (this.proxy!.target.idToNode[dirHeadId] as DirNode) : null;
     const fileHead = fileHeadId ? (this.proxy!.target.idToNode[fileHeadId] as FileNode) : null;
-    const flattened = [...this.flatten(dirHead), ...this.flatten(fileHead)];
+    const flattened = [...this.flatten(dirHead, false), ...this.flatten(fileHead, false)];
     return {
       nSelectedFiles: 0,
       nTotalNodes: flattened.length,
@@ -174,6 +177,7 @@ export class TreeManager {
     if (parent) {
       newNode.depth = parent.depth + 1;
       newNode.selected = parent.selected;
+      parent.open = true;
       this.appendNode(newNode, parent);
     } else {
       this.appendNode(newNode, this.px.rootController);
@@ -184,5 +188,10 @@ export class TreeManager {
       curr.nSelDesc += Number(newNode.selected);
       curr = this.getFamily(curr).parent;
     }
+  }
+
+  public toggleDirOpen(nodeId: string) {
+    const node = this.px.idToNode[nodeId] as DirNode;
+    node.open = !node.open;
   }
 }

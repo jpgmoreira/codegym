@@ -20,6 +20,7 @@ export const allowedInvokeChannels = Object.freeze([
   // Channels to perform treeview operations:
   TreeChannels.createNode,
   TreeChannels.getState,
+  TreeChannels.toggleDirOpen,
 ] as const);
 export const allowedOnChannels = Object.freeze([Channels.loadStartupData] as const);
 

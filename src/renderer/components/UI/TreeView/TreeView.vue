@@ -37,6 +37,10 @@
     tree.value = await window.api.invoke(TreeChannels.createNode, 0, type, prefix, parentId);
   }
 
+  async function toggleDirOpen(node: Node) {
+    tree.value = await window.api.invoke(TreeChannels.toggleDirOpen, 0, node.id);
+  }
+
   onMounted(async () => {
     tree.value = await window.api.invoke(TreeChannels.getState, 0);
   });
@@ -60,6 +64,11 @@
         :style="{ paddingLeft: `${node.depth * 20}px` }"
         @click.right.stop="(e) => showContextMenu(node.type, node, e)"
       >
+        <span v-if="node.type === 'dir'" @click="toggleDirOpen(node)">
+          <span v-if="node.open">-</span>
+          <span v-else>+</span>
+        </span>
+
         {{ node.text }}
       </div>
     </div>
