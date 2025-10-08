@@ -9,4 +9,4 @@
   });
 </script>
 
-<template>TreeView!</template>
+<template><div>TreeView!</div></template>
