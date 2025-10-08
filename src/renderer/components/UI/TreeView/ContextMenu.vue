@@ -38,5 +38,9 @@
       <div @click="emit('createNode', 'file')">New contest</div>
       <div @click="emit('createNode', 'dir')">New folder</div>
     </div>
+    <div v-else-if="props.type === 'dir'">
+      <div @click="emit('createNode', 'file')">New contest</div>
+      <div @click="emit('createNode', 'dir')">New folder</div>
+    </div>
   </div>
 </template>
