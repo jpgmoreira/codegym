@@ -3,7 +3,7 @@
   import { TreeOperationResponseDTO } from '@common/dto/treeOperationResponseDTO';
   import { NodeType, Node } from '@common/types/tree';
   import { TreeChannels } from '@common/types/treeChannels';
-  import { ref, onMounted, reactive } from 'vue';
+  import { ref, onMounted, reactive, nextTick } from 'vue';
   import AutoLengthInput from '../AutoLengthInput.vue';
   import { GenericResponseDTO } from '@common/dto/genericResponseDTO';
   import { useUIStore } from '@renderer/store/ui';
@@ -12,6 +12,7 @@
     type: NodeType | 'root';
     visible: boolean;
     activeNode: Node | null;
+    activeDomNode: HTMLInputElement | null;
     x: number;
     y: number;
   };
@@ -24,6 +25,7 @@
     type: 'root',
     visible: false,
     activeNode: null,
+    activeDomNode: null,
     x: 0,
     y: 0,
   });
@@ -37,6 +39,7 @@
     contextState.x = e.clientX;
     contextState.y = e.clientY;
     contextState.activeNode = targetNode;
+    contextState.activeDomNode = e.target as HTMLInputElement;
   }
 
   async function createNode(type: NodeType) {
@@ -53,30 +56,42 @@
   function startRenaming() {
     const node = contextState.activeNode;
     if (!node) return;
-    originalName.value = node.text;
+    originalName.value = node.text.trim();
     renamingNode.value = node;
+    contextState.activeDomNode?.focus();
+    contextState.activeDomNode?.select();
   }
 
   async function applyRenaming() {
     const node = renamingNode.value;
     if (!node) return;
     const newName = node.text.trim();
-    const result = await window.api.invoke<GenericResponseDTO>(
-      TreeChannels.renameNode,
-      node.id,
-      newName
-    );
-    if (result.status === 'error') {
-      uiStore.showToast(result.errorMsg, 'error');
-      node.text = originalName.value;
+    if (newName !== originalName.value) {
+      const result = await window.api.invoke<GenericResponseDTO>(
+        TreeChannels.renameNode,
+        node.id,
+        newName
+      );
+      if (result.status === 'error') {
+        uiStore.showToast(result.errorMsg, 'error');
+        node.text = originalName.value;
+      }
     }
     renamingNode.value = null;
+    nextTick(() => {
+      contextState.activeDomNode?.focus();
+      contextState.activeDomNode?.blur();
+    });
   }
 
   function undoRenaming() {
     if (!renamingNode.value) return;
     renamingNode.value.text = originalName.value;
     renamingNode.value = null;
+    nextTick(() => {
+      contextState.activeDomNode?.focus();
+      contextState.activeDomNode?.blur();
+    });
   }
 
   onMounted(async () => {
@@ -105,11 +120,7 @@
       Right-click here
     </div>
     <div v-else class="absolute top-0 left-0 w-full z-10">
-      <div
-        v-for="node in tree.visibleNodes"
-        :style="{ paddingLeft: `${node.depth * 20}px` }"
-        @click.right.stop="(e) => showContextMenu(node.type, node, e)"
-      >
+      <div v-for="node in tree.visibleNodes" :style="{ paddingLeft: `${node.depth * 20}px` }">
         <span v-if="node.type === 'dir'" @click="toggleDirOpen(node)">
           <span v-if="node.open">-</span>
           <span v-else>+</span>
@@ -121,6 +132,7 @@
           @keydown.enter="applyRenaming"
           @keydown.esc="undoRenaming"
           @blur="applyRenaming"
+          @click.right.stop="(e: MouseEvent) => showContextMenu(node.type, node, e)"
         />
       </div>
     </div>
