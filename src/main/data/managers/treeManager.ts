@@ -98,11 +98,39 @@ export class TreeManager {
   // --- Helpers: ---
 
   private getFamily(node: Node) {
-    return {
+    const result = {
       parent: node.parentId ? (this.idToNode[node.parentId] as DirNode) : null,
       next: node.nextId ? this.idToNode[node.nextId] : null,
       prev: node.prevId ? this.idToNode[node.prevId] : null,
+      dirHead: null as Node | null,
+      dirTail: null as Node | null,
+      fileHead: null as Node | null,
+      fileTail: null as Node | null,
     };
+    if (node.type === 'dir') {
+      const { dirs, files } = node;
+      if (dirs.headId) result.dirHead = this.idToNode[dirs.headId] as DirNode;
+      if (dirs.tailId) result.dirTail = this.idToNode[dirs.tailId] as DirNode;
+      if (files.headId) result.fileHead = this.idToNode[files.headId] as FileNode;
+      if (files.tailId) result.fileTail = this.idToNode[files.tailId] as FileNode;
+    }
+    return result;
+  }
+
+  // --- Result and flattening: ---
+
+  private flatten(node: Node | null): Node[] {
+    const result: Node[] = [];
+    let curr = node;
+    while (curr) {
+      const { dirHead, fileHead, next } = this.getFamily(curr);
+      result.push(curr);
+      if (curr.type === 'dir') {
+        result.push(...this.flatten(dirHead), ...this.flatten(fileHead));
+      }
+      curr = next;
+    }
+    return result;
   }
 
   // --- Creation: ---
