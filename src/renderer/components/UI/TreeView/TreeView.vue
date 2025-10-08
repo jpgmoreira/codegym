@@ -44,7 +44,7 @@
 
 <template>
   <div
-    class="border-2 border-violet-500 relative overflow-auto"
+    class="border-2 border-violet-500 relative"
     @click.right="(e) => showContextMenu('root', null, e)"
   >
     <ContextMenu :tree="tree" v-bind="contextState" @create-node="createNode" />
