@@ -44,7 +44,7 @@
 
 <template>
   <div
-    class="border-2 border-violet-500 relative"
+    class="border-2 border-violet-500 relative overflow-auto h-full"
     @click.right="(e) => showContextMenu('root', null, e)"
   >
     <ContextMenu :tree="tree" v-bind="contextState" @create-node="createNode" />
@@ -54,7 +54,7 @@
     >
       Right-click here
     </div>
-    <div v-else>
+    <div v-else class="absolute top-0 left-0 w-full">
       <div
         v-for="node in tree.visibleNodes"
         :style="{ paddingLeft: `${node.depth * 20}px` }"
