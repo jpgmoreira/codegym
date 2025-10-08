@@ -66,7 +66,10 @@
     const node = renamingNode.value;
     if (!node) return;
     const newName = node.text.trim();
-    if (newName !== originalName.value) {
+    if (!newName) {
+      uiStore.showToast('Name cannot be empty!', 'error');
+      node.text = originalName.value;
+    } else if (newName !== originalName.value) {
       const result = await window.api.invoke<GenericResponseDTO>(
         TreeChannels.renameNode,
         node.id,

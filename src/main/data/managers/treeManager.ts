@@ -212,6 +212,12 @@ export class TreeManager {
 
   public renameNode(nodeId: string, newName: string): GenericResponseDTO {
     newName = newName.trim();
+    if (!newName) {
+      return {
+        status: 'error',
+        errorMsg: 'Name cannot be empty!',
+      };
+    }
     const node = this.px.idToNode[nodeId];
     const control = this.getFamily(node).parent || this.px.rootController;
     const { dirHead, fileHead } = this.extractController(control);
