@@ -1,6 +1,6 @@
 <script lang="ts" setup>
   import { ref, onMounted, onBeforeUnmount } from 'vue';
-  import TreeView from '@renderer/components/UI/TreeView.vue';
+  import TreeView from '@renderer/components/UI/TreeView/TreeView.vue';
   import SettingsPageHeader from '@renderer/components/Header/custom/SettingsPageHeader.vue';
 
   const treeAreaWidth = ref(200);
@@ -32,7 +32,7 @@
   >
     <SettingsPageHeader />
     <div class="flex grow border-2 border-emerald-500">
-      <div class="border border-violet-400" :style="{ width: `${treeAreaWidth}px` }">
+      <div class="border-2 border-yellow-400" :style="{ width: `${treeAreaWidth}px` }">
         <TreeView />
       </div>
       <div class="separator" :class="{ resizing: isResizing }" @mousedown="isResizing = true"></div>
