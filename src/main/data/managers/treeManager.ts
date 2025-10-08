@@ -2,48 +2,13 @@ import { randomId } from '@common/utils/utils';
 import { DATA_DIR } from '../constants';
 import { FileProxy } from '../fileProxy';
 import path from 'path';
-
-type NodeController = {
-  dirs: {
-    headId: string | null;
-    tailId: string | null;
-  };
-  files: {
-    headId: string | null;
-    tailId: string | null;
-  };
-};
+import { NodeController, Node, FileNode, DirNode, NodeType } from '@common/types/tree';
+import { TreeOperationResponseDTO } from '@common/dto/treeOperationResponseDTO';
 
 type RootController = NodeController & {
   nextDir: number;
   nextFile: number;
 };
-
-type NodeType = 'dir' | 'file';
-
-type BaseNode = {
-  id: string;
-  text: string;
-  depth: number;
-  selected: boolean;
-  parentId: string | null;
-  nextId: string | null;
-  prevId: string | null;
-};
-
-type DirNode = BaseNode &
-  NodeController & {
-    type: 'dir';
-    open: boolean;
-    nDesc: number; // Total number of descendants, not including the node.
-    nSelDesc: number; // Total number of selected descendants.
-  };
-
-type FileNode = BaseNode & {
-  type: 'file';
-};
-
-type Node = DirNode | FileNode;
 
 type TreeData = {
   rootController: RootController;
@@ -67,6 +32,10 @@ export class TreeManager {
     return this.#instance;
   }
 
+  private get px() {
+    return this.proxy!.proxy;
+  }
+
   private getEmptyTreeData(): TreeData {
     return {
       rootController: {
@@ -84,24 +53,13 @@ export class TreeManager {
     this.proxy = new FileProxy(filePath, this.getEmptyTreeData());
   }
 
-  // --- Structures: ---
-
-  private rootController: RootController = {
-    nextDir: 1,
-    nextFile: 1,
-    dirs: { headId: null, tailId: null },
-    files: { headId: null, tailId: null },
-  };
-
-  private idToNode: Record<string, Node> = {};
-
   // --- Helpers: ---
 
   private getFamily(node: Node) {
     const result = {
-      parent: node.parentId ? (this.idToNode[node.parentId] as DirNode) : null,
-      next: node.nextId ? this.idToNode[node.nextId] : null,
-      prev: node.prevId ? this.idToNode[node.prevId] : null,
+      parent: node.parentId ? (this.px.idToNode[node.parentId] as DirNode) : null,
+      next: node.nextId ? this.px.idToNode[node.nextId] : null,
+      prev: node.prevId ? this.px.idToNode[node.prevId] : null,
       dirHead: null as Node | null,
       dirTail: null as Node | null,
       fileHead: null as Node | null,
@@ -109,10 +67,10 @@ export class TreeManager {
     };
     if (node.type === 'dir') {
       const { dirs, files } = node;
-      if (dirs.headId) result.dirHead = this.idToNode[dirs.headId] as DirNode;
-      if (dirs.tailId) result.dirTail = this.idToNode[dirs.tailId] as DirNode;
-      if (files.headId) result.fileHead = this.idToNode[files.headId] as FileNode;
-      if (files.tailId) result.fileTail = this.idToNode[files.tailId] as FileNode;
+      if (dirs.headId) result.dirHead = this.px.idToNode[dirs.headId] as DirNode;
+      if (dirs.tailId) result.dirTail = this.px.idToNode[dirs.tailId] as DirNode;
+      if (files.headId) result.fileHead = this.px.idToNode[files.headId] as FileNode;
+      if (files.tailId) result.fileTail = this.px.idToNode[files.tailId] as FileNode;
     }
     return result;
   }
@@ -133,13 +91,28 @@ export class TreeManager {
     return result;
   }
 
+  public buildResult(anchor: number): TreeOperationResponseDTO {
+    const dirHead = this.px.rootController.dirs.headId
+      ? (this.px.idToNode[this.px.rootController.dirs.headId] as DirNode)
+      : null;
+    const fileHead = this.px.rootController.files.headId
+      ? (this.px.idToNode[this.px.rootController.files.headId] as FileNode)
+      : null;
+    const flattened = [...this.flatten(dirHead), ...this.flatten(fileHead)];
+    return {
+      nSelectedFiles: 0,
+      nTotalNodes: flattened.length,
+      visibleNodes: flattened,
+    };
+  }
+
   // --- Creation: ---
 
   private createDirNode(prefix: string, parentId: string | null): DirNode {
     return {
       id: randomId(),
       type: 'dir',
-      text: `${prefix} ${this.rootController.nextDir}`,
+      text: `${prefix} ${this.px.rootController.nextDir}`,
       depth: 0,
       open: false,
       selected: false,
@@ -163,7 +136,7 @@ export class TreeManager {
     return {
       id: randomId(),
       type: 'file',
-      text: `${prefix} ${this.rootController.nextFile}`,
+      text: `${prefix} ${this.px.rootController.nextFile}`,
       depth: 0,
       selected: false,
       parentId,
@@ -178,7 +151,7 @@ export class TreeManager {
       sub.headId = node.id;
       sub.tailId = node.id;
     } else {
-      const tail = this.idToNode[sub.tailId!];
+      const tail = this.px.idToNode[sub.tailId!];
       const { next } = this.getFamily(tail);
       node.nextId = tail.nextId;
       tail.nextId = node.id;
@@ -191,19 +164,19 @@ export class TreeManager {
     let newNode: Node;
     if (type === 'dir') {
       newNode = this.createDirNode(prefix, parentId);
-      this.rootController.nextDir++;
+      this.px.rootController.nextDir++;
     } else {
       newNode = this.createFileNode(prefix, parentId);
-      this.rootController.nextFile++;
+      this.px.rootController.nextFile++;
     }
-    this.idToNode[newNode.id] = newNode;
+    this.px.idToNode[newNode.id] = newNode;
     const { parent } = this.getFamily(newNode);
     if (parent) {
       newNode.depth = parent.depth + 1;
       newNode.selected = parent.selected;
       this.appendNode(newNode, parent);
     } else {
-      this.appendNode(newNode, this.rootController);
+      this.appendNode(newNode, this.px.rootController);
     }
     let curr = parent;
     while (curr) {
