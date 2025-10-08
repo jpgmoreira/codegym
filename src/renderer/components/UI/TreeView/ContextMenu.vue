@@ -13,6 +13,7 @@
 
   const emit = defineEmits<{
     (e: 'createNode', type: NodeType): void;
+    (e: 'renameNode'): void;
   }>();
 
   const props = defineProps<ContextProps>();
@@ -41,6 +42,10 @@
     <div v-else-if="props.type === 'dir'">
       <div @click="emit('createNode', 'file')">New contest</div>
       <div @click="emit('createNode', 'dir')">New folder</div>
+      <div @click="emit('renameNode')">Rename</div>
+    </div>
+    <div v-else-if="props.type === 'file'">
+      <div @click="emit('renameNode')">Rename</div>
     </div>
   </div>
 </template>

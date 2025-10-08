@@ -5,6 +5,8 @@
   import { TreeChannels } from '@common/types/treeChannels';
   import { ref, onMounted, reactive } from 'vue';
   import AutoLengthInput from '../AutoLengthInput.vue';
+  import { GenericResponseDTO } from '@common/dto/genericResponseDTO';
+  import { useUIStore } from '@renderer/store/ui';
 
   type ContextState = {
     type: NodeType | 'root';
@@ -13,6 +15,8 @@
     x: number;
     y: number;
   };
+
+  const uiStore = useUIStore();
 
   const hasLoaded = ref(false);
   const tree = ref<TreeOperationResponseDTO | null>(null);
@@ -46,9 +50,28 @@
     tree.value = await window.api.invoke(TreeChannels.toggleDirOpen, 0, node.id);
   }
 
-  function startRenaming(node: Node) {
+  function startRenaming() {
+    const node = contextState.activeNode;
+    if (!node) return;
     originalName.value = node.text;
     renamingNode.value = node;
+  }
+
+  async function applyRenaming() {
+    const node = renamingNode.value;
+    if (!node) return;
+    const result = await window.api.invoke<GenericResponseDTO>(TreeChannels.renameNode, node.id);
+    if (result.status === 'error') {
+      uiStore.showToast(result.errorMsg, 'error');
+      node.text = originalName.value;
+    }
+    renamingNode.value = null;
+  }
+
+  function undoRenaming() {
+    if (!renamingNode.value) return;
+    renamingNode.value.text = originalName.value;
+    renamingNode.value = null;
   }
 
   onMounted(async () => {
@@ -63,7 +86,13 @@
     class="border-2 border-violet-500 relative overflow-auto h-full z-0"
     @click.right="(e) => showContextMenu('root', null, e)"
   >
-    <ContextMenu class="z-20" :tree="tree" v-bind="contextState" @create-node="createNode" />
+    <ContextMenu
+      class="z-20"
+      :tree="tree"
+      v-bind="contextState"
+      @create-node="createNode"
+      @rename-node="startRenaming"
+    />
     <div
       v-if="!tree?.visibleNodes.length"
       class="absolute-center whitespace-nowrap text-lg opacity-70"
@@ -81,7 +110,13 @@
           <span v-else>+</span>
         </span>
 
-        <AutoLengthInput v-model="node.text" @focus="startRenaming(node)" />
+        <AutoLengthInput
+          v-model="node.text"
+          :readonly="renamingNode !== node"
+          @keydown.enter="applyRenaming"
+          @keydown.esc="undoRenaming"
+          @blur="applyRenaming"
+        />
       </div>
     </div>
   </div>
