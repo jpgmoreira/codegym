@@ -3,4 +3,5 @@
  */
 export enum TreeChannels {
   createNode = 'create-node',
+  getState = 'get-state',
 }

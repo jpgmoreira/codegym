@@ -17,3 +17,10 @@ ipcMain.handle(
     return TreeManager.instance.buildResult(anchor);
   }
 );
+
+ipcMain.handle(
+  TreeChannels.getState,
+  (_: IpcMainInvokeEvent, anchor: number): TreeOperationResponseDTO => {
+    return TreeManager.instance.buildResult(anchor);
+  }
+);

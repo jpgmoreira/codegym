@@ -1,4 +1,5 @@
 import { Channels } from '@common/types/channels';
+import { TreeChannels } from '@common/types/treeChannels';
 
 export const allowedSendChannels = Object.freeze([
   Channels.updateCurrOj,
@@ -16,6 +17,9 @@ export const allowedInvokeChannels = Object.freeze([
   Channels.login,
   Channels.fetchHistoryPage,
   Channels.renameCurrProfile,
+  // Channels to perform treeview operations:
+  TreeChannels.createNode,
+  TreeChannels.getState,
 ] as const);
 export const allowedOnChannels = Object.freeze([Channels.loadStartupData] as const);
 
