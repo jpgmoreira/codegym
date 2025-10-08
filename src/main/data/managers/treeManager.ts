@@ -55,11 +55,12 @@ export class TreeManager {
 
   // --- Helpers: ---
 
-  private getFamily(node: Node) {
+  private getFamily(node: Node, asProxy = true) {
+    const source = asProxy ? this.px : this.proxy!.target;
     const result = {
-      parent: node.parentId ? (this.px.idToNode[node.parentId] as DirNode) : null,
-      next: node.nextId ? this.px.idToNode[node.nextId] : null,
-      prev: node.prevId ? this.px.idToNode[node.prevId] : null,
+      parent: node.parentId ? (source.idToNode[node.parentId] as DirNode) : null,
+      next: node.nextId ? source.idToNode[node.nextId] : null,
+      prev: node.prevId ? source.idToNode[node.prevId] : null,
       dirHead: null as Node | null,
       dirTail: null as Node | null,
       fileHead: null as Node | null,
@@ -67,10 +68,10 @@ export class TreeManager {
     };
     if (node.type === 'dir') {
       const { dirs, files } = node;
-      if (dirs.headId) result.dirHead = this.px.idToNode[dirs.headId] as DirNode;
-      if (dirs.tailId) result.dirTail = this.px.idToNode[dirs.tailId] as DirNode;
-      if (files.headId) result.fileHead = this.px.idToNode[files.headId] as FileNode;
-      if (files.tailId) result.fileTail = this.px.idToNode[files.tailId] as FileNode;
+      if (dirs.headId) result.dirHead = source.idToNode[dirs.headId] as DirNode;
+      if (dirs.tailId) result.dirTail = source.idToNode[dirs.tailId] as DirNode;
+      if (files.headId) result.fileHead = source.idToNode[files.headId] as FileNode;
+      if (files.tailId) result.fileTail = source.idToNode[files.tailId] as FileNode;
     }
     return result;
   }
@@ -81,7 +82,7 @@ export class TreeManager {
     const result: Node[] = [];
     let curr = node;
     while (curr) {
-      const { dirHead, fileHead, next } = this.getFamily(curr);
+      const { dirHead, fileHead, next } = this.getFamily(curr, false);
       result.push(curr);
       if (curr.type === 'dir') {
         result.push(...this.flatten(dirHead), ...this.flatten(fileHead));

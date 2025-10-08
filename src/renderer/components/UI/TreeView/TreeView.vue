@@ -34,7 +34,7 @@
     const node = contextState.activeNode;
     const parentId = node ? node.id : null;
     const prefix = type === 'dir' ? 'Folder' : 'Contest';
-    tree.value = await window.api.invoke(TreeChannels.createNode, type, prefix, parentId);
+    tree.value = await window.api.invoke(TreeChannels.createNode, 0, type, prefix, parentId);
   }
 
   onMounted(async () => {
