@@ -4,6 +4,7 @@
   import { NodeType, Node } from '@common/types/tree';
   import { TreeChannels } from '@common/types/treeChannels';
   import { ref, onMounted, reactive } from 'vue';
+  import AutoLengthInput from '../AutoLengthInput.vue';
 
   type ContextState = {
     type: NodeType | 'root';
@@ -13,6 +14,7 @@
     y: number;
   };
 
+  const hasLoaded = ref(false);
   const tree = ref<TreeOperationResponseDTO | null>(null);
   const contextState = reactive<ContextState>({
     type: 'root',
@@ -21,6 +23,9 @@
     x: 0,
     y: 0,
   });
+
+  const renamingNode = ref<Node | null>(null);
+  const originalName = ref('');
 
   function showContextMenu(type: ContextState['type'], targetNode: Node | null, e: MouseEvent) {
     contextState.visible = true;
@@ -41,13 +46,20 @@
     tree.value = await window.api.invoke(TreeChannels.toggleDirOpen, 0, node.id);
   }
 
+  function startRenaming(node: Node) {
+    originalName.value = node.text;
+    renamingNode.value = node;
+  }
+
   onMounted(async () => {
     tree.value = await window.api.invoke(TreeChannels.getState, 0);
+    hasLoaded.value = true;
   });
 </script>
 
 <template>
   <div
+    v-if="hasLoaded"
     class="border-2 border-violet-500 relative overflow-auto h-full z-0"
     @click.right="(e) => showContextMenu('root', null, e)"
   >
@@ -69,7 +81,7 @@
           <span v-else>+</span>
         </span>
 
-        {{ node.text }}
+        <AutoLengthInput v-model="node.text" @focus="startRenaming(node)" />
       </div>
     </div>
   </div>

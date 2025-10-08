@@ -4,6 +4,7 @@ import { FileProxy } from '../fileProxy';
 import path from 'path';
 import { NodeController, Node, FileNode, DirNode, NodeType } from '@common/types/tree';
 import { TreeOperationResponseDTO } from '@common/dto/treeOperationResponseDTO';
+import { GenericResponseDTO } from '@common/dto/genericResponseDTO';
 
 type RootController = NodeController & {
   nextDir: number;
@@ -67,12 +68,25 @@ export class TreeManager {
       fileTail: null as Node | null,
     };
     if (node.type === 'dir') {
-      const { dirs, files } = node;
-      if (dirs.headId) result.dirHead = source.idToNode[dirs.headId] as DirNode;
-      if (dirs.tailId) result.dirTail = source.idToNode[dirs.tailId] as DirNode;
-      if (files.headId) result.fileHead = source.idToNode[files.headId] as FileNode;
-      if (files.tailId) result.fileTail = source.idToNode[files.tailId] as FileNode;
+      const pointers = this.extractController(node);
+      Object.assign(result, pointers);
     }
+    return result;
+  }
+
+  private extractController(control: NodeController, asProxy = true) {
+    const source = asProxy ? this.px : this.proxy!.target;
+    const result = {
+      dirHead: null as Node | null,
+      dirTail: null as Node | null,
+      fileHead: null as Node | null,
+      fileTail: null as Node | null,
+    };
+    const { dirs, files } = control;
+    if (dirs.headId) result.dirHead = source.idToNode[dirs.headId] as DirNode;
+    if (dirs.tailId) result.dirTail = source.idToNode[dirs.tailId] as DirNode;
+    if (files.headId) result.fileHead = source.idToNode[files.headId] as FileNode;
+    if (files.tailId) result.fileTail = source.idToNode[files.tailId] as FileNode;
     return result;
   }
 
@@ -96,10 +110,7 @@ export class TreeManager {
   }
 
   public buildResult(anchor: number): TreeOperationResponseDTO {
-    const dirHeadId = this.px.rootController.dirs.headId;
-    const fileHeadId = this.px.rootController.files.headId;
-    const dirHead = dirHeadId ? (this.proxy!.target.idToNode[dirHeadId] as DirNode) : null;
-    const fileHead = fileHeadId ? (this.proxy!.target.idToNode[fileHeadId] as FileNode) : null;
+    const { dirHead, fileHead } = this.extractController(this.px.rootController, false);
     const flattened = [...this.flatten(dirHead, false), ...this.flatten(fileHead, false)];
     return {
       nSelectedFiles: 0,
@@ -190,8 +201,33 @@ export class TreeManager {
     }
   }
 
+  // --- Toggle directory open: ---
+
   public toggleDirOpen(nodeId: string) {
     const node = this.px.idToNode[nodeId] as DirNode;
     node.open = !node.open;
+  }
+
+  // --- Rename node: ---
+
+  public renameNode(nodeId: string, newName: string): GenericResponseDTO {
+    newName = newName.trim();
+    const node = this.px.idToNode[nodeId];
+    const control = this.getFamily(node).parent || this.px.rootController;
+    const { dirHead, fileHead } = this.extractController(control);
+    for (const head of [dirHead, fileHead]) {
+      let curr = head;
+      while (curr) {
+        if (curr.text === newName) {
+          return {
+            status: 'error',
+            errorMsg: 'Name already exists in this folder.',
+          };
+        }
+        curr = this.getFamily(curr).next;
+      }
+    }
+    node.text = newName;
+    return { status: 'success' };
   }
 }

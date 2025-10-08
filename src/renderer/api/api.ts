@@ -21,6 +21,7 @@ export const allowedInvokeChannels = Object.freeze([
   TreeChannels.createNode,
   TreeChannels.getState,
   TreeChannels.toggleDirOpen,
+  TreeChannels.renameNode,
 ] as const);
 export const allowedOnChannels = Object.freeze([Channels.loadStartupData] as const);
 
