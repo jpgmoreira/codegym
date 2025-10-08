@@ -44,9 +44,20 @@
 
 <template>
   <div
-    class="border-2 border-violet-500 h-full"
+    class="border-2 border-violet-500 h-full relative"
     @click.right="(e) => showContextMenu('root', null, e)"
   >
     <ContextMenu :tree="tree" v-bind="contextState" @create-node="createNode" />
+    <div
+      v-if="!tree?.visibleNodes.length"
+      class="absolute-center whitespace-nowrap text-lg opacity-70"
+    >
+      Right-click here
+    </div>
+    <div v-else>
+      <div v-for="node in tree.visibleNodes" :style="{ paddingLeft: `${node.depth * 20}px` }">
+        {{ node.text }}
+      </div>
+    </div>
   </div>
 </template>

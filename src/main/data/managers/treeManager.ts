@@ -156,6 +156,7 @@ export class TreeManager {
       tail.nextId = node.id;
       node.prevId = tail.id;
       if (next) next.prevId = node.id;
+      sub.tailId = node.id;
     }
   }
 
