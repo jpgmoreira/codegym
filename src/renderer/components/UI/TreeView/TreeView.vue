@@ -22,11 +22,19 @@
     y: 0,
   });
 
-  function showContextMenu(type: ContextState['type'], e: MouseEvent) {
+  function showContextMenu(type: ContextState['type'], targetNode: Node | null, e: MouseEvent) {
     contextState.visible = true;
     contextState.type = type;
     contextState.x = e.clientX;
     contextState.y = e.clientY;
+    contextState.activeNode = targetNode;
+  }
+
+  async function createNode(type: NodeType) {
+    const node = contextState.activeNode;
+    const parentId = node ? node.id : null;
+    const prefix = type === 'dir' ? 'Folder' : 'Contest';
+    tree.value = await window.api.invoke(TreeChannels.createNode, type, prefix, parentId);
   }
 
   onMounted(async () => {
@@ -35,7 +43,10 @@
 </script>
 
 <template>
-  <div class="border-2 border-violet-500 h-full" @click.right="(e) => showContextMenu('root', e)">
-    <ContextMenu :tree="tree" v-bind="contextState" />
+  <div
+    class="border-2 border-violet-500 h-full"
+    @click.right="(e) => showContextMenu('root', null, e)"
+  >
+    <ContextMenu :tree="tree" v-bind="contextState" @create-node="createNode" />
   </div>
 </template>

@@ -11,6 +11,10 @@
     y: number;
   };
 
+  const emit = defineEmits<{
+    (e: 'createNode', type: NodeType): void;
+  }>();
+
   const props = defineProps<ContextProps>();
 
   const style = ref<Record<string, string>>({});
@@ -29,5 +33,10 @@
 </script>
 
 <template>
-  <div class="fixed" v-if="props.visible" :style="style">AAAA</div>
+  <div class="fixed" v-if="props.visible" :style="style">
+    <div v-if="props.type === 'root'">
+      <div @click="emit('createNode', 'file')">New contest</div>
+      <div @click="emit('createNode', 'dir')">New folder</div>
+    </div>
+  </div>
 </template>

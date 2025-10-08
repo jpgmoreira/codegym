@@ -92,12 +92,10 @@ export class TreeManager {
   }
 
   public buildResult(anchor: number): TreeOperationResponseDTO {
-    const dirHead = this.px.rootController.dirs.headId
-      ? (this.px.idToNode[this.px.rootController.dirs.headId] as DirNode)
-      : null;
-    const fileHead = this.px.rootController.files.headId
-      ? (this.px.idToNode[this.px.rootController.files.headId] as FileNode)
-      : null;
+    const dirHeadId = this.px.rootController.dirs.headId;
+    const fileHeadId = this.px.rootController.files.headId;
+    const dirHead = dirHeadId ? (this.proxy!.target.idToNode[dirHeadId] as DirNode) : null;
+    const fileHead = fileHeadId ? (this.proxy!.target.idToNode[fileHeadId] as FileNode) : null;
     const flattened = [...this.flatten(dirHead), ...this.flatten(fileHead)];
     return {
       nSelectedFiles: 0,
