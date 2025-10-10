@@ -25,6 +25,7 @@ export class FileProxy<T extends JSONObject> {
   private savedCount = 0;
   private filePath: string;
   private timer?: NodeJS.Timeout;
+  private writingPromise: Promise<void> | null = null;
   private _target: T;
   private _proxy: T;
 
@@ -65,17 +66,27 @@ export class FileProxy<T extends JSONObject> {
     if (obj[prop] === value) return true;
     obj[prop] = value;
     clearTimeout(this.timer);
-    this.timer = setTimeout(() => {
-      this.writeFileAsync().catch((err) => {
-        console.error(`Failed to save ${this.filePath}:`, err);
-      });
-    }, DISK_FLUSH_DEBOUNCE);
+    this.timer = setTimeout(() => this.queueWrite(), DISK_FLUSH_DEBOUNCE);
     return true;
   }
 
+  private queueWrite() {
+    if (this.writingPromise) {
+      this.writingPromise = this.writingPromise.finally(() => this.writeFileAsync());
+    } else {
+      this.writingPromise = this.writeFileAsync();
+    }
+  }
+
   private async writeFileAsync() {
-    await fs.promises.writeFile(this.filePath, JSON.stringify(this._target, null, INDENT), 'utf-8');
-    this.savedCount++;
-    console.log(`-- ${this.filePath} saved! ${this.savedCount}`);
+    await fs.promises
+      .writeFile(this.filePath, JSON.stringify(this._target, null, INDENT), 'utf-8')
+      .then(() => {
+        this.savedCount++;
+        console.log(`-- ${this.filePath} saved! ${this.savedCount}`);
+      })
+      .catch((err) => {
+        console.error(`-- failed to save ${this.filePath}:`, err);
+      });
   }
 }
