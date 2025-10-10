@@ -1,10 +1,10 @@
 import { randomId } from '@common/utils/utils';
 import { DATA_DIR } from '../constants';
 import { FileProxy } from '../fileProxy';
-import path from 'path';
 import { NodeController, Node, FileNode, DirNode, NodeType } from '@common/types/tree';
 import { TreeOperationResponseDTO } from '@common/dto/treeOperationResponseDTO';
 import { GenericResponseDTO } from '@common/dto/genericResponseDTO';
+import path from 'path';
 
 type RootController = NodeController & {
   nextDir: number;
@@ -108,12 +108,10 @@ export class TreeManager {
    *  - nSelDesc;
    */
   private refresh() {
-    const before = Date.now();
     const { dirHead, fileHead } = this.extractController(this.px.rootController, false);
     this.expandedFlat = [];
     this.flatten(dirHead, this.expandedFlat, true);
     this.flatten(fileHead, this.expandedFlat, true);
-    console.log('flatten time:', Date.now() - before);
     this.nSelectedNodes = 0;
     this.nSelectedFiles = 0;
     for (let node of this.expandedFlat) {
@@ -130,8 +128,6 @@ export class TreeManager {
         node.nSelDesc = 0;
       }
     }
-    const after = Date.now();
-    console.log('-- refresh call time:', after - before);
   }
 
   // --- Helpers: ---

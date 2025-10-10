@@ -50,10 +50,7 @@
   }
 
   async function toggleDirOpen(node: Node) {
-    const before = Date.now();
     tree.value = await window.api.invoke(TreeChannels.toggleDirOpen, 0, node.id);
-    const after = Date.now();
-    console.log('total time:', after - before);
   }
 
   function startRenaming() {
