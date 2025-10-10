@@ -39,10 +39,11 @@ export class TreeManager {
     return this.proxy!.proxy;
   }
 
-  // --- Properties: ---
+  // --- Variables and structures: ---
 
   private nSelectedNodes = 0;
   private nSelectedFiles = 0;
+  private expandedFlat: Node[] = [];
 
   // --- Setup methods: ---
 
@@ -61,12 +62,78 @@ export class TreeManager {
   public loadTree(profileId: string) {
     const filePath = path.join(DATA_DIR, 'profileData', profileId, 'tree.json');
     this.proxy = new FileProxy(filePath, this.getEmptyTreeData());
-    for (const node of Object.values(this.px.idToNode)) {
-      if (node.selected) {
-        this.nSelectedNodes++;
-        if (node.type === 'file') this.nSelectedFiles++;
+    this.refresh();
+  }
+
+  // --- Result and flattening: ---
+
+  private flatten(node: Node | null, expandClosed: boolean): Node[] {
+    const result: Node[] = [];
+    let curr = node;
+    while (curr) {
+      const { dirHead, fileHead, next } = this.getFamily(curr, false);
+      result.push(curr);
+      if (curr.type === 'dir' && (curr.open || expandClosed)) {
+        result.push(
+          ...this.flatten(dirHead, expandClosed),
+          ...this.flatten(fileHead, expandClosed)
+        );
+      }
+      curr = next;
+    }
+    return result;
+  }
+
+  public buildResult(anchor: number): TreeOperationResponseDTO {
+    const visibleNodes: Node[] = [];
+    for (let i = 0; i < 100; ) {
+      const node = this.expandedFlat[i];
+      visibleNodes.push(node);
+      if (node.type === 'dir' && !node.open) i += node.nDesc;
+      i++;
+    }
+    return {
+      nSelectedNodes: this.nSelectedNodes,
+      nSelectedFiles: this.nSelectedFiles,
+      nTotalNodes: this.expandedFlat.length,
+      visibleNodes,
+    };
+  }
+
+  /**
+   * Refreshes:
+   *  - this.expandedFlat;
+   *  - this.collapsedFlat;
+   *  - this.nSelectedNodes;
+   *  - this.nSelectedFiles;
+   * For every node, updates:
+   *  - depth;
+   *  - nDesc;
+   *  - nSelDesc;
+   */
+  private refresh() {
+    const before = Date.now();
+    const { dirHead, fileHead } = this.extractController(this.px.rootController, false);
+    this.expandedFlat = [...this.flatten(dirHead, true), ...this.flatten(fileHead, true)];
+    console.log('flatten time:', Date.now() - before);
+    this.nSelectedNodes = 0;
+    this.nSelectedFiles = 0;
+    for (let node of this.expandedFlat) {
+      this.nSelectedNodes += Number(node.selected);
+      this.nSelectedFiles += Number(node.type === 'file' && node.selected);
+      const parent = this.getFamily(node).parent;
+      node.depth = parent ? parent.depth + 1 : 0;
+      if (parent) {
+        parent.nDesc++;
+        parent.nSelDesc += Number(node.selected);
+      }
+      if (node.type === 'dir') {
+        node.nDesc = 0;
+        node.nSelDesc = 0;
       }
     }
+    const after = Date.now();
+    console.log('-- refresh call time:', after - before);
   }
 
   // --- Helpers: ---
@@ -103,36 +170,6 @@ export class TreeManager {
     if (files.headId) result.fileHead = source.idToNode[files.headId] as FileNode;
     if (files.tailId) result.fileTail = source.idToNode[files.tailId] as FileNode;
     return result;
-  }
-
-  // --- Result and flattening: ---
-
-  private flatten(node: Node | null, expandClosed: boolean): Node[] {
-    const result: Node[] = [];
-    let curr = node;
-    while (curr) {
-      const { dirHead, fileHead, next } = this.getFamily(curr, false);
-      result.push(curr);
-      if (curr.type === 'dir' && (curr.open || expandClosed)) {
-        result.push(
-          ...this.flatten(dirHead, expandClosed),
-          ...this.flatten(fileHead, expandClosed)
-        );
-      }
-      curr = next;
-    }
-    return result;
-  }
-
-  public buildResult(anchor: number): TreeOperationResponseDTO {
-    const { dirHead, fileHead } = this.extractController(this.px.rootController, false);
-    const flattened = [...this.flatten(dirHead, false), ...this.flatten(fileHead, false)];
-    return {
-      nSelectedNodes: this.nSelectedNodes,
-      nSelectedFiles: this.nSelectedFiles,
-      nTotalNodes: Object.keys(this.px.idToNode).length,
-      visibleNodes: flattened,
-    };
   }
 
   // --- Creation: ---
@@ -202,23 +239,13 @@ export class TreeManager {
     this.px.idToNode[newNode.id] = newNode;
     const { parent } = this.getFamily(newNode);
     if (parent) {
-      newNode.depth = parent.depth + 1;
-      if (parent.selected) {
-        newNode.selected = true;
-        this.nSelectedNodes++;
-        if (type === 'file') this.nSelectedFiles++;
-      }
+      newNode.selected = parent.selected;
       parent.open = true;
       this.appendNode(newNode, parent);
     } else {
       this.appendNode(newNode, this.px.rootController);
     }
-    let curr = parent;
-    while (curr) {
-      curr.nDesc++;
-      curr.nSelDesc += Number(newNode.selected);
-      curr = this.getFamily(curr).parent;
-    }
+    this.refresh();
   }
 
   // --- Toggle directory open: ---
@@ -226,6 +253,7 @@ export class TreeManager {
   public toggleDirOpen(nodeId: string) {
     const node = this.px.idToNode[nodeId] as DirNode;
     node.open = !node.open;
+    this.refresh();
   }
 
   // --- Rename node: ---

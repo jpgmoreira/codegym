@@ -50,7 +50,10 @@
   }
 
   async function toggleDirOpen(node: Node) {
+    const before = Date.now();
     tree.value = await window.api.invoke(TreeChannels.toggleDirOpen, 0, node.id);
+    const after = Date.now();
+    console.log('total time:', after - before);
   }
 
   function startRenaming() {
@@ -104,6 +107,9 @@
 </script>
 
 <template>
+  <div>Total nodes: {{ tree?.nTotalNodes }}</div>
+  <div>Selected nodes: {{ tree?.nSelectedNodes }}</div>
+  <div>Selected files: {{ tree?.nSelectedFiles }}</div>
   <div
     v-if="hasLoaded"
     class="border-2 border-violet-500 relative overflow-auto h-full z-0"
@@ -123,7 +129,11 @@
       Right-click here
     </div>
     <div v-else class="absolute top-0 left-0 w-full z-10">
-      <div v-for="node in tree.visibleNodes" :style="{ paddingLeft: `${node.depth * 20}px` }">
+      <div
+        v-for="node in tree.visibleNodes"
+        :style="{ paddingLeft: `${node.depth * 20}px` }"
+        :key="node.id"
+      >
         <span v-if="node.type === 'dir'" @click="toggleDirOpen(node)">
           <span v-if="node.open">-</span>
           <span v-else>+</span>
