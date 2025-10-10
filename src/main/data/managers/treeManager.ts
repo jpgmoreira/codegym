@@ -67,19 +67,33 @@ export class TreeManager {
 
   // --- Result and flattening: ---
 
-  private flatten(node: Node | null, array: Node[]) {
+  private flatten(node: Node | null, depth: number, array: Node[]) {
     let curr = node;
     const target = this.proxy!.target;
+    const result = {
+      nSub: 0,
+      nSubSel: 0,
+    };
     while (curr) {
       array.push(curr);
+      curr.depth = depth;
+      result.nSub++;
+      result.nSubSel += Number(curr.selected);
+      this.nSelectedNodes += Number(curr.selected);
+      this.nSelectedFiles += curr.type === 'file' ? Number(curr.selected) : 0;
       if (curr.type === 'dir') {
         const dirHead = curr.dirs.headId ? target.idToNode[curr.dirs.headId] : null;
         const fileHead = curr.files.headId ? target.idToNode[curr.files.headId] : null;
-        this.flatten(dirHead, array);
-        this.flatten(fileHead, array);
+        const dirResult = this.flatten(dirHead, depth + 1, array);
+        const fileResult = this.flatten(fileHead, depth + 1, array);
+        curr.nDesc = dirResult.nSub + fileResult.nSub;
+        curr.nSelDesc = dirResult.nSubSel + fileResult.nSubSel;
+        result.nSub += curr.nDesc;
+        result.nSubSel += curr.nSelDesc;
       }
       curr = curr.nextId ? target.idToNode[curr.nextId] : null;
     }
+    return result;
   }
 
   public buildResult(anchor: number): TreeOperationResponseDTO {
@@ -111,24 +125,10 @@ export class TreeManager {
   private refresh() {
     const { dirHead, fileHead } = this.extractController(this.px.rootController, false);
     this.expandedFlat = [];
-    this.flatten(dirHead, this.expandedFlat);
-    this.flatten(fileHead, this.expandedFlat);
     this.nSelectedNodes = 0;
     this.nSelectedFiles = 0;
-    for (let node of this.expandedFlat) {
-      this.nSelectedNodes += Number(node.selected);
-      this.nSelectedFiles += Number(node.type === 'file' && node.selected);
-      const parent = node.parentId ? (this.px.idToNode[node.parentId] as DirNode) : null;
-      node.depth = parent ? parent.depth + 1 : 0;
-      if (parent) {
-        parent.nDesc++;
-        parent.nSelDesc += Number(node.selected);
-      }
-      if (node.type === 'dir') {
-        node.nDesc = 0;
-        node.nSelDesc = 0;
-      }
-    }
+    this.flatten(dirHead, 0, this.expandedFlat);
+    this.flatten(fileHead, 0, this.expandedFlat);
   }
 
   // --- Helpers: ---
