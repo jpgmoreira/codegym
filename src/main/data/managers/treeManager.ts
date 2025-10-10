@@ -70,35 +70,34 @@ export class TreeManager {
   private flatten(node: Node | null, depth: number, array: Node[]) {
     let curr = node;
     const target = this.proxy!.target;
-    const result = {
-      nSub: 0,
-      nSubSel: 0,
-    };
+    let nSub = 0,
+      nSubSel = 0;
     while (curr) {
+      const sel = curr.selected ? 1 : 0;
       array.push(curr);
       curr.depth = depth;
-      result.nSub++;
-      result.nSubSel += Number(curr.selected);
-      this.nSelectedNodes += Number(curr.selected);
-      this.nSelectedFiles += curr.type === 'file' ? Number(curr.selected) : 0;
+      nSub++;
+      nSubSel += sel;
+      this.nSelectedNodes += sel;
+      this.nSelectedFiles += curr.type === 'file' ? sel : 0;
       if (curr.type === 'dir') {
         const dirHead = curr.dirs.headId ? target.idToNode[curr.dirs.headId] : null;
         const fileHead = curr.files.headId ? target.idToNode[curr.files.headId] : null;
         const dirResult = this.flatten(dirHead, depth + 1, array);
         const fileResult = this.flatten(fileHead, depth + 1, array);
-        curr.nDesc = dirResult.nSub + fileResult.nSub;
-        curr.nSelDesc = dirResult.nSubSel + fileResult.nSubSel;
-        result.nSub += curr.nDesc;
-        result.nSubSel += curr.nSelDesc;
+        curr.nDesc = dirResult[0] + fileResult[0];
+        curr.nSelDesc = dirResult[1] + fileResult[1];
+        nSub += curr.nDesc;
+        nSubSel += curr.nSelDesc;
       }
       curr = curr.nextId ? target.idToNode[curr.nextId] : null;
     }
-    return result;
+    return [nSub, nSubSel];
   }
 
   public buildResult(anchor: number): TreeOperationResponseDTO {
     const visibleNodes: Node[] = [];
-    for (let i = 0; i < Math.min(100, this.expandedFlat.length); ) {
+    for (let i = 0, j = 0; j < 100 && i < this.expandedFlat.length; j++) {
       const node = this.expandedFlat[i];
       visibleNodes.push(node);
       if (node.type === 'dir' && !node.open) i += node.nDesc;

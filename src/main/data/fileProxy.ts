@@ -66,10 +66,16 @@ export class FileProxy<T extends JSONObject> {
     obj[prop] = value;
     clearTimeout(this.timer);
     this.timer = setTimeout(() => {
-      fs.writeFileSync(this.filePath, JSON.stringify(this._target, null, INDENT), 'utf-8');
-      this.savedCount++;
-      console.log(`-- ${this.filePath} saved! ${this.savedCount}`);
+      this.writeFileAsync().catch((err) => {
+        console.error(`Failed to save ${this.filePath}:`, err);
+      });
     }, DISK_FLUSH_DEBOUNCE);
     return true;
+  }
+
+  private async writeFileAsync() {
+    await fs.promises.writeFile(this.filePath, JSON.stringify(this._target, null, INDENT), 'utf-8');
+    this.savedCount++;
+    console.log(`-- ${this.filePath} saved! ${this.savedCount}`);
   }
 }
