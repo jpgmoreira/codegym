@@ -67,21 +67,18 @@ export class TreeManager {
 
   // --- Result and flattening: ---
 
-  private flatten(node: Node | null, expandClosed: boolean): Node[] {
-    const result: Node[] = [];
+  private flatten(node: Node | null, array: Node[], expandClosed: boolean) {
     let curr = node;
     while (curr) {
-      const { dirHead, fileHead, next } = this.getFamily(curr, false);
-      result.push(curr);
+      array.push(curr);
       if (curr.type === 'dir' && (curr.open || expandClosed)) {
-        result.push(
-          ...this.flatten(dirHead, expandClosed),
-          ...this.flatten(fileHead, expandClosed)
-        );
+        const dirHead = curr.dirs.headId ? this.proxy!.target.idToNode[curr.dirs.headId] : null;
+        const fileHead = curr.files.headId ? this.proxy!.target.idToNode[curr.files.headId] : null;
+        this.flatten(dirHead, array, expandClosed);
+        this.flatten(fileHead, array, expandClosed);
       }
-      curr = next;
+      curr = curr.nextId ? this.proxy!.target.idToNode[curr.nextId] : null;
     }
-    return result;
   }
 
   public buildResult(anchor: number): TreeOperationResponseDTO {
@@ -113,7 +110,9 @@ export class TreeManager {
   private refresh() {
     const before = Date.now();
     const { dirHead, fileHead } = this.extractController(this.px.rootController, false);
-    this.expandedFlat = [...this.flatten(dirHead, true), ...this.flatten(fileHead, true)];
+    this.expandedFlat = [];
+    this.flatten(dirHead, this.expandedFlat, true);
+    this.flatten(fileHead, this.expandedFlat, true);
     console.log('flatten time:', Date.now() - before);
     this.nSelectedNodes = 0;
     this.nSelectedFiles = 0;
