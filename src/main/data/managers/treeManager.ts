@@ -56,7 +56,7 @@ export class TreeManager {
 
   // --- Helpers: ---
 
-  private getFamily(node: Node, asProxy = true) {
+  private getFamily(node: Node, asProxy: boolean) {
     const source = asProxy ? this.px : this.proxy!.target;
     const result = {
       parent: node.parentId ? (source.idToNode[node.parentId] as DirNode) : null,
@@ -74,7 +74,7 @@ export class TreeManager {
     return result;
   }
 
-  private extractController(control: NodeController, asProxy = true) {
+  private extractController(control: NodeController, asProxy: boolean) {
     const source = asProxy ? this.px : this.proxy!.target;
     const result = {
       dirHead: null as Node | null,
@@ -165,7 +165,7 @@ export class TreeManager {
       sub.tailId = node.id;
     } else {
       const tail = this.px.idToNode[sub.tailId!];
-      const { next } = this.getFamily(tail);
+      const { next } = this.getFamily(tail, true);
       node.nextId = tail.nextId;
       tail.nextId = node.id;
       node.prevId = tail.id;
@@ -184,7 +184,7 @@ export class TreeManager {
       this.px.rootController.nextFile++;
     }
     this.px.idToNode[newNode.id] = newNode;
-    const { parent } = this.getFamily(newNode);
+    const { parent } = this.getFamily(newNode, true);
     if (parent) {
       newNode.depth = parent.depth + 1;
       newNode.selected = parent.selected;
@@ -197,7 +197,7 @@ export class TreeManager {
     while (curr) {
       curr.nDesc++;
       curr.nSelDesc += Number(newNode.selected);
-      curr = this.getFamily(curr).parent;
+      curr = this.getFamily(curr, true).parent;
     }
   }
 
@@ -219,8 +219,8 @@ export class TreeManager {
       };
     }
     const node = this.px.idToNode[nodeId];
-    const control = this.getFamily(node).parent || this.px.rootController;
-    const { dirHead, fileHead } = this.extractController(control);
+    const control = this.getFamily(node, true).parent || this.px.rootController;
+    const { dirHead, fileHead } = this.extractController(control, true);
     for (const head of [dirHead, fileHead]) {
       let curr = head;
       while (curr) {
@@ -230,7 +230,7 @@ export class TreeManager {
             errorMsg: 'Name already exists in this folder.',
           };
         }
-        curr = this.getFamily(curr).next;
+        curr = this.getFamily(curr, true).next;
       }
     }
     node.text = newName;
