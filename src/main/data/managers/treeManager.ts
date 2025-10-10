@@ -103,7 +103,6 @@ export class TreeManager {
   /**
    * Refreshes:
    *  - this.expandedFlat;
-   *  - this.collapsedFlat;
    *  - this.nSelectedNodes;
    *  - this.nSelectedFiles;
    * For every node, updates:
@@ -121,7 +120,7 @@ export class TreeManager {
     for (let node of this.expandedFlat) {
       this.nSelectedNodes += Number(node.selected);
       this.nSelectedFiles += Number(node.type === 'file' && node.selected);
-      const parent = this.getFamily(node).parent;
+      const parent = node.parentId ? (this.px.idToNode[node.parentId] as DirNode) : null;
       node.depth = parent ? parent.depth + 1 : 0;
       if (parent) {
         parent.nDesc++;
@@ -253,7 +252,6 @@ export class TreeManager {
   public toggleDirOpen(nodeId: string) {
     const node = this.px.idToNode[nodeId] as DirNode;
     node.open = !node.open;
-    this.refresh();
   }
 
   // --- Rename node: ---
