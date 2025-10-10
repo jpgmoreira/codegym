@@ -21,6 +21,8 @@ type TreeData = {
  * Access via TreeManager.instance
  */
 export class TreeManager {
+  // -- Class configuration: ---
+
   static #instance: TreeManager;
   private proxy: FileProxy<TreeData> | null = null;
 
@@ -37,6 +39,13 @@ export class TreeManager {
     return this.proxy!.proxy;
   }
 
+  // --- Properties: ---
+
+  private nSelectedNodes = 0;
+  private nSelectedFiles = 0;
+
+  // --- Setup methods: ---
+
   private getEmptyTreeData(): TreeData {
     return {
       rootController: {
@@ -52,11 +61,17 @@ export class TreeManager {
   public loadTree(profileId: string) {
     const filePath = path.join(DATA_DIR, 'profileData', profileId, 'tree.json');
     this.proxy = new FileProxy(filePath, this.getEmptyTreeData());
+    for (const node of Object.values(this.px.idToNode)) {
+      if (node.selected) {
+        this.nSelectedNodes++;
+        if (node.type === 'file') this.nSelectedFiles++;
+      }
+    }
   }
 
   // --- Helpers: ---
 
-  private getFamily(node: Node, asProxy: boolean) {
+  private getFamily(node: Node, asProxy = true) {
     const source = asProxy ? this.px : this.proxy!.target;
     const result = {
       parent: node.parentId ? (source.idToNode[node.parentId] as DirNode) : null,
@@ -74,7 +89,7 @@ export class TreeManager {
     return result;
   }
 
-  private extractController(control: NodeController, asProxy: boolean) {
+  private extractController(control: NodeController, asProxy = true) {
     const source = asProxy ? this.px : this.proxy!.target;
     const result = {
       dirHead: null as Node | null,
@@ -113,8 +128,9 @@ export class TreeManager {
     const { dirHead, fileHead } = this.extractController(this.px.rootController, false);
     const flattened = [...this.flatten(dirHead, false), ...this.flatten(fileHead, false)];
     return {
-      nSelectedFiles: 0,
-      nTotalNodes: flattened.length,
+      nSelectedNodes: this.nSelectedNodes,
+      nSelectedFiles: this.nSelectedFiles,
+      nTotalNodes: Object.keys(this.px.idToNode).length,
       visibleNodes: flattened,
     };
   }
@@ -165,7 +181,7 @@ export class TreeManager {
       sub.tailId = node.id;
     } else {
       const tail = this.px.idToNode[sub.tailId!];
-      const { next } = this.getFamily(tail, true);
+      const { next } = this.getFamily(tail);
       node.nextId = tail.nextId;
       tail.nextId = node.id;
       node.prevId = tail.id;
@@ -184,10 +200,14 @@ export class TreeManager {
       this.px.rootController.nextFile++;
     }
     this.px.idToNode[newNode.id] = newNode;
-    const { parent } = this.getFamily(newNode, true);
+    const { parent } = this.getFamily(newNode);
     if (parent) {
       newNode.depth = parent.depth + 1;
-      newNode.selected = parent.selected;
+      if (parent.selected) {
+        newNode.selected = true;
+        this.nSelectedNodes++;
+        if (type === 'file') this.nSelectedFiles++;
+      }
       parent.open = true;
       this.appendNode(newNode, parent);
     } else {
@@ -197,7 +217,7 @@ export class TreeManager {
     while (curr) {
       curr.nDesc++;
       curr.nSelDesc += Number(newNode.selected);
-      curr = this.getFamily(curr, true).parent;
+      curr = this.getFamily(curr).parent;
     }
   }
 
@@ -219,8 +239,8 @@ export class TreeManager {
       };
     }
     const node = this.px.idToNode[nodeId];
-    const control = this.getFamily(node, true).parent || this.px.rootController;
-    const { dirHead, fileHead } = this.extractController(control, true);
+    const control = this.getFamily(node).parent || this.px.rootController;
+    const { dirHead, fileHead } = this.extractController(control);
     for (const head of [dirHead, fileHead]) {
       let curr = head;
       while (curr) {
@@ -230,7 +250,7 @@ export class TreeManager {
             errorMsg: 'Name already exists in this folder.',
           };
         }
-        curr = this.getFamily(curr, true).next;
+        curr = this.getFamily(curr).next;
       }
     }
     node.text = newName;
