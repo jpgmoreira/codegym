@@ -53,3 +53,11 @@ ipcMain.handle(
     return TreeManager.instance.buildResult(anchor);
   }
 );
+
+ipcMain.handle(
+  TreeChannels.deleteNode,
+  (_: IpcMainInvokeEvent, anchor: number, nodeId: string): TreeOperationResponseDTO => {
+    TreeManager.instance.deleteNode(nodeId);
+    return TreeManager.instance.buildResult(anchor);
+  }
+);

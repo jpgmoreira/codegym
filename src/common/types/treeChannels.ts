@@ -7,4 +7,5 @@ export enum TreeChannels {
   toggleDirOpen = 'toggle-dir-open',
   renameNode = 'rename-node',
   handleSelection = 'handle-selection',
+  deleteNode = 'delete-node',
 }

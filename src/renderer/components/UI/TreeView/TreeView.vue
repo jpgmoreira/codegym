@@ -105,6 +105,12 @@
     tree.value = await window.api.invoke(TreeChannels.handleSelection, 0, node.id, keys);
   }
 
+  async function deleteNode() {
+    const node = contextState.activeNode;
+    if (!node) return;
+    tree.value = await window.api.invoke(TreeChannels.deleteNode, 0, node.id);
+  }
+
   function windowKeyDown(e: KeyboardEvent) {
     if (e.key === 'Control') keys.ctrl = true;
   }
@@ -142,6 +148,7 @@
       v-bind="contextState"
       @create-node="createNode"
       @rename-node="startRenaming"
+      @delete-node="deleteNode"
     />
     <div
       v-if="!tree?.visibleNodes.length"

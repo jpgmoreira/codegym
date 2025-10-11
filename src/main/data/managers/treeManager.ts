@@ -1,5 +1,5 @@
 import { randomId } from '@common/utils/utils';
-import { DATA_DIR } from '../constants';
+import { DATA_DIR, TREE_PAGE_SIZE } from '../constants';
 import { FileProxy } from '../fileProxy';
 import {
   NodeController,
@@ -110,7 +110,8 @@ export class TreeManager {
 
   public buildResult(anchor: number): TreeOperationResponseDTO {
     const visibleNodes: Node[] = [];
-    for (let i = 0, j = 0; j < 100 && i < this.expandedFlat.length; j++) {
+    let i = Math.min(anchor, this.expandedFlat.length - 1);
+    for (let j = 0; j < TREE_PAGE_SIZE && i < this.expandedFlat.length; j++) {
       const node = this.expandedFlat[i];
       visibleNodes.push(node);
       if (node.type === 'dir' && !node.open) i += node.nDesc;
@@ -162,6 +163,12 @@ export class TreeManager {
   private getNext(node: Node, asProxy: boolean) {
     const source = asProxy ? this.proxy : this.target;
     const id = node.nextId;
+    return id ? source.idToNode[id] : null;
+  }
+
+  private getPrev(node: Node, asProxy: boolean) {
+    const source = asProxy ? this.proxy : this.target;
+    const id = node.prevId;
     return id ? source.idToNode[id] : null;
   }
 
@@ -319,6 +326,56 @@ export class TreeManager {
     node.selected = nextState;
     if (node.type === 'dir') {
       this.setSubtreeSelection(node, nextState);
+    }
+    this.refresh();
+  }
+
+  // --- Deletion: ---
+
+  private removeNodeFromTree(node: Node) {
+    const control = node.parentId ? this.getParent(node, false)! : this.target.rootController;
+    const sub = node.type === 'file' ? control.files : control.dirs;
+    const head = this.getHead(sub, false)!;
+    const tail = this.getTail(sub, false)!;
+    if (node === head) sub.headId = head.nextId;
+    if (node === tail) sub.tailId = tail.prevId;
+    const prev = this.getPrev(node, false);
+    const next = this.getNext(node, false);
+    if (prev) prev.nextId = node.nextId;
+    if (next) next.prevId = node.prevId;
+  }
+
+  private deleteSubtree(control: NodeController) {
+    const dirHead = this.getHead(control.dirs, false);
+    const fileHead = this.getHead(control.files, false);
+    let curr: Node | null = dirHead;
+    while (curr) {
+      this.deleteCallback(curr);
+      this.deleteSubtree(curr as DirNode);
+      curr = this.getNext(curr, false);
+    }
+    curr = fileHead;
+    while (curr) {
+      this.deleteCallback(curr);
+      curr = this.getNext(curr, false);
+    }
+  }
+
+  private deleteCallback(node: Node) {
+    console.log('- node deleted:', node.text);
+  }
+
+  public setDeleteCallback(callback: (node: Node) => void) {
+    this.deleteCallback = callback;
+  }
+
+  public deleteNode(nodeId: string) {
+    const node = this.target.idToNode[nodeId];
+    if (!node) return;
+    this.removeNodeFromTree(node);
+    this.deleteCallback(node);
+    if (node.type === 'dir') {
+      this.deleteSubtree(node);
     }
     this.refresh();
   }
