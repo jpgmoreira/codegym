@@ -323,8 +323,10 @@ export class TreeManager {
     const nextState = !node.selected;
     if (!keys.ctrl) {
       this.clearSelection();
-      this._proxy!.queueWrite();
-      if (!nextState) return;
+      if (!nextState) {
+        this._proxy!.queueWrite();
+        return;
+      }
     }
     node.selected = nextState;
     if (node.type === 'dir') {
