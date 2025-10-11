@@ -418,9 +418,14 @@ export class TreeManager {
       this.clearHidden();
       return;
     }
-    this.clearSelection(); // Clear selection on search to avoid confusion.
     const regex = new RegExp(text, 'i');
-    for (const node of this.expandedFlat) node.hidden = true;
+    // Clear selection on search to avoid confusion.
+    this.nSelectedFiles = 0;
+    this.nSelectedNodes = 0;
+    for (const node of this.expandedFlat) {
+      node.hidden = true;
+      node.selected = false;
+    }
     for (let i = this.expandedFlat.length - 1; i >= 0; i--) {
       const node = this.expandedFlat[i];
       if (node.type === 'file') {
