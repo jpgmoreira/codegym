@@ -151,14 +151,16 @@
     tree.value = await window.api.invoke(TreeChannels.search, anchor.value, text);
   }
 
-  async function handleScroll() {
-    const container = scrollContainer.value;
-    if (!container) return;
-    const scrollTop = container.scrollTop;
-    anchor.value = Math.floor(scrollTop / rowHeight);
-    console.log('- anchor:', anchor.value);
-    tree.value = await window.api.invoke(TreeChannels.getState, anchor.value);
-    nodeContainerOffset.value = anchor.value * rowHeight; // This is the key! Using a computed-value causes flickering.
+  function handleScroll() {
+    clearTimeout(scrollTimer.value);
+    setTimeout(async () => {
+      const container = scrollContainer.value;
+      if (!container) return;
+      const scrollTop = container.scrollTop;
+      anchor.value = Math.max(0, Math.floor(scrollTop / rowHeight) - 30);
+      tree.value = await window.api.invoke(TreeChannels.getState, anchor.value);
+      nodeContainerOffset.value = anchor.value * rowHeight; // This is the key! Using a computed-value causes flickering.
+    }, 40);
   }
 
   function windowKeyDown(e: KeyboardEvent) {
