@@ -31,7 +31,7 @@ export class TreeManager {
   // -- Class configuration: ---
 
   static #instance: TreeManager;
-  private proxy: FileProxy<TreeData> | null = null;
+  private _proxy: FileProxy<TreeData> | null = null;
 
   private constructor() {}
 
@@ -42,8 +42,11 @@ export class TreeManager {
     return this.#instance;
   }
 
-  private get px() {
-    return this.proxy!.proxy;
+  private get proxy() {
+    return this._proxy!.proxy;
+  }
+  private get target() {
+    return this._proxy!.target;
   }
 
   // --- Variables and structures: ---
@@ -68,7 +71,7 @@ export class TreeManager {
 
   public loadTree(profileId: string) {
     const filePath = path.join(DATA_DIR, 'profileData', profileId, 'tree.json');
-    this.proxy = new FileProxy(filePath, this.getEmptyTreeData());
+    this._proxy = new FileProxy(filePath, this.getEmptyTreeData());
     this.refresh();
   }
 
@@ -78,12 +81,11 @@ export class TreeManager {
     let curr = node;
     let nSub = 0,
       nSubSel = 0;
-    const source = this.proxy!.target;
     while (curr) {
       array.push(curr);
       if (curr.type === 'dir') {
-        const dirHead = curr.dirs.headId ? source.idToNode[curr.dirs.headId] : null;
-        const fileHead = curr.files.headId ? source.idToNode[curr.files.headId] : null;
+        const dirHead = curr.dirs.headId ? this.target.idToNode[curr.dirs.headId] : null;
+        const fileHead = curr.files.headId ? this.target.idToNode[curr.files.headId] : null;
         const dirResult = this.flatten(dirHead, depth + 1, array);
         const fileResult = this.flatten(fileHead, depth + 1, array);
         curr.nDesc = dirResult[0] + fileResult[0];
@@ -100,7 +102,7 @@ export class TreeManager {
       nSubSel += sel;
       this.nSelectedNodes += sel;
       this.nSelectedFiles += curr.type === 'file' ? sel : 0;
-      curr = curr.nextId ? source.idToNode[curr.nextId] : null;
+      curr = curr.nextId ? this.target.idToNode[curr.nextId] : null;
     }
     return [nSub, nSubSel];
   }
@@ -133,7 +135,7 @@ export class TreeManager {
    */
   private refresh() {
     const before = Date.now();
-    const { dirHead, fileHead } = this.extractController(this.px.rootController, false);
+    const { dirHead, fileHead } = this.extractController(this.target.rootController, false);
     this.expandedFlat = [];
     this.nSelectedNodes = 0;
     this.nSelectedFiles = 0;
@@ -146,7 +148,7 @@ export class TreeManager {
   // --- Helpers: ---
 
   private getFamily(node: Node, asProxy = true) {
-    const source = asProxy ? this.px : this.proxy!.target;
+    const source = asProxy ? this.proxy : this.target;
     const result = {
       parent: node.parentId ? (source.idToNode[node.parentId] as DirNode) : null,
       next: node.nextId ? source.idToNode[node.nextId] : null,
@@ -164,7 +166,7 @@ export class TreeManager {
   }
 
   private extractController(control: NodeController, asProxy = true) {
-    const source = asProxy ? this.px : this.proxy!.target;
+    const source = asProxy ? this.proxy : this.target;
     const result = {
       dirHead: null as DirNode | null,
       dirTail: null as DirNode | null,
@@ -185,7 +187,7 @@ export class TreeManager {
     return {
       id: randomId(),
       type: 'dir',
-      text: `${prefix} ${this.px.rootController.nextDir}`,
+      text: `${prefix} ${this.target.rootController.nextDir}`,
       depth: 0,
       open: false,
       selected: false,
@@ -209,7 +211,7 @@ export class TreeManager {
     return {
       id: randomId(),
       type: 'file',
-      text: `${prefix} ${this.px.rootController.nextFile}`,
+      text: `${prefix} ${this.target.rootController.nextFile}`,
       depth: 0,
       selected: false,
       parentId,
@@ -224,7 +226,7 @@ export class TreeManager {
       sub.headId = node.id;
       sub.tailId = node.id;
     } else {
-      const tail = this.px.idToNode[sub.tailId!];
+      const tail = this.target.idToNode[sub.tailId!];
       const { next } = this.getFamily(tail);
       node.nextId = tail.nextId;
       tail.nextId = node.id;
@@ -238,19 +240,19 @@ export class TreeManager {
     let newNode: Node;
     if (type === 'dir') {
       newNode = this.createDirNode(prefix, parentId);
-      this.px.rootController.nextDir++;
+      this.proxy.rootController.nextDir++;
     } else {
       newNode = this.createFileNode(prefix, parentId);
-      this.px.rootController.nextFile++;
+      this.proxy.rootController.nextFile++;
     }
-    this.px.idToNode[newNode.id] = newNode;
+    this.proxy.idToNode[newNode.id] = newNode;
     const { parent } = this.getFamily(newNode);
     if (parent) {
       newNode.selected = parent.selected;
       parent.open = true;
       this.appendNode(newNode, parent);
     } else {
-      this.appendNode(newNode, this.px.rootController);
+      this.appendNode(newNode, this.proxy.rootController);
     }
     this.refresh();
   }
@@ -258,7 +260,7 @@ export class TreeManager {
   // --- Toggle directory open: ---
 
   public toggleDirOpen(nodeId: string) {
-    const node = this.px.idToNode[nodeId] as DirNode;
+    const node = this.proxy.idToNode[nodeId] as DirNode;
     node.open = !node.open;
   }
 
@@ -272,9 +274,9 @@ export class TreeManager {
         errorMsg: 'Name cannot be empty!',
       };
     }
-    const node = this.px.idToNode[nodeId];
-    const control = this.getFamily(node).parent || this.px.rootController;
-    const { dirHead, fileHead } = this.extractController(control);
+    const node = this.proxy.idToNode[nodeId];
+    const control = this.getFamily(node, false).parent || this.target.rootController;
+    const { dirHead, fileHead } = this.extractController(control, false);
     for (const head of [dirHead, fileHead]) {
       let curr = head;
       while (curr) {
@@ -284,7 +286,7 @@ export class TreeManager {
             errorMsg: 'Name already exists in this folder.',
           };
         }
-        curr = this.getFamily(curr).next;
+        curr = this.getFamily(curr, false).next;
       }
     }
     node.text = newName;
@@ -315,7 +317,7 @@ export class TreeManager {
   }
 
   public handleSelection(nodeId: string, keys: ModifierKeys) {
-    const node = this.px.idToNode[nodeId];
+    const node = this.target.idToNode[nodeId];
     const nextState = !node.selected;
     if (!keys.ctrl) {
       this.clearSelection();
