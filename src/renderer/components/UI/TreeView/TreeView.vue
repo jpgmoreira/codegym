@@ -173,7 +173,7 @@
     >
       Right-click here
     </div>
-    <div v-else class="absolute top-0 left-0 w-full z-10">
+    <div v-else-if="tree" class="absolute top-0 left-0 w-full z-10">
       <div class="flex w-full">
         <input
           v-model.trim="searchText"
