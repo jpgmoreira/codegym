@@ -5,7 +5,7 @@ import util from 'util';
 import path from 'path';
 
 export const INDENT = 2;
-export const DISK_FLUSH_DEBOUNCE = 99999999; // Debounce in milliseconds to write file to disk.
+export const DISK_FLUSH_DEBOUNCE = 500; // Debounce in milliseconds to write file to disk.
 
 /**
  * Creates a proxy around a JSON-serializable object that automatically persists changes to disk.

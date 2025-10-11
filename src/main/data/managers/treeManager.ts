@@ -76,21 +76,22 @@ export class TreeManager {
 
   private flatten(node: Node | null, depth: number, array: Node[]) {
     let curr = node;
-    const target = this.proxy!.target;
     let nSub = 0,
       nSubSel = 0;
     while (curr) {
-      array.push(curr);
+      array.push(this.proxy!.target.idToNode[curr.id]);
       if (curr.type === 'dir') {
-        const dirHead = curr.dirs.headId ? target.idToNode[curr.dirs.headId] : null;
-        const fileHead = curr.files.headId ? target.idToNode[curr.files.headId] : null;
+        const dirHead = curr.dirs.headId ? this.px.idToNode[curr.dirs.headId] : null;
+        const fileHead = curr.files.headId ? this.px.idToNode[curr.files.headId] : null;
         const dirResult = this.flatten(dirHead, depth + 1, array);
         const fileResult = this.flatten(fileHead, depth + 1, array);
         curr.nDesc = dirResult[0] + fileResult[0];
         curr.nSelDesc = dirResult[1] + fileResult[1];
         nSub += curr.nDesc;
         nSubSel += curr.nSelDesc;
-        curr.selected = curr.nDesc === curr.nSelDesc;
+        if (curr.nDesc) {
+          curr.selected = !!curr.nDesc && curr.nDesc === curr.nSelDesc;
+        }
       }
       curr.depth = depth;
       const sel = curr.selected ? 1 : 0;
@@ -98,7 +99,7 @@ export class TreeManager {
       nSubSel += sel;
       this.nSelectedNodes += sel;
       this.nSelectedFiles += curr.type === 'file' ? sel : 0;
-      curr = curr.nextId ? target.idToNode[curr.nextId] : null;
+      curr = curr.nextId ? this.px.idToNode[curr.nextId] : null;
     }
     return [nSub, nSubSel];
   }
@@ -130,7 +131,7 @@ export class TreeManager {
    *  - nSelDesc;
    */
   private refresh() {
-    const { dirHead, fileHead } = this.extractController(this.px.rootController, false);
+    const { dirHead, fileHead } = this.extractController(this.px.rootController);
     this.expandedFlat = [];
     this.nSelectedNodes = 0;
     this.nSelectedFiles = 0;
@@ -320,5 +321,6 @@ export class TreeManager {
     if (node.type === 'dir') {
       this.setSubtreeSelection(node, nextState);
     }
+    this.refresh();
   }
 }
