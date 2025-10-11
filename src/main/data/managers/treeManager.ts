@@ -1,7 +1,14 @@
 import { randomId } from '@common/utils/utils';
 import { DATA_DIR } from '../constants';
 import { FileProxy } from '../fileProxy';
-import { NodeController, Node, FileNode, DirNode, NodeType } from '@common/types/tree';
+import {
+  NodeController,
+  Node,
+  FileNode,
+  DirNode,
+  NodeType,
+  ModifierKeys,
+} from '@common/types/tree';
 import { TreeOperationResponseDTO } from '@common/dto/treeOperationResponseDTO';
 import { GenericResponseDTO } from '@common/dto/genericResponseDTO';
 import path from 'path';
@@ -73,13 +80,7 @@ export class TreeManager {
     let nSub = 0,
       nSubSel = 0;
     while (curr) {
-      const sel = curr.selected ? 1 : 0;
       array.push(curr);
-      curr.depth = depth;
-      nSub++;
-      nSubSel += sel;
-      this.nSelectedNodes += sel;
-      this.nSelectedFiles += curr.type === 'file' ? sel : 0;
       if (curr.type === 'dir') {
         const dirHead = curr.dirs.headId ? target.idToNode[curr.dirs.headId] : null;
         const fileHead = curr.files.headId ? target.idToNode[curr.files.headId] : null;
@@ -89,7 +90,14 @@ export class TreeManager {
         curr.nSelDesc = dirResult[1] + fileResult[1];
         nSub += curr.nDesc;
         nSubSel += curr.nSelDesc;
+        curr.selected = curr.nDesc === curr.nSelDesc;
       }
+      curr.depth = depth;
+      const sel = curr.selected ? 1 : 0;
+      nSub++;
+      nSubSel += sel;
+      this.nSelectedNodes += sel;
+      this.nSelectedFiles += curr.type === 'file' ? sel : 0;
       curr = curr.nextId ? target.idToNode[curr.nextId] : null;
     }
     return [nSub, nSubSel];
@@ -138,10 +146,10 @@ export class TreeManager {
       parent: node.parentId ? (source.idToNode[node.parentId] as DirNode) : null,
       next: node.nextId ? source.idToNode[node.nextId] : null,
       prev: node.prevId ? source.idToNode[node.prevId] : null,
-      dirHead: null as Node | null,
-      dirTail: null as Node | null,
-      fileHead: null as Node | null,
-      fileTail: null as Node | null,
+      dirHead: null as DirNode | null,
+      dirTail: null as DirNode | null,
+      fileHead: null as FileNode | null,
+      fileTail: null as FileNode | null,
     };
     if (node.type === 'dir') {
       const pointers = this.extractController(node, asProxy);
@@ -153,10 +161,10 @@ export class TreeManager {
   private extractController(control: NodeController, asProxy = true) {
     const source = asProxy ? this.px : this.proxy!.target;
     const result = {
-      dirHead: null as Node | null,
-      dirTail: null as Node | null,
-      fileHead: null as Node | null,
-      fileTail: null as Node | null,
+      dirHead: null as DirNode | null,
+      dirTail: null as DirNode | null,
+      fileHead: null as FileNode | null,
+      fileTail: null as FileNode | null,
     };
     const { dirs, files } = control;
     if (dirs.headId) result.dirHead = source.idToNode[dirs.headId] as DirNode;
@@ -276,5 +284,41 @@ export class TreeManager {
     }
     node.text = newName;
     return { status: 'success' };
+  }
+
+  // --- Selection handling: ---
+
+  private clearSelection() {
+    for (const node of this.expandedFlat) node.selected = false;
+    this.nSelectedFiles = 0;
+    this.nSelectedNodes = 0;
+  }
+
+  private setSubtreeSelection(control: NodeController, state: boolean) {
+    const { dirHead, fileHead } = this.extractController(control);
+    let curr: Node | null = dirHead;
+    while (curr) {
+      curr.selected = state;
+      this.setSubtreeSelection(curr as DirNode, state);
+      curr = this.getFamily(curr).next;
+    }
+    curr = fileHead;
+    while (curr) {
+      curr.selected = state;
+      curr = this.getFamily(curr).next;
+    }
+  }
+
+  public handleSelection(nodeId: string, keys: ModifierKeys) {
+    const node = this.px.idToNode[nodeId];
+    const nextState = !node.selected;
+    if (!keys.ctrl) {
+      this.clearSelection();
+      if (!nextState) return;
+    }
+    node.selected = nextState;
+    if (node.type === 'dir') {
+      this.setSubtreeSelection(node, nextState);
+    }
   }
 }

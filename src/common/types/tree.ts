@@ -34,3 +34,7 @@ export type FileNode = BaseNode & {
 };
 
 export type Node = DirNode | FileNode;
+
+export type ModifierKeys = {
+  ctrl: boolean;
+};

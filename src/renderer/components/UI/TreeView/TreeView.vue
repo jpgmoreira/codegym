@@ -1,9 +1,9 @@
 <script lang="ts" setup>
   import ContextMenu from './ContextMenu.vue';
   import { TreeOperationResponseDTO } from '@common/dto/treeOperationResponseDTO';
-  import { NodeType, Node } from '@common/types/tree';
+  import { NodeType, Node, ModifierKeys } from '@common/types/tree';
   import { TreeChannels } from '@common/types/treeChannels';
-  import { ref, onMounted, reactive, nextTick } from 'vue';
+  import { ref, onMounted, reactive, nextTick, onBeforeUnmount } from 'vue';
   import AutoLengthInput from '../AutoLengthInput.vue';
   import { GenericResponseDTO } from '@common/dto/genericResponseDTO';
   import { useUIStore } from '@renderer/store/ui';
@@ -18,6 +18,10 @@
   };
 
   const uiStore = useUIStore();
+
+  const keys: ModifierKeys = {
+    ctrl: false,
+  };
 
   const hasLoaded = ref(false);
   const tree = ref<TreeOperationResponseDTO | null>(null);
@@ -97,9 +101,27 @@
     });
   }
 
+  async function handleSelection(node: Node) {
+    tree.value = await window.api.invoke(TreeChannels.handleSelection, 0, node.id, keys);
+  }
+
+  function windowKeyDown(e: KeyboardEvent) {
+    if (e.key === 'Control') keys.ctrl = true;
+  }
+
+  function windowKeyUp(e: KeyboardEvent) {
+    if (e.key === 'Control') keys.ctrl = false;
+  }
+
   onMounted(async () => {
     tree.value = await window.api.invoke(TreeChannels.getState, 0);
     hasLoaded.value = true;
+    window.addEventListener('keydown', windowKeyDown);
+    window.addEventListener('keyup', windowKeyUp);
+  });
+  onBeforeUnmount(() => {
+    window.removeEventListener('keydown', windowKeyDown);
+    window.removeEventListener('keyup', windowKeyUp);
   });
 </script>
 
@@ -111,6 +133,8 @@
     v-if="hasLoaded"
     class="border-2 border-violet-500 relative overflow-auto h-full z-0"
     @click.right="(e) => showContextMenu('root', null, e)"
+    @click="() => (contextState.visible = false)"
+    @scroll="() => (contextState.visible = false)"
   >
     <ContextMenu
       class="z-20"
@@ -137,14 +161,22 @@
         </span>
 
         <AutoLengthInput
+          :class="{ selected: node.selected }"
           v-model="node.text"
           :readonly="renamingNode !== node"
           @keydown.enter="applyRenaming"
           @keydown.esc="undoRenaming"
           @blur="applyRenaming"
           @click.right.stop="(e: MouseEvent) => showContextMenu(node.type, node, e)"
+          @click="handleSelection(node)"
         />
       </div>
     </div>
   </div>
 </template>
+
+<style scoped>
+  .selected {
+    outline: 2px solid orange !important;
+  }
+</style>
