@@ -111,17 +111,24 @@ export class TreeManager {
 
   public buildResult(anchor: number): TreeOperationResponseDTO {
     const visibleNodes: Node[] = [];
-    let i = Math.min(anchor, Math.max(this.expandedFlat.length - 1, 0));
-    for (; visibleNodes.length < TREE_PAGE_SIZE && i < this.expandedFlat.length; ) {
+    let nSurfaceNodes = 0;
+    for (let i = 0; i < this.expandedFlat.length; i++) {
       const node = this.expandedFlat[i];
-      if (!node.hidden) visibleNodes.push(node);
-      if (node.type === 'dir' && (node.hidden || !node.open)) i += node.nDesc;
-      i++;
+      if (!node.hidden) {
+        nSurfaceNodes++;
+        if (i >= anchor && visibleNodes.length < TREE_PAGE_SIZE) {
+          visibleNodes.push(node);
+        }
+      }
+      if (node.type === 'dir' && (node.hidden || !node.open)) {
+        i += node.nDesc;
+      }
     }
     return {
       nSelectedNodes: this.nSelectedNodes,
       nSelectedFiles: this.nSelectedFiles,
       nTotalNodes: this.expandedFlat.length,
+      nSurfaceNodes,
       visibleNodes,
     };
   }
