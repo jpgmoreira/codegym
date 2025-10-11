@@ -80,7 +80,7 @@ export class TreeManager {
       nSubSel = 0;
     const source = this.proxy!.target;
     while (curr) {
-      array.push(source.idToNode[curr.id]);
+      array.push(curr);
       if (curr.type === 'dir') {
         const dirHead = curr.dirs.headId ? source.idToNode[curr.dirs.headId] : null;
         const fileHead = curr.files.headId ? source.idToNode[curr.files.headId] : null;
@@ -133,7 +133,7 @@ export class TreeManager {
    */
   private refresh() {
     const before = Date.now();
-    const { dirHead, fileHead } = this.extractController(this.px.rootController);
+    const { dirHead, fileHead } = this.extractController(this.px.rootController, false);
     this.expandedFlat = [];
     this.nSelectedNodes = 0;
     this.nSelectedFiles = 0;
@@ -300,7 +300,7 @@ export class TreeManager {
   }
 
   private setSubtreeSelection(control: NodeController, state: boolean) {
-    const { dirHead, fileHead } = this.extractController(control);
+    const { dirHead, fileHead } = this.extractController(control, false);
     let curr: Node | null = dirHead;
     while (curr) {
       curr.selected = state;
