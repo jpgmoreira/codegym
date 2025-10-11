@@ -31,8 +31,8 @@
     :class="{ resizing: isResizing }"
   >
     <SettingsPageHeader />
-    <div class="flex grow border-2 border-emerald-500">
-      <div class="border-2 border-yellow-400" :style="{ width: `${treeAreaWidth}px` }">
+    <div class="flex grow">
+      <div :style="{ width: `${treeAreaWidth}px` }">
         <TreeView />
       </div>
       <div class="separator" :class="{ resizing: isResizing }" @mousedown="isResizing = true"></div>

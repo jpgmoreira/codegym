@@ -17,6 +17,8 @@
     y: number;
   };
 
+  const rowHeight = 30;
+
   const uiStore = useUIStore();
 
   const keys: ModifierKeys = {
@@ -40,6 +42,10 @@
   const searchText = ref('');
 
   const isSearching = computed(() => searchText.value.trim());
+
+  const ghostStyle = computed(() => ({
+    height: `${rowHeight * (tree.value?.nTotalNodes || 0)}px`,
+  }));
 
   function showContextMenu(type: ContextState['type'], targetNode: Node | null, e: MouseEvent) {
     contextState.visible = true;
@@ -183,32 +189,38 @@
         />
         <button class="btn-primary rounded-none" @click="search">Search</button>
       </div>
-      <TransitionGroup name="list" tag="div">
-        <div
-          v-for="(node, index) in tree.visibleNodes"
-          :style="{
-            paddingLeft: `${node.depth * 20}px`,
-            '--index': index,
-          }"
-          :key="node.id"
-        >
-          <span v-if="node.type === 'dir'" @click="toggleDirOpen(node)">
-            <span v-if="node.open">-</span>
-            <span v-else>+</span>
-          </span>
+      <div class="relative">
+        <div :style="ghostStyle"></div>
+        <div class="absolute top-0 left-0">
+          <TransitionGroup name="list" tag="div">
+            <div
+              v-for="(node, index) in tree.visibleNodes"
+              :style="{
+                paddingLeft: `${node.depth * 20}px`,
+                '--index': index,
+              }"
+              :key="node.id"
+            >
+              <span v-if="node.type === 'dir'" @click="toggleDirOpen(node)">
+                <span v-if="node.open">-</span>
+                <span v-else>+</span>
+              </span>
 
-          <AutoLengthInput
-            :class="{ selected: node.selected }"
-            v-model="node.text"
-            :readonly="renamingNode !== node"
-            @keydown.enter="applyRenaming"
-            @keydown.esc="undoRenaming"
-            @blur="applyRenaming"
-            @click.right.stop="(e: MouseEvent) => showContextMenu(node.type, node, e)"
-            @click="handleSelection(node)"
-          />
+              <AutoLengthInput
+                class="node-input"
+                :class="{ selected: node.selected }"
+                v-model="node.text"
+                :readonly="renamingNode !== node"
+                @keydown.enter="applyRenaming"
+                @keydown.esc="undoRenaming"
+                @blur="applyRenaming"
+                @click.right.stop="(e: MouseEvent) => showContextMenu(node.type, node, e)"
+                @click="handleSelection(node)"
+              />
+            </div>
+          </TransitionGroup>
         </div>
-      </TransitionGroup>
+      </div>
     </div>
   </div>
 </template>
@@ -216,6 +228,10 @@
 <style scoped>
   .selected {
     outline: 2px solid orange !important;
+  }
+
+  .node-input {
+    height: 30px;
   }
 
   /* --- Transitions --- */
