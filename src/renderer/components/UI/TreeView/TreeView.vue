@@ -138,8 +138,15 @@
   }
 
   async function handleSelection(node: Node) {
-    if (node.type === 'dir' && isSearching.value) return; // Do not allow dir selection while searching.
-    tree.value = await window.api.invoke(TreeChannels.handleSelection, anchor.value, node.id, keys);
+    if (isNodeDisabled(node)) return; // Do not allow folder selection while searching.
+    const localKeys = { ...keys };
+    if (props.checkbox) localKeys.ctrl = true;
+    tree.value = await window.api.invoke(
+      TreeChannels.handleSelection,
+      anchor.value,
+      node.id,
+      localKeys
+    );
   }
 
   async function deleteNode() {
@@ -168,6 +175,14 @@
       tree.value = await window.api.invoke(TreeChannels.getState, anchor.value);
       nodeContainerOffset.value = anchor.value * rowHeight; // This is the key! Using a computed-value causes flickering.
     }, 40);
+  }
+
+  function isCheckIndeterminate(node: Node) {
+    return Boolean(node.type === 'dir' && node.nSelDesc && node.nSelDesc < node.nDesc);
+  }
+
+  function isNodeDisabled(node: Node) {
+    return node.type === 'dir' && isSearching.value;
   }
 
   function windowKeyDown(e: KeyboardEvent) {
@@ -237,10 +252,11 @@
         <div :style="ghostStyle"></div>
         <div
           :style="{ transform: `translateY(${nodeContainerOffset}px)` }"
-          class="node-container absolute top-0 left-0"
+          class="nodes-container absolute top-0 left-0"
         >
           <!-- <TransitionGroup name="list" tag="div"> -->
           <div
+            class="flex items-center whitespace-nowrap"
             v-for="(node, index) in tree.visibleNodes"
             :style="{
               paddingLeft: `${node.depth * 20}px`,
@@ -253,17 +269,26 @@
               <span v-else>+</span>
             </span>
 
-            <AutoLengthInput
-              class="node-input"
-              :class="{ selected: node.selected }"
-              v-model="node.text"
-              :readonly="renamingNode !== node"
-              @keydown.enter="applyRenaming"
-              @keydown.esc="undoRenaming"
-              @blur="applyRenaming"
-              @click.right.stop="(e: MouseEvent) => showContextMenu(node.type, node, e)"
-              @click="handleSelection(node)"
-            />
+            <div class="flex items-center" @click="handleSelection(node)">
+              <input
+                v-if="props.checkbox"
+                type="checkbox"
+                :checked="node.selected"
+                :indeterminate="isCheckIndeterminate(node)"
+                :disabled="isNodeDisabled(node)"
+                :class="{ 'cursor-not-allowed': isNodeDisabled(node) }"
+              />
+              <AutoLengthInput
+                class="node-input"
+                :class="{ selected: node.selected, 'cursor-not-allowed': isNodeDisabled(node) }"
+                v-model="node.text"
+                :readonly="renamingNode !== node"
+                @keydown.enter="applyRenaming"
+                @keydown.esc="undoRenaming"
+                @blur="applyRenaming"
+                @click.right.stop="(e: MouseEvent) => showContextMenu(node.type, node, e)"
+              />
+            </div>
           </div>
           <!-- </TransitionGroup> -->
         </div>
@@ -281,7 +306,7 @@
     height: 30px;
   }
 
-  .node-container {
+  .nodes-container {
     will-change: transform;
   }
 
