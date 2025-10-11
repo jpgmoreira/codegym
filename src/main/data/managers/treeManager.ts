@@ -418,12 +418,18 @@ export class TreeManager {
         if (regex.test(node.text)) {
           node.hidden = false;
           const parent = this.getParent(node, false);
-          if (parent) parent.hidden = false;
+          if (parent) {
+            parent.hidden = false;
+            parent.open = true;
+          }
         }
       } else {
         if (!node.hidden) {
           const parent = this.getParent(node, false);
-          if (parent) parent.hidden = false;
+          if (parent) {
+            parent.hidden = false;
+            parent.open = true;
+          }
         }
       }
     }
