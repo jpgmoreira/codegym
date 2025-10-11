@@ -26,6 +26,7 @@
   };
 
   const rowHeight = 30;
+  const paddingBottom = 100;
 
   const uiStore = useUIStore();
 
@@ -50,12 +51,12 @@
   const scrollTimer = ref<NodeJS.Timeout | undefined>(undefined);
   const topNodeIndex = ref(0);
 
+  const isSearching = ref(false);
+
   const scrollContainer = useTemplateRef('scroll-container');
 
-  const isSearching = computed(() => searchText.value.trim());
-
   const ghostStyle = computed(() => ({
-    height: `${rowHeight * (tree.value?.nTotalNodes || 0)}px`,
+    height: `${rowHeight * (tree.value?.nSurfaceNodes || 0)}px`,
   }));
   const nodeContainerStyle = computed(() => ({
     transform: `translateY(${topNodeIndex.value * rowHeight}px)`,
@@ -74,11 +75,17 @@
     const node = contextState.activeNode;
     const parentId = node ? node.id : null;
     const prefix = type === 'dir' ? 'Folder' : 'Contest';
-    tree.value = await window.api.invoke(TreeChannels.createNode, 0, type, prefix, parentId);
+    tree.value = await window.api.invoke(
+      TreeChannels.createNode,
+      topNodeIndex.value,
+      type,
+      prefix,
+      parentId
+    );
   }
 
   async function toggleDirOpen(node: Node) {
-    tree.value = await window.api.invoke(TreeChannels.toggleDirOpen, 0, node.id);
+    tree.value = await window.api.invoke(TreeChannels.toggleDirOpen, topNodeIndex.value, node.id);
   }
 
   function startRenaming() {
@@ -127,30 +134,38 @@
 
   async function handleSelection(node: Node) {
     if (node.type === 'dir' && isSearching.value) return; // Do not allow dir selection while searching.
-    tree.value = await window.api.invoke(TreeChannels.handleSelection, 0, node.id, keys);
+    tree.value = await window.api.invoke(
+      TreeChannels.handleSelection,
+      topNodeIndex.value,
+      node.id,
+      keys
+    );
   }
 
   async function deleteNode() {
     const node = contextState.activeNode;
     if (!node) return;
-    tree.value = await window.api.invoke(TreeChannels.deleteNode, 0, node.id);
+    tree.value = await window.api.invoke(TreeChannels.deleteNode, topNodeIndex.value, node.id);
   }
 
   async function deleteSelectedNodes() {
-    tree.value = await window.api.invoke(TreeChannels.deleteSelectedNodes, 0);
+    tree.value = await window.api.invoke(TreeChannels.deleteSelectedNodes, topNodeIndex.value);
   }
 
   async function search() {
-    tree.value = await window.api.invoke(TreeChannels.search, 0, searchText.value.trim());
+    const text = searchText.value.trim();
+    isSearching.value = Boolean(text);
+    tree.value = await window.api.invoke(TreeChannels.search, topNodeIndex.value, text);
   }
 
   function handleScroll() {
     clearTimeout(scrollTimer.value);
-    scrollTimer.value = setTimeout(() => {
+    scrollTimer.value = setTimeout(async () => {
       const container = scrollContainer.value;
       if (!container) return;
       const scrollTop = container.scrollTop;
       topNodeIndex.value = Math.floor(scrollTop / rowHeight);
+      tree.value = await window.api.invoke(TreeChannels.getState, topNodeIndex.value);
     }, 40);
   }
 
@@ -217,33 +232,33 @@
       <div class="relative">
         <div :style="ghostStyle"></div>
         <div :style="nodeContainerStyle" class="node-container absolute top-0 left-0">
-          <TransitionGroup name="list" tag="div">
-            <div
-              v-for="(node, index) in tree.visibleNodes"
-              :style="{
-                paddingLeft: `${node.depth * 20}px`,
-                '--index': index,
-              }"
-              :key="node.id"
-            >
-              <span v-if="node.type === 'dir'" @click="toggleDirOpen(node)">
-                <span v-if="node.open">-</span>
-                <span v-else>+</span>
-              </span>
+          <!-- <TransitionGroup name="list" tag="div"> -->
+          <div
+            v-for="(node, index) in tree.visibleNodes"
+            :style="{
+              paddingLeft: `${node.depth * 20}px`,
+              '--index': index,
+            }"
+            :key="node.id"
+          >
+            <span v-if="node.type === 'dir'" @click="toggleDirOpen(node)">
+              <span v-if="node.open">-</span>
+              <span v-else>+</span>
+            </span>
 
-              <AutoLengthInput
-                class="node-input"
-                :class="{ selected: node.selected }"
-                v-model="node.text"
-                :readonly="renamingNode !== node"
-                @keydown.enter="applyRenaming"
-                @keydown.esc="undoRenaming"
-                @blur="applyRenaming"
-                @click.right.stop="(e: MouseEvent) => showContextMenu(node.type, node, e)"
-                @click="handleSelection(node)"
-              />
-            </div>
-          </TransitionGroup>
+            <AutoLengthInput
+              class="node-input"
+              :class="{ selected: node.selected }"
+              v-model="node.text"
+              :readonly="renamingNode !== node"
+              @keydown.enter="applyRenaming"
+              @keydown.esc="undoRenaming"
+              @blur="applyRenaming"
+              @click.right.stop="(e: MouseEvent) => showContextMenu(node.type, node, e)"
+              @click="handleSelection(node)"
+            />
+          </div>
+          <!-- </TransitionGroup> -->
         </div>
       </div>
     </div>
