@@ -78,11 +78,12 @@ export class TreeManager {
     let curr = node;
     let nSub = 0,
       nSubSel = 0;
+    const source = this.proxy!.target;
     while (curr) {
-      array.push(this.proxy!.target.idToNode[curr.id]);
+      array.push(source.idToNode[curr.id]);
       if (curr.type === 'dir') {
-        const dirHead = curr.dirs.headId ? this.px.idToNode[curr.dirs.headId] : null;
-        const fileHead = curr.files.headId ? this.px.idToNode[curr.files.headId] : null;
+        const dirHead = curr.dirs.headId ? source.idToNode[curr.dirs.headId] : null;
+        const fileHead = curr.files.headId ? source.idToNode[curr.files.headId] : null;
         const dirResult = this.flatten(dirHead, depth + 1, array);
         const fileResult = this.flatten(fileHead, depth + 1, array);
         curr.nDesc = dirResult[0] + fileResult[0];
@@ -99,7 +100,7 @@ export class TreeManager {
       nSubSel += sel;
       this.nSelectedNodes += sel;
       this.nSelectedFiles += curr.type === 'file' ? sel : 0;
-      curr = curr.nextId ? this.px.idToNode[curr.nextId] : null;
+      curr = curr.nextId ? source.idToNode[curr.nextId] : null;
     }
     return [nSub, nSubSel];
   }
@@ -131,12 +132,15 @@ export class TreeManager {
    *  - nSelDesc;
    */
   private refresh() {
+    const before = Date.now();
     const { dirHead, fileHead } = this.extractController(this.px.rootController);
     this.expandedFlat = [];
     this.nSelectedNodes = 0;
     this.nSelectedFiles = 0;
     this.flatten(dirHead, 0, this.expandedFlat);
     this.flatten(fileHead, 0, this.expandedFlat);
+    const after = Date.now();
+    console.log('-- refresh time:', after - before);
   }
 
   // --- Helpers: ---
