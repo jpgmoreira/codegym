@@ -106,7 +106,7 @@
   }
 
   async function handleSelection(node: Node) {
-    if (node.type === 'dir' && isSearching) return; // Do not allow dir selection while searching.
+    if (node.type === 'dir' && isSearching.value) return; // Do not allow dir selection while searching.
     tree.value = await window.api.invoke(TreeChannels.handleSelection, 0, node.id, keys);
   }
 
