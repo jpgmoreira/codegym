@@ -1,14 +1,13 @@
 export type NodeType = 'dir' | 'file';
 
+export type HeadAndTail = {
+  headId: string | null;
+  tailId: string | null;
+};
+
 export type NodeController = {
-  dirs: {
-    headId: string | null;
-    tailId: string | null;
-  };
-  files: {
-    headId: string | null;
-    tailId: string | null;
-  };
+  dirs: HeadAndTail;
+  files: HeadAndTail;
 };
 
 export type BaseNode = {

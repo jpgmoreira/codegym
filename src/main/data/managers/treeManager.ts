@@ -8,6 +8,7 @@ import {
   DirNode,
   NodeType,
   ModifierKeys,
+  HeadAndTail,
 } from '@common/types/tree';
 import { TreeOperationResponseDTO } from '@common/dto/treeOperationResponseDTO';
 import { GenericResponseDTO } from '@common/dto/genericResponseDTO';
@@ -84,8 +85,8 @@ export class TreeManager {
     while (curr) {
       array.push(curr);
       if (curr.type === 'dir') {
-        const dirHead = curr.dirs.headId ? this.target.idToNode[curr.dirs.headId] : null;
-        const fileHead = curr.files.headId ? this.target.idToNode[curr.files.headId] : null;
+        const dirHead = this.getHead(curr.dirs, false);
+        const fileHead = this.getHead(curr.files, false);
         const dirResult = this.flatten(dirHead, depth + 1, array);
         const fileResult = this.flatten(fileHead, depth + 1, array);
         curr.nDesc = dirResult[0] + fileResult[0];
@@ -102,7 +103,7 @@ export class TreeManager {
       nSubSel += sel;
       this.nSelectedNodes += sel;
       this.nSelectedFiles += curr.type === 'file' ? sel : 0;
-      curr = curr.nextId ? this.target.idToNode[curr.nextId] : null;
+      curr = this.getNext(curr, false);
     }
     return [nSub, nSubSel];
   }
@@ -134,52 +135,40 @@ export class TreeManager {
    *  - nSelDesc;
    */
   private refresh() {
-    const before = Date.now();
-    const { dirHead, fileHead } = this.extractController(this.target.rootController, false);
+    const dirHead = this.getHead(this.target.rootController.dirs, false);
+    const fileHead = this.getHead(this.target.rootController.files, false);
     this.expandedFlat = [];
     this.nSelectedNodes = 0;
     this.nSelectedFiles = 0;
     this.flatten(dirHead, 0, this.expandedFlat);
     this.flatten(fileHead, 0, this.expandedFlat);
     this._proxy!.queueWrite();
-    const after = Date.now();
-    console.log('-- refresh time:', after - before);
   }
 
   // --- Helpers: ---
 
-  private getFamily(node: Node, asProxy = true) {
+  private getHead(headAndTail: HeadAndTail, asProxy: boolean) {
     const source = asProxy ? this.proxy : this.target;
-    const result = {
-      parent: node.parentId ? (source.idToNode[node.parentId] as DirNode) : null,
-      next: node.nextId ? source.idToNode[node.nextId] : null,
-      prev: node.prevId ? source.idToNode[node.prevId] : null,
-      dirHead: null as DirNode | null,
-      dirTail: null as DirNode | null,
-      fileHead: null as FileNode | null,
-      fileTail: null as FileNode | null,
-    };
-    if (node.type === 'dir') {
-      const pointers = this.extractController(node, asProxy);
-      Object.assign(result, pointers);
-    }
-    return result;
+    const id = headAndTail.headId;
+    return id ? source.idToNode[id] : null;
   }
 
-  private extractController(control: NodeController, asProxy = true) {
+  private getTail(headAndTail: HeadAndTail, asProxy: boolean) {
     const source = asProxy ? this.proxy : this.target;
-    const result = {
-      dirHead: null as DirNode | null,
-      dirTail: null as DirNode | null,
-      fileHead: null as FileNode | null,
-      fileTail: null as FileNode | null,
-    };
-    const { dirs, files } = control;
-    if (dirs.headId) result.dirHead = source.idToNode[dirs.headId] as DirNode;
-    if (dirs.tailId) result.dirTail = source.idToNode[dirs.tailId] as DirNode;
-    if (files.headId) result.fileHead = source.idToNode[files.headId] as FileNode;
-    if (files.tailId) result.fileTail = source.idToNode[files.tailId] as FileNode;
-    return result;
+    const id = headAndTail.tailId;
+    return id ? source.idToNode[id] : null;
+  }
+
+  private getNext(node: Node, asProxy: boolean) {
+    const source = asProxy ? this.proxy : this.target;
+    const id = node.nextId;
+    return id ? source.idToNode[id] : null;
+  }
+
+  private getParent(node: Node, asProxy: boolean) {
+    const source = asProxy ? this.proxy : this.target;
+    const id = node.parentId;
+    return id ? (source.idToNode[id] as DirNode) : null;
   }
 
   // --- Creation: ---
@@ -227,8 +216,8 @@ export class TreeManager {
       sub.headId = node.id;
       sub.tailId = node.id;
     } else {
-      const tail = this.target.idToNode[sub.tailId!];
-      const { next } = this.getFamily(tail);
+      const tail = this.getTail(sub, true)!;
+      const next = this.getNext(tail, true);
       node.nextId = tail.nextId;
       tail.nextId = node.id;
       node.prevId = tail.id;
@@ -247,7 +236,7 @@ export class TreeManager {
       this.proxy.rootController.nextFile++;
     }
     this.proxy.idToNode[newNode.id] = newNode;
-    const { parent } = this.getFamily(newNode);
+    const parent = this.getParent(newNode, true);
     if (parent) {
       newNode.selected = parent.selected;
       parent.open = true;
@@ -276,8 +265,9 @@ export class TreeManager {
       };
     }
     const node = this.proxy.idToNode[nodeId];
-    const control = this.getFamily(node, false).parent || this.target.rootController;
-    const { dirHead, fileHead } = this.extractController(control, false);
+    const control = this.getParent(node, false) || this.target.rootController;
+    const dirHead = this.getHead(control.dirs, false);
+    const fileHead = this.getHead(control.files, false);
     for (const head of [dirHead, fileHead]) {
       let curr = head;
       while (curr) {
@@ -287,7 +277,7 @@ export class TreeManager {
             errorMsg: 'Name already exists in this folder.',
           };
         }
-        curr = this.getFamily(curr, false).next;
+        curr = this.getNext(curr, false);
       }
     }
     node.text = newName;
@@ -303,17 +293,18 @@ export class TreeManager {
   }
 
   private setSubtreeSelection(control: NodeController, state: boolean) {
-    const { dirHead, fileHead } = this.extractController(control, false);
+    const dirHead = this.getHead(control.dirs, false);
+    const fileHead = this.getHead(control.files, false);
     let curr: Node | null = dirHead;
     while (curr) {
       curr.selected = state;
       this.setSubtreeSelection(curr as DirNode, state);
-      curr = this.getFamily(curr).next;
+      curr = this.getNext(curr, false);
     }
     curr = fileHead;
     while (curr) {
       curr.selected = state;
-      curr = this.getFamily(curr).next;
+      curr = this.getNext(curr, false);
     }
   }
 
@@ -326,9 +317,12 @@ export class TreeManager {
       if (!nextState) return;
     }
     node.selected = nextState;
+    const before = Date.now();
     if (node.type === 'dir') {
       this.setSubtreeSelection(node, nextState);
     }
+    const after = Date.now();
+    console.log(after - before);
     this.refresh();
   }
 }
