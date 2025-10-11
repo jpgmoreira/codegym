@@ -115,10 +115,10 @@ export class TreeManager {
     for (let i = 0; i < this.expandedFlat.length; i++) {
       const node = this.expandedFlat[i];
       if (!node.hidden) {
-        nSurfaceNodes++;
-        if (i >= anchor && visibleNodes.length < TREE_PAGE_SIZE) {
+        if (nSurfaceNodes >= anchor && visibleNodes.length < TREE_PAGE_SIZE) {
           visibleNodes.push(node);
         }
+        nSurfaceNodes++;
       }
       if (node.type === 'dir' && (node.hidden || !node.open)) {
         i += node.nDesc;

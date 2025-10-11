@@ -58,9 +58,7 @@
   const ghostStyle = computed(() => ({
     height: `${rowHeight * (tree.value?.nSurfaceNodes || 0)}px`,
   }));
-  const nodeContainerStyle = computed(() => ({
-    transform: `translateY(${anchor.value * rowHeight}px)`,
-  }));
+  const nodeContainerOffset = ref(0);
 
   function showContextMenu(type: ContextState['type'], targetNode: Node | null, e: MouseEvent) {
     contextState.visible = true;
@@ -153,15 +151,14 @@
     tree.value = await window.api.invoke(TreeChannels.search, anchor.value, text);
   }
 
-  function handleScroll() {
-    clearTimeout(scrollTimer.value);
-    scrollTimer.value = setTimeout(async () => {
-      const container = scrollContainer.value;
-      if (!container) return;
-      const scrollTop = container.scrollTop;
-      anchor.value = Math.floor(scrollTop / rowHeight);
-      tree.value = await window.api.invoke(TreeChannels.getState, anchor.value);
-    }, 40);
+  async function handleScroll() {
+    const container = scrollContainer.value;
+    if (!container) return;
+    const scrollTop = container.scrollTop;
+    anchor.value = Math.floor(scrollTop / rowHeight);
+    console.log('- anchor:', anchor.value);
+    tree.value = await window.api.invoke(TreeChannels.getState, anchor.value);
+    nodeContainerOffset.value = anchor.value * rowHeight; // This is the key! Using a computed-value causes flickering.
   }
 
   function windowKeyDown(e: KeyboardEvent) {
@@ -226,7 +223,10 @@
       </div>
       <div class="relative">
         <div :style="ghostStyle"></div>
-        <div :style="nodeContainerStyle" class="node-container absolute top-0 left-0">
+        <div
+          :style="{ transform: `translateY(${nodeContainerOffset}px)` }"
+          class="node-container absolute top-0 left-0"
+        >
           <!-- <TransitionGroup name="list" tag="div"> -->
           <div
             v-for="(node, index) in tree.visibleNodes"
