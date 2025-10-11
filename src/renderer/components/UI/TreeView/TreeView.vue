@@ -25,6 +25,13 @@
     y: number;
   };
 
+  const props = defineProps({
+    checkbox: {
+      type: Boolean,
+      required: false,
+    },
+  });
+
   const rowHeight = 30;
   const paddingBottom = 100;
 
@@ -190,11 +197,9 @@
   <div>Selected files: {{ tree?.nSelectedFiles }}</div> -->
   <div
     v-if="hasLoaded"
-    ref="scroll-container"
-    class="border-2 border-violet-500 relative overflow-auto h-full z-0"
+    class="relative z-0 h-full"
     @click.right="(e) => showContextMenu('root', null, e)"
     @click="() => (contextState.visible = false)"
-    @scroll="handleScroll"
   >
     <ContextMenu
       class="z-20"
@@ -213,7 +218,12 @@
     >
       Right-click here
     </div>
-    <div v-else-if="tree" class="absolute top-0 left-0 w-full z-10">
+    <div
+      v-else-if="tree"
+      class="absolute top-0 left-0 w-full z-10 overflow-auto h-full"
+      ref="scroll-container"
+      @scroll="handleScroll"
+    >
       <div class="flex w-full">
         <input
           v-model.trim="searchText"

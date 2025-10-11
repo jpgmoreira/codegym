@@ -26,10 +26,7 @@
 </script>
 
 <template>
-  <div
-    class="main-container flex flex-col h-[100vh] border-2 border-red-500"
-    :class="{ resizing: isResizing }"
-  >
+  <div class="main-container flex flex-col h-[100vh]" :class="{ resizing: isResizing }">
     <SettingsPageHeader />
     <div class="flex grow">
       <div :style="{ width: `${treeAreaWidth}px` }">
