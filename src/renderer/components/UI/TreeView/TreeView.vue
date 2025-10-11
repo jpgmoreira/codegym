@@ -183,27 +183,29 @@
         />
         <button class="btn-primary rounded-none" @click="search">Search</button>
       </div>
-      <div
-        v-for="node in tree.visibleNodes"
-        :style="{ paddingLeft: `${node.depth * 20}px` }"
-        :key="node.id"
-      >
-        <span v-if="node.type === 'dir'" @click="toggleDirOpen(node)">
-          <span v-if="node.open">-</span>
-          <span v-else>+</span>
-        </span>
+      <TransitionGroup name="list" tag="div">
+        <div
+          v-for="node in tree.visibleNodes"
+          :style="{ paddingLeft: `${node.depth * 20}px` }"
+          :key="node.id"
+        >
+          <span v-if="node.type === 'dir'" @click="toggleDirOpen(node)">
+            <span v-if="node.open">-</span>
+            <span v-else>+</span>
+          </span>
 
-        <AutoLengthInput
-          :class="{ selected: node.selected }"
-          v-model="node.text"
-          :readonly="renamingNode !== node"
-          @keydown.enter="applyRenaming"
-          @keydown.esc="undoRenaming"
-          @blur="applyRenaming"
-          @click.right.stop="(e: MouseEvent) => showContextMenu(node.type, node, e)"
-          @click="handleSelection(node)"
-        />
-      </div>
+          <AutoLengthInput
+            :class="{ selected: node.selected }"
+            v-model="node.text"
+            :readonly="renamingNode !== node"
+            @keydown.enter="applyRenaming"
+            @keydown.esc="undoRenaming"
+            @blur="applyRenaming"
+            @click.right.stop="(e: MouseEvent) => showContextMenu(node.type, node, e)"
+            @click="handleSelection(node)"
+          />
+        </div>
+      </TransitionGroup>
     </div>
   </div>
 </template>
@@ -211,5 +213,19 @@
 <style scoped>
   .selected {
     outline: 2px solid orange !important;
+  }
+  /* Open/close animation */
+  .list-move,
+  .list-enter-active,
+  .list-leave-active {
+    transition: all 0.3s ease;
+  }
+  .list-enter-from,
+  .list-leave-to {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  .list-leave-active {
+    position: absolute;
   }
 </style>
