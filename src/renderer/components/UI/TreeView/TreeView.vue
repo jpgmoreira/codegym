@@ -49,7 +49,7 @@
   const originalName = ref('');
   const searchText = ref('');
   const scrollTimer = ref<NodeJS.Timeout | undefined>(undefined);
-  const topNodeIndex = ref(0);
+  const anchor = ref(0);
 
   const isSearching = ref(false);
 
@@ -59,7 +59,7 @@
     height: `${rowHeight * (tree.value?.nSurfaceNodes || 0)}px`,
   }));
   const nodeContainerStyle = computed(() => ({
-    transform: `translateY(${topNodeIndex.value * rowHeight}px)`,
+    transform: `translateY(${anchor.value * rowHeight}px)`,
   }));
 
   function showContextMenu(type: ContextState['type'], targetNode: Node | null, e: MouseEvent) {
@@ -77,7 +77,7 @@
     const prefix = type === 'dir' ? 'Folder' : 'Contest';
     tree.value = await window.api.invoke(
       TreeChannels.createNode,
-      topNodeIndex.value,
+      anchor.value,
       type,
       prefix,
       parentId
@@ -85,7 +85,7 @@
   }
 
   async function toggleDirOpen(node: Node) {
-    tree.value = await window.api.invoke(TreeChannels.toggleDirOpen, topNodeIndex.value, node.id);
+    tree.value = await window.api.invoke(TreeChannels.toggleDirOpen, anchor.value, node.id);
   }
 
   function startRenaming() {
@@ -134,28 +134,23 @@
 
   async function handleSelection(node: Node) {
     if (node.type === 'dir' && isSearching.value) return; // Do not allow dir selection while searching.
-    tree.value = await window.api.invoke(
-      TreeChannels.handleSelection,
-      topNodeIndex.value,
-      node.id,
-      keys
-    );
+    tree.value = await window.api.invoke(TreeChannels.handleSelection, anchor.value, node.id, keys);
   }
 
   async function deleteNode() {
     const node = contextState.activeNode;
     if (!node) return;
-    tree.value = await window.api.invoke(TreeChannels.deleteNode, topNodeIndex.value, node.id);
+    tree.value = await window.api.invoke(TreeChannels.deleteNode, anchor.value, node.id);
   }
 
   async function deleteSelectedNodes() {
-    tree.value = await window.api.invoke(TreeChannels.deleteSelectedNodes, topNodeIndex.value);
+    tree.value = await window.api.invoke(TreeChannels.deleteSelectedNodes, anchor.value);
   }
 
   async function search() {
     const text = searchText.value.trim();
     isSearching.value = Boolean(text);
-    tree.value = await window.api.invoke(TreeChannels.search, topNodeIndex.value, text);
+    tree.value = await window.api.invoke(TreeChannels.search, anchor.value, text);
   }
 
   function handleScroll() {
@@ -164,8 +159,8 @@
       const container = scrollContainer.value;
       if (!container) return;
       const scrollTop = container.scrollTop;
-      topNodeIndex.value = Math.floor(scrollTop / rowHeight);
-      tree.value = await window.api.invoke(TreeChannels.getState, topNodeIndex.value);
+      anchor.value = Math.floor(scrollTop / rowHeight);
+      tree.value = await window.api.invoke(TreeChannels.getState, anchor.value);
     }, 40);
   }
 
@@ -191,9 +186,9 @@
 </script>
 
 <template>
-  <div>Total nodes: {{ tree?.nTotalNodes }}</div>
+  <!-- <div>Total nodes: {{ tree?.nTotalNodes }}</div>
   <div>Selected nodes: {{ tree?.nSelectedNodes }}</div>
-  <div>Selected files: {{ tree?.nSelectedFiles }}</div>
+  <div>Selected files: {{ tree?.nSelectedFiles }}</div> -->
   <div
     v-if="hasLoaded"
     ref="scroll-container"

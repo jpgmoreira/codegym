@@ -3,7 +3,7 @@
   import TreeView from '@renderer/components/UI/TreeView/TreeView.vue';
   import SettingsPageHeader from '@renderer/components/Header/custom/SettingsPageHeader.vue';
 
-  const treeAreaWidth = ref(200);
+  const treeAreaWidth = ref(300);
   const isResizing = ref(false);
 
   function windowMouseUp() {
