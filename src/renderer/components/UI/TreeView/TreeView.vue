@@ -56,7 +56,7 @@
   const scrollContainer = useTemplateRef('scroll-container');
 
   const ghostStyle = computed(() => ({
-    height: `${rowHeight * (tree.value?.nSurfaceNodes || 0)}px`,
+    height: `${rowHeight * (tree.value?.nSurfaceNodes || 0) + paddingBottom}px`,
   }));
   const nodeContainerOffset = ref(0);
 
