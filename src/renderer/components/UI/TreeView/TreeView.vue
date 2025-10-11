@@ -3,7 +3,15 @@
   import { TreeOperationResponseDTO } from '@common/dto/treeOperationResponseDTO';
   import { NodeType, Node, ModifierKeys } from '@common/types/tree';
   import { TreeChannels } from '@common/types/treeChannels';
-  import { ref, onMounted, reactive, nextTick, onBeforeUnmount, computed } from 'vue';
+  import {
+    ref,
+    onMounted,
+    reactive,
+    nextTick,
+    onBeforeUnmount,
+    useTemplateRef,
+    computed,
+  } from 'vue';
   import AutoLengthInput from '../AutoLengthInput.vue';
   import { GenericResponseDTO } from '@common/dto/genericResponseDTO';
   import { useUIStore } from '@renderer/store/ui';
@@ -38,13 +46,19 @@
 
   const renamingNode = ref<Node | null>(null);
   const originalName = ref('');
-
   const searchText = ref('');
+  const scrollTimer = ref<NodeJS.Timeout | undefined>(undefined);
+  const topNodeIndex = ref(0);
+
+  const scrollContainer = useTemplateRef('scroll-container');
 
   const isSearching = computed(() => searchText.value.trim());
 
   const ghostStyle = computed(() => ({
     height: `${rowHeight * (tree.value?.nTotalNodes || 0)}px`,
+  }));
+  const nodeContainerStyle = computed(() => ({
+    transform: `translateY(${topNodeIndex.value * rowHeight}px)`,
   }));
 
   function showContextMenu(type: ContextState['type'], targetNode: Node | null, e: MouseEvent) {
@@ -130,6 +144,16 @@
     tree.value = await window.api.invoke(TreeChannels.search, 0, searchText.value.trim());
   }
 
+  function handleScroll() {
+    clearTimeout(scrollTimer.value);
+    scrollTimer.value = setTimeout(() => {
+      const container = scrollContainer.value;
+      if (!container) return;
+      const scrollTop = container.scrollTop;
+      topNodeIndex.value = Math.floor(scrollTop / rowHeight);
+    }, 40);
+  }
+
   function windowKeyDown(e: KeyboardEvent) {
     if (e.key === 'Control') keys.ctrl = true;
   }
@@ -157,10 +181,11 @@
   <div>Selected files: {{ tree?.nSelectedFiles }}</div>
   <div
     v-if="hasLoaded"
+    ref="scroll-container"
     class="border-2 border-violet-500 relative overflow-auto h-full z-0"
     @click.right="(e) => showContextMenu('root', null, e)"
     @click="() => (contextState.visible = false)"
-    @scroll="() => (contextState.visible = false)"
+    @scroll="handleScroll"
   >
     <ContextMenu
       class="z-20"
@@ -191,7 +216,7 @@
       </div>
       <div class="relative">
         <div :style="ghostStyle"></div>
-        <div class="absolute top-0 left-0">
+        <div :style="nodeContainerStyle" class="node-container absolute top-0 left-0">
           <TransitionGroup name="list" tag="div">
             <div
               v-for="(node, index) in tree.visibleNodes"
@@ -232,6 +257,10 @@
 
   .node-input {
     height: 30px;
+  }
+
+  .node-container {
+    will-change: transform;
   }
 
   /* --- Transitions --- */
