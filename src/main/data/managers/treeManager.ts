@@ -139,7 +139,7 @@ export class TreeManager {
   private refresh() {
     const dirHead = this.getHead(this.target.rootController.dirs, false);
     const fileHead = this.getHead(this.target.rootController.files, false);
-    this.expandedFlat = [];
+    this.expandedFlat.length = 0;
     this.nSelectedNodes = 0;
     this.nSelectedFiles = 0;
     this.flatten(dirHead, 0, this.expandedFlat);
