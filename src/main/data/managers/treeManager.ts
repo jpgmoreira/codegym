@@ -333,6 +333,10 @@ export class TreeManager {
   // --- Deletion: ---
 
   private removeNodeFromTree(node: Node) {
+    if (node.parentId && !(node.parentId in this.target.idToNode)) {
+      // Orphaned node: no need to remove from tree.
+      return;
+    }
     const control = node.parentId ? this.getParent(node, false)! : this.target.rootController;
     const sub = node.type === 'file' ? control.files : control.dirs;
     const head = this.getHead(sub, false)!;
@@ -352,11 +356,13 @@ export class TreeManager {
     while (curr) {
       this.deleteCallback(curr);
       this.deleteSubtree(curr as DirNode);
+      delete this.target.idToNode[curr.id];
       curr = this.getNext(curr, false);
     }
     curr = fileHead;
     while (curr) {
       this.deleteCallback(curr);
+      delete this.target.idToNode[curr.id];
       curr = this.getNext(curr, false);
     }
   }
@@ -376,6 +382,18 @@ export class TreeManager {
     this.deleteCallback(node);
     if (node.type === 'dir') {
       this.deleteSubtree(node);
+    }
+    delete this.target.idToNode[nodeId];
+    this.refresh();
+  }
+
+  public deleteSelectedNodes() {
+    for (const node of this.expandedFlat) {
+      if (node.selected) {
+        this.removeNodeFromTree(node);
+        this.deleteCallback(node);
+        delete this.target.idToNode[node.id];
+      }
     }
     this.refresh();
   }

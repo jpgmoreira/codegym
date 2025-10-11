@@ -8,4 +8,5 @@ export enum TreeChannels {
   renameNode = 'rename-node',
   handleSelection = 'handle-selection',
   deleteNode = 'delete-node',
+  deleteSelectedNodes = 'delete-selected-nodes',
 }

@@ -111,6 +111,10 @@
     tree.value = await window.api.invoke(TreeChannels.deleteNode, 0, node.id);
   }
 
+  async function deleteSelectedNodes() {
+    tree.value = await window.api.invoke(TreeChannels.deleteSelectedNodes, 0);
+  }
+
   function windowKeyDown(e: KeyboardEvent) {
     if (e.key === 'Control') keys.ctrl = true;
   }
@@ -145,10 +149,12 @@
     <ContextMenu
       class="z-20"
       :tree="tree"
+      :n-selected-nodes="tree?.nSelectedNodes || 0"
       v-bind="contextState"
       @create-node="createNode"
       @rename-node="startRenaming"
       @delete-node="deleteNode"
+      @delete-selected-nodes="deleteSelectedNodes"
     />
     <div
       v-if="!tree?.visibleNodes.length"

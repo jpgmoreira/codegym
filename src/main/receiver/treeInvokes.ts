@@ -61,3 +61,11 @@ ipcMain.handle(
     return TreeManager.instance.buildResult(anchor);
   }
 );
+
+ipcMain.handle(
+  TreeChannels.deleteSelectedNodes,
+  (_: IpcMainInvokeEvent, anchor: number): TreeOperationResponseDTO => {
+    TreeManager.instance.deleteSelectedNodes();
+    return TreeManager.instance.buildResult(anchor);
+  }
+);

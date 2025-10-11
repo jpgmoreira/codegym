@@ -7,6 +7,7 @@
     tree: TreeOperationResponseDTO | null;
     visible: boolean;
     type: NodeType | 'root';
+    nSelectedNodes: number;
     x: number;
     y: number;
   };
@@ -15,6 +16,7 @@
     (e: 'createNode', type: NodeType): void;
     (e: 'renameNode'): void;
     (e: 'deleteNode'): void;
+    (e: 'deleteSelectedNodes'): void;
   }>();
 
   const props = defineProps<ContextProps>();
@@ -39,6 +41,7 @@
     <div v-if="props.type === 'root'">
       <div @click="emit('createNode', 'file')">New contest</div>
       <div @click="emit('createNode', 'dir')">New folder</div>
+      <div v-if="props.nSelectedNodes" @click="emit('deleteSelectedNodes')">Delete selected</div>
     </div>
     <div v-else-if="props.type === 'dir'">
       <div @click="emit('createNode', 'file')">New contest</div>
