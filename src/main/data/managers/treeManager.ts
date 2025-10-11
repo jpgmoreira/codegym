@@ -317,12 +317,9 @@ export class TreeManager {
       if (!nextState) return;
     }
     node.selected = nextState;
-    const before = Date.now();
     if (node.type === 'dir') {
       this.setSubtreeSelection(node, nextState);
     }
-    const after = Date.now();
-    console.log(after - before);
     this.refresh();
   }
 }
