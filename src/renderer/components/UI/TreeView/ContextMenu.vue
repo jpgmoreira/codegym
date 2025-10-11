@@ -1,13 +1,14 @@
 <script lang="ts" setup>
   import { TreeOperationResponseDTO } from '@common/dto/treeOperationResponseDTO';
   import { NodeType } from '@common/types/tree';
-  import { ref, watch } from 'vue';
+  import { ref, watch, computed } from 'vue';
 
   export type ContextProps = {
     tree: TreeOperationResponseDTO | null;
     visible: boolean;
     type: NodeType | 'root';
     nSelectedNodes: number;
+    searchText: string;
     x: number;
     y: number;
   };
@@ -22,6 +23,8 @@
   const props = defineProps<ContextProps>();
 
   const style = ref<Record<string, string>>({});
+
+  const isSearching = computed(() => props.searchText.trim());
 
   function computeContextStyle() {
     style.value = {};
@@ -39,15 +42,15 @@
 <template>
   <div class="fixed" v-if="props.visible" :style="style">
     <div v-if="props.type === 'root'">
-      <div @click="emit('createNode', 'file')">New contest</div>
-      <div @click="emit('createNode', 'dir')">New folder</div>
+      <div v-if="!isSearching" @click="emit('createNode', 'file')">New contest</div>
+      <div v-if="!isSearching" @click="emit('createNode', 'dir')">New folder</div>
       <div v-if="props.nSelectedNodes" @click="emit('deleteSelectedNodes')">Delete selected</div>
     </div>
     <div v-else-if="props.type === 'dir'">
-      <div @click="emit('createNode', 'file')">New contest</div>
-      <div @click="emit('createNode', 'dir')">New folder</div>
+      <div v-if="!isSearching" @click="emit('createNode', 'file')">New contest</div>
+      <div v-if="!isSearching" @click="emit('createNode', 'dir')">New folder</div>
       <div @click="emit('renameNode')">Rename</div>
-      <div @click="emit('deleteNode')">Delete</div>
+      <div v-if="!isSearching" @click="emit('deleteNode')">Delete</div>
     </div>
     <div v-else-if="props.type === 'file'">
       <div @click="emit('renameNode')">Rename</div>

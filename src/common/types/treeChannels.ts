@@ -9,4 +9,5 @@ export enum TreeChannels {
   handleSelection = 'handle-selection',
   deleteNode = 'delete-node',
   deleteSelectedNodes = 'delete-selected-nodes',
+  search = 'search',
 }

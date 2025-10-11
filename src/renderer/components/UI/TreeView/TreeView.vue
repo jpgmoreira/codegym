@@ -3,7 +3,7 @@
   import { TreeOperationResponseDTO } from '@common/dto/treeOperationResponseDTO';
   import { NodeType, Node, ModifierKeys } from '@common/types/tree';
   import { TreeChannels } from '@common/types/treeChannels';
-  import { ref, onMounted, reactive, nextTick, onBeforeUnmount } from 'vue';
+  import { ref, onMounted, reactive, nextTick, onBeforeUnmount, computed } from 'vue';
   import AutoLengthInput from '../AutoLengthInput.vue';
   import { GenericResponseDTO } from '@common/dto/genericResponseDTO';
   import { useUIStore } from '@renderer/store/ui';
@@ -36,6 +36,10 @@
 
   const renamingNode = ref<Node | null>(null);
   const originalName = ref('');
+
+  const searchText = ref('');
+
+  const isSearching = computed(() => searchText.value.trim());
 
   function showContextMenu(type: ContextState['type'], targetNode: Node | null, e: MouseEvent) {
     contextState.visible = true;
@@ -102,6 +106,7 @@
   }
 
   async function handleSelection(node: Node) {
+    if (node.type === 'dir' && isSearching) return; // Do not allow dir selection while searching.
     tree.value = await window.api.invoke(TreeChannels.handleSelection, 0, node.id, keys);
   }
 
@@ -113,6 +118,10 @@
 
   async function deleteSelectedNodes() {
     tree.value = await window.api.invoke(TreeChannels.deleteSelectedNodes, 0);
+  }
+
+  async function search() {
+    tree.value = await window.api.invoke(TreeChannels.search, 0, searchText.value.trim());
   }
 
   function windowKeyDown(e: KeyboardEvent) {
@@ -129,7 +138,8 @@
     window.addEventListener('keydown', windowKeyDown);
     window.addEventListener('keyup', windowKeyUp);
   });
-  onBeforeUnmount(() => {
+  onBeforeUnmount(async () => {
+    await window.api.invoke(TreeChannels.search, 0, ''); // Clear search when leaving.
     window.removeEventListener('keydown', windowKeyDown);
     window.removeEventListener('keyup', windowKeyUp);
   });
@@ -150,6 +160,7 @@
       class="z-20"
       :tree="tree"
       :n-selected-nodes="tree?.nSelectedNodes || 0"
+      :search-text="searchText"
       v-bind="contextState"
       @create-node="createNode"
       @rename-node="startRenaming"
@@ -157,12 +168,21 @@
       @delete-selected-nodes="deleteSelectedNodes"
     />
     <div
-      v-if="!tree?.visibleNodes.length"
+      v-if="!isSearching && !tree?.visibleNodes.length"
       class="absolute-center whitespace-nowrap text-lg opacity-70"
     >
       Right-click here
     </div>
     <div v-else class="absolute top-0 left-0 w-full z-10">
+      <div class="flex w-full">
+        <input
+          v-model.trim="searchText"
+          class="w-full rounded-none"
+          type="text"
+          placeholder="Search for files..."
+        />
+        <button class="btn-primary rounded-none" @click="search">Search</button>
+      </div>
       <div
         v-for="node in tree.visibleNodes"
         :style="{ paddingLeft: `${node.depth * 20}px` }"

@@ -69,3 +69,11 @@ ipcMain.handle(
     return TreeManager.instance.buildResult(anchor);
   }
 );
+
+ipcMain.handle(
+  TreeChannels.search,
+  (_: IpcMainInvokeEvent, anchor: number, searchText: string): TreeOperationResponseDTO => {
+    TreeManager.instance.search(searchText);
+    return TreeManager.instance.buildResult(anchor);
+  }
+);

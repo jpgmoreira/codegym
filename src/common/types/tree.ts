@@ -15,6 +15,7 @@ export type BaseNode = {
   text: string;
   depth: number;
   selected: boolean;
+  hidden: boolean;
   parentId: string | null;
   nextId: string | null;
   prevId: string | null;

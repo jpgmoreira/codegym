@@ -74,6 +74,7 @@ export class TreeManager {
     const filePath = path.join(DATA_DIR, 'profileData', profileId, 'tree.json');
     this._proxy = new FileProxy(filePath, this.getEmptyTreeData());
     this.refresh();
+    this.clearHidden();
   }
 
   // --- Result and flattening: ---
@@ -110,11 +111,11 @@ export class TreeManager {
 
   public buildResult(anchor: number): TreeOperationResponseDTO {
     const visibleNodes: Node[] = [];
-    let i = Math.min(anchor, this.expandedFlat.length - 1);
+    let i = Math.min(anchor, Math.max(this.expandedFlat.length - 1, 0));
     for (let j = 0; j < TREE_PAGE_SIZE && i < this.expandedFlat.length; j++) {
       const node = this.expandedFlat[i];
-      visibleNodes.push(node);
-      if (node.type === 'dir' && !node.open) i += node.nDesc;
+      if (!node.hidden) visibleNodes.push(node);
+      if (node.type === 'dir' && (node.hidden || !node.open)) i += node.nDesc;
       i++;
     }
     return {
@@ -188,6 +189,7 @@ export class TreeManager {
       depth: 0,
       open: false,
       selected: false,
+      hidden: false,
       parentId,
       nextId: null,
       prevId: null,
@@ -211,6 +213,7 @@ export class TreeManager {
       text: `${prefix} ${this.target.rootController.nextFile}`,
       depth: 0,
       selected: false,
+      hidden: false,
       parentId,
       nextId: null,
       prevId: null,
@@ -396,5 +399,37 @@ export class TreeManager {
       }
     }
     this.refresh();
+  }
+
+  // --- Search: ---
+
+  public search(text: string) {
+    text = text.trim();
+    if (!text) {
+      this.clearHidden();
+      return;
+    }
+    this.clearSelection(); // Clear selection on search to avoid confusion.
+    const regex = new RegExp(text, 'i');
+    for (const node of this.expandedFlat) node.hidden = true;
+    for (let i = this.expandedFlat.length - 1; i >= 0; i--) {
+      const node = this.expandedFlat[i];
+      if (node.type === 'file') {
+        if (regex.test(node.text)) {
+          node.hidden = false;
+          const parent = this.getParent(node, false);
+          if (parent) parent.hidden = false;
+        }
+      } else {
+        if (!node.hidden) {
+          const parent = this.getParent(node, false);
+          if (parent) parent.hidden = false;
+        }
+      }
+    }
+  }
+
+  public clearHidden() {
+    for (const node of this.expandedFlat) node.hidden = false;
   }
 }
