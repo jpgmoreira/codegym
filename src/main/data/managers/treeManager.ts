@@ -112,7 +112,7 @@ export class TreeManager {
   public buildResult(anchor: number): TreeOperationResponseDTO {
     const visibleNodes: Node[] = [];
     let i = Math.min(anchor, Math.max(this.expandedFlat.length - 1, 0));
-    for (let j = 0; j < TREE_PAGE_SIZE && i < this.expandedFlat.length; j++) {
+    for (; visibleNodes.length < TREE_PAGE_SIZE && i < this.expandedFlat.length; ) {
       const node = this.expandedFlat[i];
       if (!node.hidden) visibleNodes.push(node);
       if (node.type === 'dir' && (node.hidden || !node.open)) i += node.nDesc;
