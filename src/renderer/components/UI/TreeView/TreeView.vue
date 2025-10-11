@@ -185,8 +185,11 @@
       </div>
       <TransitionGroup name="list" tag="div">
         <div
-          v-for="node in tree.visibleNodes"
-          :style="{ paddingLeft: `${node.depth * 20}px` }"
+          v-for="(node, index) in tree.visibleNodes"
+          :style="{
+            paddingLeft: `${node.depth * 20}px`,
+            '--index': index,
+          }"
           :key="node.id"
         >
           <span v-if="node.type === 'dir'" @click="toggleDirOpen(node)">
@@ -214,18 +217,52 @@
   .selected {
     outline: 2px solid orange !important;
   }
-  /* Open/close animation */
+
+  /* --- Transitions --- */
   .list-move,
   .list-enter-active,
   .list-leave-active {
-    transition: all 0.3s ease;
+    transition: all 0.25s ease;
+    overflow: hidden;
   }
-  .list-enter-from,
-  .list-leave-to {
+
+  /* Entering */
+  .list-enter-from {
     opacity: 0;
     transform: translateY(-10px);
+    max-height: 0;
+  }
+  .list-enter-to {
+    opacity: 1;
+    transform: translateY(0);
+    max-height: 40px; /* adjust for maximum item height */
+  }
+
+  /* Leaving */
+  .list-leave-from {
+    opacity: 1;
+    transform: translateY(0);
+    max-height: 40px;
+  }
+  .list-leave-to {
+    opacity: 0;
+    transform: translateY(10px);
+    max-height: 0;
+  }
+
+  /* --- Smoother staggering --- */
+  .list-enter-active,
+  .list-leave-active {
+    transition-property: opacity, transform, max-height;
+    transition-duration: 0.25s;
+    transition-timing-function: ease;
+  }
+
+  /* Smaller delay */
+  .list-enter-active {
+    transition-delay: calc(var(--index) * 1ms);
   }
   .list-leave-active {
-    position: absolute;
+    transition-delay: 1ms;
   }
 </style>
