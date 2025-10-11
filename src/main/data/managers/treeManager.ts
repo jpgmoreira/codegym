@@ -141,6 +141,7 @@ export class TreeManager {
     this.nSelectedFiles = 0;
     this.flatten(dirHead, 0, this.expandedFlat);
     this.flatten(fileHead, 0, this.expandedFlat);
+    this._proxy!.queueWrite();
     const after = Date.now();
     console.log('-- refresh time:', after - before);
   }
@@ -321,6 +322,7 @@ export class TreeManager {
     const nextState = !node.selected;
     if (!keys.ctrl) {
       this.clearSelection();
+      this._proxy!.queueWrite();
       if (!nextState) return;
     }
     node.selected = nextState;

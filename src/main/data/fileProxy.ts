@@ -65,17 +65,19 @@ export class FileProxy<T extends JSONObject> {
   private proxySetHandler(obj: JSONObject, prop: string, value: JSONValue) {
     if (obj[prop] === value) return true;
     obj[prop] = value;
-    clearTimeout(this.timer);
-    this.timer = setTimeout(() => this.queueWrite(), DISK_FLUSH_DEBOUNCE);
+    this.queueWrite();
     return true;
   }
 
-  private queueWrite() {
-    if (this.writingPromise) {
-      this.writingPromise = this.writingPromise.finally(() => this.writeFileAsync());
-    } else {
-      this.writingPromise = this.writeFileAsync();
-    }
+  public queueWrite() {
+    clearTimeout(this.timer);
+    this.timer = setTimeout(() => {
+      if (this.writingPromise) {
+        this.writingPromise = this.writingPromise.finally(() => this.writeFileAsync());
+      } else {
+        this.writingPromise = this.writeFileAsync();
+      }
+    }, DISK_FLUSH_DEBOUNCE);
   }
 
   private async writeFileAsync() {
