@@ -45,27 +45,39 @@
 </script>
 
 <template>
-  <div class="fixed" v-if="props.visible" :style="style">
+  <div class="fixed context-menu" v-if="props.visible" :style="style">
     <div v-if="props.type === 'root'">
-      <div v-if="!isSearching" @click="emit('createNode', 'file')">New contest</div>
-      <div v-if="!isSearching" @click="emit('createNode', 'dir')">New folder</div>
-      <div v-if="props.nSelectedNodes" @click="emit('deleteSelectedNodes')">Delete selected</div>
-      <div v-if="props.nSelectedNodes" @click="emit('clearSelection')">Clear selection</div>
-      <div v-if="props.nOpenDirs" @click="emit('collapseAll')">Collapse all</div>
+      <div class="item" v-if="!isSearching" @click="emit('createNode', 'file')">New contest</div>
+      <div class="item" v-if="!isSearching" @click="emit('createNode', 'dir')">New folder</div>
+      <div class="item" v-if="props.nSelectedNodes" @click="emit('clearSelection')">
+        Clear selection
+      </div>
+      <div class="item" v-if="props.nOpenDirs" @click="emit('collapseAll')">Collapse all</div>
+      <div class="item" v-if="props.nSelectedNodes" @click="emit('deleteSelectedNodes')">
+        Delete selected
+      </div>
     </div>
     <div v-else-if="props.type === 'dir'">
-      <div v-if="!isSearching" @click="emit('createNode', 'file')">New contest</div>
-      <div v-if="!isSearching" @click="emit('createNode', 'dir')">New folder</div>
-      <div v-if="!isSearching" @click="emit('createNodeAbove', 'dir')">Create folder above</div>
-      <div v-if="!isSearching" @click="emit('createNodeBelow', 'dir')">Create folder below</div>
-      <div @click="emit('renameNode')">Rename</div>
-      <div v-if="!isSearching" @click="emit('deleteNode')">Delete</div>
+      <div class="item" v-if="!isSearching" @click="emit('createNode', 'file')">New contest</div>
+      <div class="item" v-if="!isSearching" @click="emit('createNode', 'dir')">New folder</div>
+      <div class="item" v-if="!isSearching" @click="emit('createNodeAbove', 'dir')">
+        Create folder above
+      </div>
+      <div class="item" v-if="!isSearching" @click="emit('createNodeBelow', 'dir')">
+        Create folder below
+      </div>
+      <div class="item" @click="emit('renameNode')">Rename</div>
+      <div class="item" v-if="!isSearching" @click="emit('deleteNode')">Delete</div>
     </div>
     <div v-else-if="props.type === 'file'">
-      <div v-if="!isSearching" @click="emit('createNodeAbove', 'file')">Create file above</div>
-      <div v-if="!isSearching" @click="emit('createNodeBelow', 'file')">Create file below</div>
-      <div @click="emit('renameNode')">Rename</div>
-      <div @click="emit('deleteNode')">Delete</div>
+      <div class="item" v-if="!isSearching" @click="emit('createNodeAbove', 'file')">
+        Create file above
+      </div>
+      <div class="item" v-if="!isSearching" @click="emit('createNodeBelow', 'file')">
+        Create file below
+      </div>
+      <div class="item" @click="emit('renameNode')">Rename</div>
+      <div class="item" @click="emit('deleteNode')">Delete</div>
     </div>
   </div>
 </template>
