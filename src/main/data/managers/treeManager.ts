@@ -259,22 +259,24 @@ export class TreeManager {
     }
   }
 
-  private appendNodeAbove(node: Node, sibling: Node, control: NodeController) {
+  private appendNodeAbove(node: Node, baseNode: Node) {
+    const control = this.getParent(baseNode, false) || this.target.rootController;
     const sub = node.type === 'dir' ? control.dirs : control.files;
-    const prev = this.getPrev(sibling, false);
-    node.nextId = sibling.id;
-    node.prevId = sibling.prevId;
-    sibling.prevId = node.id;
+    const prev = this.getPrev(baseNode, false);
+    node.nextId = baseNode.id;
+    node.prevId = baseNode.prevId;
+    baseNode.prevId = node.id;
     if (prev) prev.nextId = node.id;
     else sub.headId = node.id;
   }
 
-  private appendNodeBelow(node: Node, sibling: Node, control: NodeController) {
+  private appendNodeBelow(node: Node, baseNode: Node) {
+    const control = this.getParent(baseNode, false) || this.target.rootController;
     const sub = node.type === 'dir' ? control.dirs : control.files;
-    const next = this.getNext(sibling, false);
-    node.prevId = sibling.id;
-    node.nextId = sibling.nextId;
-    sibling.nextId = node.id;
+    const next = this.getNext(baseNode, false);
+    node.prevId = baseNode.id;
+    node.nextId = baseNode.nextId;
+    baseNode.nextId = node.id;
     if (next) next.prevId = node.id;
     else sub.tailId = node.id;
   }
@@ -305,31 +307,23 @@ export class TreeManager {
     this.refresh();
   }
 
-  public createNodeAbove(type: NodeType, prefix: string, siblingId: string) {
-    const sibling = this.target.idToNode[siblingId];
-    if (!sibling) return;
-    const parent = this.getParent(sibling, false);
+  public createNodeAbove(type: NodeType, prefix: string, baseNodeId: string) {
+    const baseNode = this.target.idToNode[baseNodeId];
+    if (!baseNode) return;
+    const parent = this.getParent(baseNode, false);
     const newNode = this.createNodeHelper(type, prefix, parent?.id || null);
-    if (parent) {
-      newNode.selected = parent.selected;
-      this.appendNodeAbove(newNode, sibling, parent);
-    } else {
-      this.appendNodeAbove(newNode, sibling, this.target.rootController);
-    }
+    if (parent) newNode.selected = parent.selected;
+    this.appendNodeAbove(newNode, baseNode);
     this.refresh();
   }
 
-  public createNodeBelow(type: NodeType, prefix: string, siblingId: string) {
-    const sibling = this.target.idToNode[siblingId];
-    if (!sibling) return;
-    const parent = this.getParent(sibling, false);
+  public createNodeBelow(type: NodeType, prefix: string, baseNodeId: string) {
+    const baseNode = this.target.idToNode[baseNodeId];
+    if (!baseNode) return;
+    const parent = this.getParent(baseNode, false);
     const newNode = this.createNodeHelper(type, prefix, parent?.id || null);
-    if (parent) {
-      newNode.selected = parent.selected;
-      this.appendNodeBelow(newNode, sibling, parent);
-    } else {
-      this.appendNodeBelow(newNode, sibling, this.target.rootController);
-    }
+    if (parent) newNode.selected = parent.selected;
+    this.appendNodeBelow(newNode, baseNode);
     this.refresh();
   }
 
@@ -544,5 +538,81 @@ export class TreeManager {
 
   private clearHidden() {
     for (const node of this.expandedFlat) node.hidden = false;
+  }
+
+  //  -- Movement: ---
+
+  public moveSelectedFilesAbove(baseNodeId: string) {
+    const baseNode = this.target.idToNode[baseNodeId];
+    if (!baseNode || baseNode.type !== 'file' || baseNode.selected) return;
+    const parent = this.getParent(baseNode, false);
+    for (const node of this.expandedFlat) {
+      if (node.type === 'file' && node.selected) {
+        this.removeNodeFromTree(node);
+        this.appendNodeAbove(node, baseNode);
+        node.parentId = parent?.id || null;
+      }
+    }
+    this.refresh();
+  }
+
+  public moveSelectedFilesBelow(baseNodeId: string) {
+    const baseNode = this.target.idToNode[baseNodeId];
+    if (!baseNode || baseNode.type !== 'file' || baseNode.selected) return;
+    const parent = this.getParent(baseNode, false);
+    for (let i = this.expandedFlat.length - 1; i >= 0; i--) {
+      const node = this.expandedFlat[i];
+      if (node.type === 'file' && node.selected) {
+        this.removeNodeFromTree(node);
+        this.appendNodeBelow(node, baseNode);
+        node.parentId = parent?.id || null;
+      }
+    }
+    this.refresh();
+  }
+
+  public moveSelectedFoldersAbove(baseNodeId: string) {
+    const baseNode = this.target.idToNode[baseNodeId];
+    if (!baseNode || baseNode.type !== 'dir' || baseNode.selected) return;
+    const parent = this.getParent(baseNode, false);
+    for (const node of this.expandedFlat) {
+      if (node.type === 'dir' && node.selected) {
+        this.removeNodeFromTree(node);
+        this.appendNodeAbove(node, baseNode);
+        node.parentId = parent?.id || null;
+      }
+    }
+    this.refresh();
+  }
+
+  public moveSelectedFoldersBelow(baseNodeId: string) {
+    const baseNode = this.target.idToNode[baseNodeId];
+    if (!baseNode || baseNode.type !== 'dir' || baseNode.selected) return;
+    const parent = this.getParent(baseNode, false);
+    for (let i = this.expandedFlat.length - 1; i >= 0; i--) {
+      const node = this.expandedFlat[i];
+      if (node.type === 'dir' && node.selected) {
+        this.removeNodeFromTree(node);
+        this.appendNodeBelow(node, baseNode);
+        node.parentId = parent?.id || null;
+      }
+    }
+    this.refresh();
+  }
+
+  public moveSelectedNodesInto(destinationId: string | null) {
+    const destinationNode = destinationId ? (this.target.idToNode[destinationId] as DirNode) : null;
+    const control = destinationNode || this.target.rootController;
+    if (destinationNode && (destinationNode.type !== 'dir' || destinationNode.selected)) return;
+    for (const node of this.expandedFlat) {
+      if (node.selected) {
+        const parent = this.getParent(node, false);
+        if (parent && parent.selected) continue;
+        this.removeNodeFromTree(node);
+        this.appendNode(node, control);
+        node.parentId = destinationNode ? destinationNode.id : null;
+      }
+    }
+    this.refresh();
   }
 }

@@ -14,4 +14,11 @@ export enum TreeChannels {
   search = 'search',
   collapseAll = 'collapse-all',
   clearSelection = 'clear-selection',
+
+  // Move operations
+  moveSelectedFilesAbove = 'move-selected-files-above',
+  moveSelectedFilesBelow = 'move-selected-files-below',
+  moveSelectedFoldersAbove = 'move-selected-folders-above',
+  moveSelectedFoldersBelow = 'move-selected-folders-below',
+  moveSelectedNodesInto = 'move-selected-nodes-into',
 }

@@ -26,9 +26,9 @@ ipcMain.handle(
     anchor: number,
     type: NodeType,
     prefix: string,
-    siblingId: string
+    baseNodeId: string
   ): TreeOperationResponseDTO => {
-    TreeManager.instance.createNodeAbove(type, prefix, siblingId);
+    TreeManager.instance.createNodeAbove(type, prefix, baseNodeId);
     return TreeManager.instance.buildResult(anchor);
   }
 );
@@ -40,9 +40,9 @@ ipcMain.handle(
     anchor: number,
     type: NodeType,
     prefix: string,
-    siblingId: string
+    baseNodeId: string
   ): TreeOperationResponseDTO => {
-    TreeManager.instance.createNodeBelow(type, prefix, siblingId);
+    TreeManager.instance.createNodeBelow(type, prefix, baseNodeId);
     return TreeManager.instance.buildResult(anchor);
   }
 );
@@ -118,6 +118,50 @@ ipcMain.handle(
   TreeChannels.clearSelection,
   (_: IpcMainInvokeEvent, anchor: number): TreeOperationResponseDTO => {
     TreeManager.instance.clearSelection();
+    return TreeManager.instance.buildResult(anchor);
+  }
+);
+
+ipcMain.handle(
+  TreeChannels.moveSelectedFilesAbove,
+  (_: IpcMainInvokeEvent, anchor: number, baseNodeId: string): TreeOperationResponseDTO => {
+    TreeManager.instance.moveSelectedFilesAbove(baseNodeId);
+    return TreeManager.instance.buildResult(anchor);
+  }
+);
+
+ipcMain.handle(
+  TreeChannels.moveSelectedFilesBelow,
+  (_: IpcMainInvokeEvent, anchor: number, baseNodeId: string): TreeOperationResponseDTO => {
+    TreeManager.instance.moveSelectedFilesBelow(baseNodeId);
+    return TreeManager.instance.buildResult(anchor);
+  }
+);
+
+ipcMain.handle(
+  TreeChannels.moveSelectedFoldersAbove,
+  (_: IpcMainInvokeEvent, anchor: number, baseNodeId: string): TreeOperationResponseDTO => {
+    TreeManager.instance.moveSelectedFoldersAbove(baseNodeId);
+    return TreeManager.instance.buildResult(anchor);
+  }
+);
+
+ipcMain.handle(
+  TreeChannels.moveSelectedFoldersBelow,
+  (_: IpcMainInvokeEvent, anchor: number, nodeId: string): TreeOperationResponseDTO => {
+    TreeManager.instance.moveSelectedFoldersBelow(nodeId);
+    return TreeManager.instance.buildResult(anchor);
+  }
+);
+
+ipcMain.handle(
+  TreeChannels.moveSelectedNodesInto,
+  (
+    _: IpcMainInvokeEvent,
+    anchor: number,
+    destinationId: string | null
+  ): TreeOperationResponseDTO => {
+    TreeManager.instance.moveSelectedNodesInto(destinationId);
     return TreeManager.instance.buildResult(anchor);
   }
 );

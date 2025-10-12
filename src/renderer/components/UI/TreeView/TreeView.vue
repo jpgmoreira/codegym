@@ -50,7 +50,7 @@
   });
 
   const rowHeight = 28;
-  const paddingBottom = 100;
+  const paddingBottom = 250;
 
   const uiStore = useUIStore();
 
@@ -255,6 +255,24 @@
     tree.value = await window.api.invoke(TreeChannels.collapseAll, tree.value?.anchor || 0);
   }
 
+  async function moveSelection(channel: TreeChannels) {
+    if (!tree.value) return;
+    tree.value = await window.api.invoke(
+      channel,
+      tree.value.anchor || 0,
+      contextState.activeNode?.id || null
+    );
+  }
+
+  async function moveSelectionToRoot() {
+    if (!tree.value) return;
+    tree.value = await window.api.invoke(
+      TreeChannels.moveSelectedNodesInto,
+      tree.value.anchor || 0,
+      null
+    );
+  }
+
   function isCheckIndeterminate(node: Node) {
     return Boolean(node.type === 'dir' && node.nSelDesc && node.nSelDesc < node.nDesc);
   }
@@ -324,6 +342,12 @@
       @delete-selected-nodes="deleteSelectedNodes"
       @collapse-all="collapseAll"
       @clear-selection="clearSelection"
+      @move-selected-files-above="() => moveSelection(TreeChannels.moveSelectedFilesAbove)"
+      @move-selected-files-below="() => moveSelection(TreeChannels.moveSelectedFilesBelow)"
+      @move-selected-folders-above="() => moveSelection(TreeChannels.moveSelectedFoldersAbove)"
+      @move-selected-folders-below="() => moveSelection(TreeChannels.moveSelectedFoldersAbove)"
+      @move-selected-nodes-into="() => moveSelection(TreeChannels.moveSelectedNodesInto)"
+      @move-selected-nodes-to-root="moveSelectionToRoot"
     />
     <Transition name="badge-fade">
       <div v-show="showFilesSelectedBadge" class="z-20 files-selected-badge text-sm font-bold">
