@@ -211,6 +211,10 @@
   box-shadow: inset 0 0 0 2px #2b6db9b9;
 }
 
+.theme-dark .indent-span::after {
+  background-color: #606368;
+}
+
 .theme-dark .treeview .dir-icon {
   background-image: url('@renderer/assets/images/folder.png');
 }

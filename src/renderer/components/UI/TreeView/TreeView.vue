@@ -365,12 +365,9 @@
             <div
               class="flex items-center whitespace-nowrap"
               v-for="(node, index) in tree.visibleNodes"
-              :style="{
-                paddingLeft: `${node.depth * 20}px`,
-                '--index': index,
-              }"
               :key="node.id"
             >
+              <span class="indent-span" v-for="_ in node.depth"></span>
               <span
                 class="node-caret"
                 :class="{ closed: !node.open }"
@@ -381,6 +378,7 @@
               <div class="flex items-center" @click="handleSelection(node)">
                 <input
                   v-if="props.checkbox"
+                  class="input-checkbox"
                   type="checkbox"
                   :checked="node.selected"
                   :indeterminate="isCheckIndeterminate(node)"
@@ -414,6 +412,26 @@
 </template>
 
 <style scoped>
+  .indent-span {
+    width: 20px;
+    height: 28px;
+    position: relative;
+  }
+
+  .indent-span::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    width: 0.5px;
+    transform: translateX(-50%);
+  }
+
+  .input-checkbox {
+    margin-left: 5px;
+  }
+
   .node-input {
     height: 28px;
     padding-left: 2px;
