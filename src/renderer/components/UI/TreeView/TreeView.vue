@@ -403,7 +403,9 @@
                 :checked="node.selected"
                 :indeterminate="isCheckIndeterminate(node)"
                 :disabled="isNodeDisabled(node)"
-                :class="{ 'cursor-not-allowed': isNodeDisabled(node) }"
+                :class="{
+                  indeterminate: isCheckIndeterminate(node),
+                }"
               />
               <span
                 v-if="props.icons"
