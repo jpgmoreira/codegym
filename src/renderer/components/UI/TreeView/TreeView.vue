@@ -318,7 +318,7 @@
   .list-move,
   .list-enter-active,
   .list-leave-active {
-    transition: opacity 0.25s ease;
+    transition: opacity 0.12s ease;
   }
 
   /* Entering */
