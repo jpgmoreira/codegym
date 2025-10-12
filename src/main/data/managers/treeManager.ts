@@ -608,6 +608,7 @@ export class TreeManager {
     const destinationNode = destinationId ? (this.target.idToNode[destinationId] as DirNode) : null;
     const control = destinationNode || this.target.rootController;
     if (destinationNode && (destinationNode.type !== 'dir' || destinationNode.selected)) return;
+    if (destinationNode) this.openDir(destinationNode);
     for (const node of this.expandedFlat) {
       if (node.selected) {
         const parent = this.getParent(node, false);
