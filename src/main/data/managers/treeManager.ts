@@ -446,6 +446,9 @@ export class TreeManager {
     const next = this.getNext(node, false);
     if (prev) prev.nextId = node.nextId;
     if (next) next.prevId = node.prevId;
+    node.nextId = null;
+    node.prevId = null;
+    node.parentId = null;
   }
 
   private deleteSubtree(control: NodeController) {
