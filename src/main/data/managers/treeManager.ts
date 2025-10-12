@@ -83,7 +83,8 @@ export class TreeManager {
   private flatten(node: Node | null, depth: number, array: Node[]) {
     let curr = node;
     let nSub = 0,
-      nSubSel = 0;
+      nSubSel = 0,
+      nSubFiles = 0;
     while (curr) {
       array.push(curr);
       if (curr.type === 'dir') {
@@ -93,8 +94,10 @@ export class TreeManager {
         const fileResult = this.flatten(fileHead, depth + 1, array);
         curr.nDesc = dirResult[0] + fileResult[0];
         curr.nSelDesc = dirResult[1] + fileResult[1];
+        curr.nFileDesc = dirResult[2] + fileResult[2];
         nSub += curr.nDesc;
         nSubSel += curr.nSelDesc;
+        nSubFiles += curr.nFileDesc;
         if (curr.nDesc) {
           curr.selected = !!curr.nDesc && curr.nDesc === curr.nSelDesc;
         }
@@ -104,11 +107,12 @@ export class TreeManager {
       const sel = curr.selected ? 1 : 0;
       nSub++;
       nSubSel += sel;
+      nSubFiles += curr.type === 'file' ? 1 : 0;
       this.nSelectedNodes += sel;
       this.nSelectedFiles += curr.type === 'file' ? sel : 0;
       curr = this.getNext(curr, false);
     }
-    return [nSub, nSubSel];
+    return [nSub, nSubSel, nSubFiles];
   }
 
   public buildResult(anchor: number): TreeOperationResponseDTO {
@@ -151,6 +155,7 @@ export class TreeManager {
    *  - depth;
    *  - nDesc;
    *  - nSelDesc;
+   *  - nFileDesc;
    */
   private refresh() {
     const dirHead = this.getHead(this.target.rootController.dirs, false);
@@ -220,6 +225,7 @@ export class TreeManager {
       },
       nDesc: 0,
       nSelDesc: 0,
+      nFileDesc: 0,
     } as const;
   }
 
@@ -301,6 +307,7 @@ export class TreeManager {
     for (const node of this.expandedFlat) {
       if (node.type === 'dir') node.open = false;
     }
+    this._proxy!.queueWrite();
   }
 
   // --- Rename node: ---

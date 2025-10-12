@@ -30,6 +30,12 @@
     checkbox: {
       type: Boolean,
       required: false,
+      default: false,
+    },
+    filesHint: {
+      type: Boolean,
+      required: false,
+      default: false,
     },
   });
 
@@ -81,7 +87,7 @@
   async function createNode(type: NodeType) {
     const node = contextState.activeNode;
     const parentId = node ? node.id : null;
-    const prefix = type === 'dir' ? 'Folder' : 'Contest';
+    const prefix = type === 'dir' ? 'Folder' : 'File';
     tree.value = await window.api.invoke(
       TreeChannels.createNode,
       tree.value?.anchor || 0,
@@ -334,6 +340,9 @@
                   @blur="applyRenaming"
                   @click.right.stop="(e: MouseEvent) => showContextMenu(node.type, node, e)"
                 />
+                <span v-if="node.type === 'dir' && props.filesHint">
+                  ({{ toLocaleNumber(node.nFileDesc) }} files)
+                </span>
               </div>
             </div>
           </TransitionGroup>

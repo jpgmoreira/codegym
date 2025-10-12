@@ -27,6 +27,7 @@ export type DirNode = BaseNode &
     open: boolean;
     nDesc: number; // Total number of descendants, not including the node.
     nSelDesc: number; // Total number of selected descendants.
+    nFileDesc: number; // Total number of file descendants.
   };
 
 export type FileNode = BaseNode & {
