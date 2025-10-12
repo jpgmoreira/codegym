@@ -225,3 +225,59 @@
 .theme-dark .treeview .files-selected-badge {
   background-color: #080808;
 }
+
+/* Treeview checkbox */
+.theme-dark .treeview input[type='checkbox'] {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  display: inline-block;
+  box-sizing: border-box;
+  width: 16px;
+  height: 16px;
+  min-width: 0;
+  min-height: 0;
+  padding: 0;
+  margin: 0;
+  line-height: 0;
+  vertical-align: middle;
+  font-size: 0;
+  border: 1px solid #666;
+  border-radius: 4px;
+  background-color: #2f2f2f;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.12s ease-in-out;
+  box-shadow: none;
+  outline: none;
+  overflow: hidden;
+  transform: none;
+  zoom: 1;
+}
+
+.theme-dark .treeview input[type='checkbox']:hover {
+  border-color: #aaa;
+  background-color: #333;
+}
+
+.theme-dark .treeview input[type='checkbox']:checked {
+  background-color: #2588caa4;
+  border-color: #2588ca;
+}
+
+.theme-dark .treeview input[type='checkbox']:checked::after {
+  content: '';
+  position: absolute;
+  left: 5px;
+  top: 2px;
+  transform: rotate(45deg);
+  width: 5px;
+  height: 9px;
+  border: solid #fff;
+  border-width: 0 2px 2px 0;
+}
+
+.theme-dark .treeview input[type='checkbox']:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(76, 102, 175, 0.18);
+}

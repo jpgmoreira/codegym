@@ -458,7 +458,7 @@
 
   .files-selected-badge {
     position: absolute;
-    bottom: 10px;
+    bottom: 25px;
     right: 25px;
     display: inline;
     border-radius: 5px;
