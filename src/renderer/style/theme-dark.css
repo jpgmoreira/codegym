@@ -236,4 +236,5 @@
 
 .theme-dark .treeview .files-selected-badge {
   background-color: #080808;
+  padding: 3px 5px;
 }

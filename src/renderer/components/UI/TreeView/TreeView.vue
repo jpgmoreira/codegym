@@ -72,13 +72,25 @@
   const animateFolders = ref(false);
   const isSearching = ref(false);
   const showFilesSelectedBadge = ref(false);
+  const nodeContainerOffset = ref(0);
 
   const scrollContainer = useTemplateRef('scroll-container');
 
   const ghostStyle = computed(() => ({
     height: `${rowHeight * (tree.value?.nSurfaceNodes || 0) + paddingBottom}px`,
   }));
-  const nodeContainerOffset = ref(0);
+
+  const selectedFilesText = computed(() => {
+    if (!tree.value) return '0 files';
+    const val = toLocaleNumber(tree.value.nSelectedFiles);
+    return val === '1' ? '1 file' : `${val} files`;
+  });
+
+  const selectedFoldersText = computed(() => {
+    if (!tree.value) return '0 folders';
+    const val = toLocaleNumber(tree.value.nSelectedNodes - tree.value.nSelectedFiles);
+    return val === '1' ? '1 folder' : `${val} folders`;
+  });
 
   function showContextMenu(type: ContextState['type'], targetNode: Node | null, e: MouseEvent) {
     contextState.visible = true;
@@ -246,9 +258,9 @@
     return node.type === 'dir' && isSearching.value;
   }
 
-  function nFoldersSelected() {
-    if (!tree.value) return 0;
-    return tree.value.nSelectedNodes - tree.value.nSelectedFiles;
+  function fileHintText(nFiles: number) {
+    if (nFiles === 1) return '1 file';
+    return `${toLocaleNumber(nFiles)} files`;
   }
 
   function containerMouseEnter() {
@@ -308,8 +320,8 @@
     />
     <Transition name="badge-fade">
       <div v-show="showFilesSelectedBadge" class="z-20 files-selected-badge text-sm font-bold">
-        <div>{{ toLocaleNumber(tree!.nSelectedFiles) }} files and</div>
-        <div>{{ toLocaleNumber(nFoldersSelected()) }} folders selected</div>
+        <div>{{ selectedFilesText }} and</div>
+        <div>{{ selectedFoldersText }} selected</div>
       </div>
     </Transition>
     <div
@@ -376,7 +388,7 @@
                   @click.right.stop="(e: MouseEvent) => showContextMenu(node.type, node, e)"
                 />
                 <span v-if="node.type === 'dir' && props.filesHint" class="files-hint">
-                  ({{ toLocaleNumber(node.nFileDesc) }} files)
+                  ({{ fileHintText(node.nFileDesc) }})
                 </span>
               </div>
             </div>
