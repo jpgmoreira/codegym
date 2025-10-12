@@ -345,7 +345,7 @@
       @move-selected-files-above="() => moveSelection(TreeChannels.moveSelectedFilesAbove)"
       @move-selected-files-below="() => moveSelection(TreeChannels.moveSelectedFilesBelow)"
       @move-selected-folders-above="() => moveSelection(TreeChannels.moveSelectedFoldersAbove)"
-      @move-selected-folders-below="() => moveSelection(TreeChannels.moveSelectedFoldersAbove)"
+      @move-selected-folders-below="() => moveSelection(TreeChannels.moveSelectedFoldersBelow)"
       @move-selected-nodes-into="() => moveSelection(TreeChannels.moveSelectedNodesInto)"
       @move-selected-nodes-to-root="moveSelectionToRoot"
     />
