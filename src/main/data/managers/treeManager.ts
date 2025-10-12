@@ -126,11 +126,16 @@ export class TreeManager {
         i += node.nDesc;
       }
     }
+    if (this.expandedFlat.length && !visibleNodes.length) {
+      // Here we have a problem: anchor is larger than nSurfaceNodes.
+      return this.buildResult(Math.max(0, nSurfaceNodes - TREE_PAGE_SIZE));
+    }
     return {
       nSelectedNodes: this.nSelectedNodes,
       nSelectedFiles: this.nSelectedFiles,
       nTotalNodes: this.expandedFlat.length,
       nOpenDirs: this.nOpenDirs,
+      anchor,
       nSurfaceNodes,
       visibleNodes,
     };

@@ -57,7 +57,6 @@
   const originalName = ref('');
   const searchText = ref('');
   const scrollTimer = ref<NodeJS.Timeout | undefined>(undefined);
-  const anchor = ref(0);
 
   const animateFolders = ref(false);
   const isSearching = ref(false);
@@ -85,7 +84,7 @@
     const prefix = type === 'dir' ? 'Folder' : 'Contest';
     tree.value = await window.api.invoke(
       TreeChannels.createNode,
-      anchor.value,
+      tree.value?.anchor || 0,
       type,
       prefix,
       parentId
@@ -94,7 +93,11 @@
 
   async function toggleDirOpen(node: Node) {
     animateFolders.value = true;
-    tree.value = await window.api.invoke(TreeChannels.toggleDirOpen, anchor.value, node.id);
+    tree.value = await window.api.invoke(
+      TreeChannels.toggleDirOpen,
+      tree.value?.anchor || 0,
+      node.id
+    );
     await nextTick();
     requestAnimationFrame(() => {
       animateFolders.value = false;
@@ -151,7 +154,7 @@
     if (props.checkbox) localKeys.ctrl = true;
     tree.value = await window.api.invoke(
       TreeChannels.handleSelection,
-      anchor.value,
+      tree.value?.anchor || 0,
       node.id,
       localKeys
     );
@@ -160,17 +163,17 @@
   async function deleteNode() {
     const node = contextState.activeNode;
     if (!node) return;
-    tree.value = await window.api.invoke(TreeChannels.deleteNode, anchor.value, node.id);
+    tree.value = await window.api.invoke(TreeChannels.deleteNode, tree.value?.anchor || 0, node.id);
   }
 
   async function deleteSelectedNodes() {
-    tree.value = await window.api.invoke(TreeChannels.deleteSelectedNodes, anchor.value);
+    tree.value = await window.api.invoke(TreeChannels.deleteSelectedNodes, tree.value?.anchor || 0);
   }
 
   async function search() {
     const text = searchText.value.trim();
     isSearching.value = Boolean(text);
-    tree.value = await window.api.invoke(TreeChannels.search, anchor.value, text);
+    tree.value = await window.api.invoke(TreeChannels.search, tree.value?.anchor || 0, text);
   }
 
   function handleScroll() {
@@ -180,14 +183,22 @@
       const container = scrollContainer.value;
       if (!container) return;
       const scrollTop = container.scrollTop;
-      anchor.value = Math.max(0, Math.floor(scrollTop / rowHeight) - 30);
-      tree.value = await window.api.invoke(TreeChannels.getState, anchor.value);
-      nodeContainerOffset.value = anchor.value * rowHeight; // This is the key! Using a computed-value causes flickering.
+      const newAnchor = Math.max(0, Math.floor(scrollTop / rowHeight) - 30);
+      tree.value = await window.api.invoke<TreeOperationResponseDTO>(
+        TreeChannels.getState,
+        newAnchor
+      );
+      nodeContainerOffset.value = tree.value.anchor * rowHeight; // This is the key! Using a computed-value causes flickering.
     }, 40);
   }
 
   async function collapseAll() {
-    tree.value = await window.api.invoke(TreeChannels.collapseAll, anchor.value);
+    animateFolders.value = true;
+    tree.value = await window.api.invoke(TreeChannels.collapseAll, tree.value?.anchor || 0);
+    await nextTick();
+    requestAnimationFrame(() => {
+      animateFolders.value = false;
+    });
   }
 
   function isCheckIndeterminate(node: Node) {
