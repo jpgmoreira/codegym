@@ -91,9 +91,14 @@
     return val === '1' ? '1 file' : `${val} files`;
   });
 
+  const nSelectedFolders = computed(() => {
+    if (!tree.value) return 0;
+    return tree.value.nSelectedNodes - tree.value.nSelectedFiles;
+  });
+
   const selectedFoldersText = computed(() => {
     if (!tree.value) return '0 folders';
-    const val = toLocaleNumber(tree.value.nSelectedNodes - tree.value.nSelectedFiles);
+    const val = toLocaleNumber(nSelectedFolders.value);
     return val === '1' ? '1 folder' : `${val} folders`;
   });
 
@@ -317,7 +322,8 @@
     <ContextMenu
       class="z-30"
       :tree="tree"
-      :n-selected-nodes="tree?.nSelectedNodes || 0"
+      :n-selected-folders="nSelectedFolders"
+      :n-selected-files="tree ? tree.nSelectedFiles : 0"
       :n-open-dirs="tree?.nOpenDirs || 0"
       :is-searching="isSearching"
       v-bind="contextState"
