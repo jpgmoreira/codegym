@@ -230,8 +230,10 @@
 
   async function search() {
     const text = searchText.value.trim();
-    isSearching.value = Boolean(text);
     tree.value = await window.api.invoke(TreeChannels.search, tree.value?.anchor || 0, text);
+    nextTick(() => {
+      isSearching.value = Boolean(text);
+    });
   }
 
   function handleScroll() {
