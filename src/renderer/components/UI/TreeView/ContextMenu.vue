@@ -9,7 +9,7 @@
     type: NodeType | 'root';
     nSelectedNodes: number;
     nOpenDirs: number;
-    searchText: string;
+    isSearching: boolean;
     x: number;
     y: number;
   };
@@ -28,8 +28,6 @@
   const props = defineProps<ContextProps>();
 
   const style = ref<Record<string, string>>({});
-
-  const isSearching = computed(() => props.searchText.trim());
 
   function computeContextStyle() {
     style.value = {};

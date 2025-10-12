@@ -317,7 +317,7 @@
       :tree="tree"
       :n-selected-nodes="tree?.nSelectedNodes || 0"
       :n-open-dirs="tree?.nOpenDirs || 0"
-      :search-text="searchText"
+      :is-searching="isSearching"
       v-bind="contextState"
       @create-node="createNode"
       @create-node-above="createNodeAbove"
