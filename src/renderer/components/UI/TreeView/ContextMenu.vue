@@ -47,10 +47,16 @@
     <div v-if="props.type === 'root'">
       <div class="item" v-if="!isSearching" @click="emit('createNode', 'file')">New contest</div>
       <div class="item" v-if="!isSearching" @click="emit('createNode', 'dir')">New folder</div>
+
+      <div class="separator" v-if="!isSearching && (props.nSelectedNodes || props.nOpenDirs)"></div>
+
       <div class="item" v-if="props.nSelectedNodes" @click="emit('clearSelection')">
         Clear selection
       </div>
       <div class="item" v-if="props.nOpenDirs" @click="emit('collapseAll')">Collapse all</div>
+
+      <div class="separator" v-if="props.nSelectedNodes"></div>
+
       <div class="item" v-if="props.nSelectedNodes" @click="emit('deleteSelectedNodes')">
         Delete selected
       </div>
@@ -58,12 +64,18 @@
     <div v-else-if="props.type === 'dir'">
       <div class="item" v-if="!isSearching" @click="emit('createNode', 'file')">New contest</div>
       <div class="item" v-if="!isSearching" @click="emit('createNode', 'dir')">New folder</div>
+
+      <div class="separator" v-if="!isSearching"></div>
+
       <div class="item" v-if="!isSearching" @click="emit('createNodeAbove', 'dir')">
         Create folder above
       </div>
       <div class="item" v-if="!isSearching" @click="emit('createNodeBelow', 'dir')">
         Create folder below
       </div>
+
+      <div class="separator" v-if="!isSearching"></div>
+
       <div class="item" @click="emit('renameNode')">Rename</div>
       <div class="item" v-if="!isSearching" @click="emit('deleteNode')">Delete</div>
     </div>
@@ -74,6 +86,9 @@
       <div class="item" v-if="!isSearching" @click="emit('createNodeBelow', 'file')">
         Create file below
       </div>
+
+      <div class="separator" v-if="!isSearching"></div>
+
       <div class="item" @click="emit('renameNode')">Rename</div>
       <div class="item" @click="emit('deleteNode')">Delete</div>
     </div>
