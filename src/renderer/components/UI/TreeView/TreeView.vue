@@ -58,6 +58,8 @@
   const scrollTimer = ref<NodeJS.Timeout | undefined>(undefined);
   const anchor = ref(0);
 
+  const animateFolders = ref(false);
+
   const isSearching = ref(false);
 
   const scrollContainer = useTemplateRef('scroll-container');
@@ -90,7 +92,12 @@
   }
 
   async function toggleDirOpen(node: Node) {
+    animateFolders.value = true;
     tree.value = await window.api.invoke(TreeChannels.toggleDirOpen, anchor.value, node.id);
+    await nextTick();
+    requestAnimationFrame(() => {
+      animateFolders.value = false;
+    });
   }
 
   function startRenaming() {
@@ -207,9 +214,6 @@
 </script>
 
 <template>
-  <!-- <div>Total nodes: {{ tree?.nTotalNodes }}</div>
-  <div>Selected nodes: {{ tree?.nSelectedNodes }}</div>
-  <div>Selected files: {{ tree?.nSelectedFiles }}</div> -->
   <div
     v-if="hasLoaded"
     class="relative z-0 h-full"
@@ -254,43 +258,43 @@
           :style="{ transform: `translateY(${nodeContainerOffset}px)` }"
           class="nodes-container absolute top-0 left-0"
         >
-          <!-- <TransitionGroup name="list" tag="div"> -->
-          <div
-            class="flex items-center whitespace-nowrap"
-            v-for="(node, index) in tree.visibleNodes"
-            :style="{
-              paddingLeft: `${node.depth * 20}px`,
-              '--index': index,
-            }"
-            :key="node.id"
-          >
-            <span v-if="node.type === 'dir'" @click="toggleDirOpen(node)">
-              <span v-if="node.open">-</span>
-              <span v-else>+</span>
-            </span>
+          <TransitionGroup :name="animateFolders ? 'list' : ''" tag="div" :css="animateFolders">
+            <div
+              class="flex items-center whitespace-nowrap"
+              v-for="(node, index) in tree.visibleNodes"
+              :style="{
+                paddingLeft: `${node.depth * 20}px`,
+                '--index': index,
+              }"
+              :key="node.id"
+            >
+              <span v-if="node.type === 'dir'" @click="toggleDirOpen(node)">
+                <span v-if="node.open">-</span>
+                <span v-else>+</span>
+              </span>
 
-            <div class="flex items-center" @click="handleSelection(node)">
-              <input
-                v-if="props.checkbox"
-                type="checkbox"
-                :checked="node.selected"
-                :indeterminate="isCheckIndeterminate(node)"
-                :disabled="isNodeDisabled(node)"
-                :class="{ 'cursor-not-allowed': isNodeDisabled(node) }"
-              />
-              <AutoLengthInput
-                class="node-input"
-                :class="{ selected: node.selected, 'cursor-not-allowed': isNodeDisabled(node) }"
-                v-model="node.text"
-                :readonly="renamingNode !== node"
-                @keydown.enter="applyRenaming"
-                @keydown.esc="undoRenaming"
-                @blur="applyRenaming"
-                @click.right.stop="(e: MouseEvent) => showContextMenu(node.type, node, e)"
-              />
+              <div class="flex items-center" @click="handleSelection(node)">
+                <input
+                  v-if="props.checkbox"
+                  type="checkbox"
+                  :checked="node.selected"
+                  :indeterminate="isCheckIndeterminate(node)"
+                  :disabled="isNodeDisabled(node)"
+                  :class="{ 'cursor-not-allowed': isNodeDisabled(node) }"
+                />
+                <AutoLengthInput
+                  class="node-input"
+                  :class="{ selected: node.selected, 'cursor-not-allowed': isNodeDisabled(node) }"
+                  v-model="node.text"
+                  :readonly="renamingNode !== node"
+                  @keydown.enter="applyRenaming"
+                  @keydown.esc="undoRenaming"
+                  @blur="applyRenaming"
+                  @click.right.stop="(e: MouseEvent) => showContextMenu(node.type, node, e)"
+                />
+              </div>
             </div>
-          </div>
-          <!-- </TransitionGroup> -->
+          </TransitionGroup>
         </div>
       </div>
     </div>
