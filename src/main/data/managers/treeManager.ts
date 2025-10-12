@@ -395,10 +395,14 @@ export class TreeManager {
 
   // --- Selection handling: ---
 
-  private clearSelection() {
-    for (const node of this.expandedFlat) node.selected = false;
+  public clearSelection() {
+    for (const node of this.expandedFlat) {
+      node.selected = false;
+      if (node.type === 'dir') node.nSelDesc = 0;
+    }
     this.nSelectedFiles = 0;
     this.nSelectedNodes = 0;
+    this._proxy!.queueWrite();
   }
 
   private setSubtreeSelection(control: NodeController, state: boolean) {
@@ -422,10 +426,7 @@ export class TreeManager {
     const nextState = !node.selected;
     if (!keys.ctrl) {
       this.clearSelection();
-      if (!nextState) {
-        this._proxy!.queueWrite();
-        return;
-      }
+      if (!nextState) return;
     }
     node.selected = nextState;
     if (node.type === 'dir') {
@@ -541,7 +542,7 @@ export class TreeManager {
     }
   }
 
-  public clearHidden() {
+  private clearHidden() {
     for (const node of this.expandedFlat) node.hidden = false;
   }
 }

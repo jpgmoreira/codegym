@@ -113,3 +113,11 @@ ipcMain.handle(
     return TreeManager.instance.buildResult(anchor);
   }
 );
+
+ipcMain.handle(
+  TreeChannels.clearSelection,
+  (_: IpcMainInvokeEvent, anchor: number): TreeOperationResponseDTO => {
+    TreeManager.instance.clearSelection();
+    return TreeManager.instance.buildResult(anchor);
+  }
+);

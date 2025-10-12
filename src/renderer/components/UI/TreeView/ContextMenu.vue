@@ -21,6 +21,7 @@
     (e: 'renameNode'): void;
     (e: 'deleteNode'): void;
     (e: 'deleteSelectedNodes'): void;
+    (e: 'clearSelection'): void;
     (e: 'collapseAll'): void;
   }>();
 
@@ -49,6 +50,7 @@
       <div v-if="!isSearching" @click="emit('createNode', 'file')">New contest</div>
       <div v-if="!isSearching" @click="emit('createNode', 'dir')">New folder</div>
       <div v-if="props.nSelectedNodes" @click="emit('deleteSelectedNodes')">Delete selected</div>
+      <div v-if="props.nSelectedNodes" @click="emit('clearSelection')">Clear selection</div>
       <div v-if="props.nOpenDirs" @click="emit('collapseAll')">Collapse all</div>
     </div>
     <div v-else-if="props.type === 'dir'">

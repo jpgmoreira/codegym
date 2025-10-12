@@ -219,6 +219,10 @@
     tree.value = await window.api.invoke(TreeChannels.deleteSelectedNodes, tree.value?.anchor || 0);
   }
 
+  async function clearSelection() {
+    tree.value = await window.api.invoke(TreeChannels.clearSelection, tree.value?.anchor || 0);
+  }
+
   async function search() {
     const text = searchText.value.trim();
     isSearching.value = Boolean(text);
@@ -317,6 +321,7 @@
       @delete-node="deleteNode"
       @delete-selected-nodes="deleteSelectedNodes"
       @collapse-all="collapseAll"
+      @clear-selection="clearSelection"
     />
     <Transition name="badge-fade">
       <div v-show="showFilesSelectedBadge" class="z-20 files-selected-badge text-sm font-bold">
