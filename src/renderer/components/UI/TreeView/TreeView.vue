@@ -74,7 +74,6 @@
   const searchText = ref('');
   const scrollTimer = ref<NodeJS.Timeout | undefined>(undefined);
 
-  const animateFolders = ref(false);
   const isSearching = ref(false);
   const showFilesSelectedBadge = ref(false);
   const nodeContainerOffset = ref(0);
@@ -151,16 +150,11 @@
   }
 
   async function toggleDirOpen(node: Node) {
-    animateFolders.value = true;
     tree.value = await window.api.invoke(
       TreeChannels.toggleDirOpen,
       tree.value?.anchor || 0,
       node.id
     );
-    await nextTick();
-    requestAnimationFrame(() => {
-      animateFolders.value = false;
-    });
   }
 
   function startRenaming() {
@@ -258,12 +252,7 @@
   }
 
   async function collapseAll() {
-    animateFolders.value = true;
     tree.value = await window.api.invoke(TreeChannels.collapseAll, tree.value?.anchor || 0);
-    await nextTick();
-    requestAnimationFrame(() => {
-      animateFolders.value = false;
-    });
   }
 
   function isCheckIndeterminate(node: Node) {
@@ -369,54 +358,52 @@
           :style="{ transform: `translateY(${nodeContainerOffset}px)` }"
           class="nodes-container absolute top-0 left-0"
         >
-          <TransitionGroup :name="animateFolders ? 'list' : ''" tag="div" :css="animateFolders">
-            <div
-              class="flex items-center whitespace-nowrap"
-              v-for="(node, index) in tree.visibleNodes"
-              :key="node.id"
-            >
-              <span class="indent-span" v-for="_ in node.depth"></span>
-              <span
-                class="node-caret"
-                :class="{ closed: !node.open }"
-                v-if="node.type === 'dir'"
-                @click="toggleDirOpen(node)"
-              ></span>
+          <div
+            class="flex items-center whitespace-nowrap"
+            v-for="node in tree.visibleNodes"
+            :key="node.id"
+          >
+            <span class="indent-span" v-for="_ in node.depth"></span>
+            <span
+              class="node-caret"
+              :class="{ closed: !node.open }"
+              v-if="node.type === 'dir'"
+              @click="toggleDirOpen(node)"
+            ></span>
 
-              <div class="flex items-center" @click="handleSelection(node)">
-                <input
-                  v-if="props.checkbox"
-                  class="input-checkbox"
-                  type="checkbox"
-                  :checked="node.selected"
-                  :indeterminate="isCheckIndeterminate(node)"
-                  :disabled="isNodeDisabled(node)"
-                  :class="{ 'cursor-not-allowed': isNodeDisabled(node) }"
-                />
-                <span
-                  v-if="props.icons"
-                  :class="{
-                    'file-icon': node.type === 'file',
-                    'dir-icon': node.type === 'dir',
-                    'cursor-not-allowed': isNodeDisabled(node),
-                  }"
-                ></span>
-                <AutoLengthInput
-                  class="node-input"
-                  :class="{ selected: node.selected, 'cursor-not-allowed': isNodeDisabled(node) }"
-                  v-model="node.text"
-                  :readonly="renamingNode !== node"
-                  @keydown.enter="applyRenaming"
-                  @keydown.esc="undoRenaming"
-                  @blur="applyRenaming"
-                  @click.right.stop="(e: MouseEvent) => showContextMenu(node.type, node, e)"
-                />
-                <span v-if="node.type === 'dir' && props.filesHint" class="files-hint">
-                  ({{ fileHintText(node.nFileDesc) }})
-                </span>
-              </div>
+            <div class="flex items-center" @click="handleSelection(node)">
+              <input
+                v-if="props.checkbox"
+                class="input-checkbox"
+                type="checkbox"
+                :checked="node.selected"
+                :indeterminate="isCheckIndeterminate(node)"
+                :disabled="isNodeDisabled(node)"
+                :class="{ 'cursor-not-allowed': isNodeDisabled(node) }"
+              />
+              <span
+                v-if="props.icons"
+                :class="{
+                  'file-icon': node.type === 'file',
+                  'dir-icon': node.type === 'dir',
+                  'cursor-not-allowed': isNodeDisabled(node),
+                }"
+              ></span>
+              <AutoLengthInput
+                class="node-input"
+                :class="{ selected: node.selected, 'cursor-not-allowed': isNodeDisabled(node) }"
+                v-model="node.text"
+                :readonly="renamingNode !== node"
+                @keydown.enter="applyRenaming"
+                @keydown.esc="undoRenaming"
+                @blur="applyRenaming"
+                @click.right.stop="(e: MouseEvent) => showContextMenu(node.type, node, e)"
+              />
+              <span v-if="node.type === 'dir' && props.filesHint" class="files-hint">
+                ({{ fileHintText(node.nFileDesc) }})
+              </span>
             </div>
-          </TransitionGroup>
+          </div>
         </div>
       </div>
     </div>
@@ -508,25 +495,6 @@
   }
 
   /* --- Transitions --- */
-
-  /* List: */
-  .list-move,
-  .list-enter-active,
-  .list-leave-active {
-    transition: opacity 0.12s ease;
-  }
-  .list-enter-from {
-    opacity: 0;
-  }
-  .list-enter-to {
-    opacity: 1;
-  }
-  .list-leave-from {
-    opacity: 1;
-  }
-  .list-leave-to {
-    opacity: 0;
-  }
 
   /* Badge fade: */
   .badge-fade-enter-active,
