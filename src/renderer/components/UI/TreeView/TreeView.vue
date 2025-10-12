@@ -37,9 +37,14 @@
       required: false,
       default: false,
     },
+    search: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
   });
 
-  const rowHeight = 30;
+  const rowHeight = 25;
   const paddingBottom = 100;
 
   const uiStore = useUIStore();
@@ -280,7 +285,7 @@
 <template>
   <div
     v-if="hasLoaded"
-    class="relative z-0 h-full"
+    class="treeview relative z-0 h-full"
     @click.right="(e) => showContextMenu('root', null, e)"
     @click="() => (contextState.visible = false)"
     @mouseenter="containerMouseEnter"
@@ -319,7 +324,7 @@
       ref="scroll-container"
       @scroll="handleScroll"
     >
-      <div class="flex w-full">
+      <div v-if="props.search" class="flex w-full">
         <input
           v-model.trim="searchText"
           class="w-full rounded-none"
@@ -344,10 +349,12 @@
               }"
               :key="node.id"
             >
-              <span v-if="node.type === 'dir'" @click="toggleDirOpen(node)">
-                <span v-if="node.open">-</span>
-                <span v-else>+</span>
-              </span>
+              <span
+                class="node-caret"
+                :class="{ closed: !node.open }"
+                v-if="node.type === 'dir'"
+                @click="toggleDirOpen(node)"
+              ></span>
 
               <div class="flex items-center" @click="handleSelection(node)">
                 <input
@@ -368,7 +375,7 @@
                   @blur="applyRenaming"
                   @click.right.stop="(e: MouseEvent) => showContextMenu(node.type, node, e)"
                 />
-                <span v-if="node.type === 'dir' && props.filesHint">
+                <span v-if="node.type === 'dir' && props.filesHint" class="files-hint">
                   ({{ toLocaleNumber(node.nFileDesc) }} files)
                 </span>
               </div>
@@ -386,7 +393,16 @@
   }
 
   .node-input {
-    height: 30px;
+    height: 25px;
+  }
+
+  .node-caret {
+    transition: transform 0.2s ease;
+    display: inline-block;
+    transform: rotate(0deg);
+  }
+  .node-caret.closed {
+    transform: rotate(-90deg);
   }
 
   .nodes-container {

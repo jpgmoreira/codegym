@@ -192,3 +192,31 @@
 .theme-dark tbody tr:hover {
   background-color: var(--table-td-hover);
 }
+
+/* TreeView */
+.theme-dark .treeview .node-caret {
+  cursor: pointer;
+  background-image: url('@renderer/assets/images/arrow-down.png');
+  background-position: center;
+  background-size: contain;
+  background-repeat: no-repeat;
+  width: 18px;
+  height: 18px;
+}
+.theme-dark .treeview {
+  background-color: #282828;
+}
+
+.theme-dark .treeview .node-input {
+  cursor: pointer;
+  background-color: transparent;
+  color: #dedede;
+}
+.theme-dark .treeview .node-input:hover {
+  background-color: #3e444b;
+}
+.theme-dark .treeview .files-hint {
+  font-size: 0.92rem;
+  font-weight: 500;
+  color: #dedede;
+}
