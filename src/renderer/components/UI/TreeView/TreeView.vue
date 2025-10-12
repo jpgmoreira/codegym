@@ -44,7 +44,7 @@
     },
   });
 
-  const rowHeight = 25;
+  const rowHeight = 28;
   const paddingBottom = 100;
 
   const uiStore = useUIStore();
@@ -388,12 +388,8 @@
 </template>
 
 <style scoped>
-  .selected {
-    outline: 2px solid orange !important;
-  }
-
   .node-input {
-    height: 25px;
+    height: 28px;
   }
 
   .node-caret {
@@ -412,7 +408,7 @@
   .files-selected-badge {
     position: absolute;
     bottom: 10px;
-    right: 30px;
+    right: 25px;
     display: inline;
     border-radius: 5px;
     padding: 1px 5px;
