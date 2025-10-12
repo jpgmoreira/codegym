@@ -574,12 +574,14 @@ export class TreeManager {
   public moveSelectedFoldersAbove(baseNodeId: string) {
     const baseNode = this.target.idToNode[baseNodeId];
     if (!baseNode || baseNode.type !== 'dir' || baseNode.selected) return;
-    const parent = this.getParent(baseNode, false);
+    const baseNodeParent = this.getParent(baseNode, false);
     for (const node of this.expandedFlat) {
       if (node.type === 'dir' && node.selected) {
+        const parent = this.getParent(node, false);
+        if (parent && parent.selected) continue;
         this.removeNodeFromTree(node);
         this.appendNodeAbove(node, baseNode);
-        node.parentId = parent?.id || null;
+        node.parentId = baseNodeParent?.id || null;
       }
     }
     this.refresh();
@@ -588,13 +590,15 @@ export class TreeManager {
   public moveSelectedFoldersBelow(baseNodeId: string) {
     const baseNode = this.target.idToNode[baseNodeId];
     if (!baseNode || baseNode.type !== 'dir' || baseNode.selected) return;
-    const parent = this.getParent(baseNode, false);
+    const baseNodeParent = this.getParent(baseNode, false);
     for (let i = this.expandedFlat.length - 1; i >= 0; i--) {
       const node = this.expandedFlat[i];
       if (node.type === 'dir' && node.selected) {
+        const parent = this.getParent(node, false);
+        if (parent && parent.selected) continue;
         this.removeNodeFromTree(node);
         this.appendNodeBelow(node, baseNode);
-        node.parentId = parent?.id || null;
+        node.parentId = baseNodeParent?.id || null;
       }
     }
     this.refresh();
