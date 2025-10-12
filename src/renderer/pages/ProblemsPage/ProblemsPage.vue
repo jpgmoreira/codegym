@@ -70,4 +70,25 @@
   footer {
     background-color: var(--footer-bg);
   }
+
+  :deep(.filters) input[type='number'] {
+    width: 130px;
+  }
+
+  :deep(.filters) input[type='number']:first-child {
+    border-top-right-radius: 0px;
+    border-bottom-right-radius: 0px;
+    margin-right: 1px;
+  }
+
+  :deep(.filters) input[type='number']:last-child {
+    border-top-left-radius: 0px;
+    border-bottom-left-radius: 0px;
+  }
+
+  :deep(.tag-badge) {
+    font-size: 0.92rem;
+    border-radius: 5px;
+    padding: 2px 4px;
+  }
 </style>
