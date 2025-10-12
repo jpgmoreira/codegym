@@ -42,6 +42,11 @@
       required: false,
       default: false,
     },
+    icons: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
   });
 
   const rowHeight = 28;
@@ -382,6 +387,10 @@
                   :disabled="isNodeDisabled(node)"
                   :class="{ 'cursor-not-allowed': isNodeDisabled(node) }"
                 />
+                <span
+                  v-if="props.icons"
+                  :class="node.type === 'file' ? 'file-icon' : 'dir-icon'"
+                ></span>
                 <AutoLengthInput
                   class="node-input"
                   :class="{ selected: node.selected, 'cursor-not-allowed': isNodeDisabled(node) }"
@@ -417,15 +426,28 @@
     transition: transform 0.2s ease;
     display: inline-block;
     transform: rotate(0deg);
+    width: 20px;
+    height: 20px;
+  }
+  .node-caret.closed {
+    transform: rotate(-90deg);
+  }
+
+  .node-caret,
+  .dir-icon,
+  .file-icon {
     cursor: pointer;
     background-position: center;
     background-size: contain;
     background-repeat: no-repeat;
-    width: 18px;
-    height: 18px;
   }
-  .node-caret.closed {
-    transform: rotate(-90deg);
+
+  .file-icon,
+  .dir-icon {
+    margin-left: 4px;
+    margin-right: 2px;
+    width: 20px;
+    height: 20px;
   }
 
   .nodes-container {

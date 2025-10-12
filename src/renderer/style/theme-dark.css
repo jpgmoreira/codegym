@@ -211,6 +211,13 @@
   box-shadow: inset 0 0 0 2px #2b6db9;
 }
 
+.theme-dark .treeview .dir-icon {
+  background-image: url('@renderer/assets/images/folder.png');
+}
+.theme-dark .treeview .file-icon {
+  background-image: url('@renderer/assets/images/document.png');
+}
+
 .theme-dark .treeview .files-hint {
   color: #8e8e8e;
 }
