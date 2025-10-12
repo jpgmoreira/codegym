@@ -389,7 +389,11 @@
                 />
                 <span
                   v-if="props.icons"
-                  :class="node.type === 'file' ? 'file-icon' : 'dir-icon'"
+                  :class="{
+                    'file-icon': node.type === 'file',
+                    'dir-icon': node.type === 'dir',
+                    'cursor-not-allowed': isNodeDisabled(node),
+                  }"
                 ></span>
                 <AutoLengthInput
                   class="node-input"
@@ -491,6 +495,10 @@
     font-size: 0.92rem;
     font-weight: 500;
     padding-left: 3px;
+  }
+
+  .cursor-not-allowed {
+    cursor: not-allowed;
   }
 
   /* --- Transitions --- */

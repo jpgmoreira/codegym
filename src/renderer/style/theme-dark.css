@@ -283,9 +283,12 @@
   border: 1px solid #666;
   border-radius: 4px;
   background-color: #2f2f2f;
-  cursor: pointer;
   position: relative;
   transition: all 0.12s ease-in-out;
+}
+
+.theme-dark .treeview input[type='checkbox']:not(.cursor-not-allowed) {
+  cursor: pointer;
 }
 
 .theme-dark .treeview input[type='checkbox']:hover {
