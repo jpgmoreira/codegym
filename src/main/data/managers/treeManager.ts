@@ -54,6 +54,7 @@ export class TreeManager {
 
   private nSelectedNodes = 0;
   private nSelectedFiles = 0;
+  private nOpenDirs = 0;
   private expandedFlat: Node[] = [];
 
   // --- Setup methods: ---
@@ -97,6 +98,7 @@ export class TreeManager {
         if (curr.nDesc) {
           curr.selected = !!curr.nDesc && curr.nDesc === curr.nSelDesc;
         }
+        this.nOpenDirs += curr.open ? 1 : 0;
       }
       curr.depth = depth;
       const sel = curr.selected ? 1 : 0;
@@ -128,6 +130,7 @@ export class TreeManager {
       nSelectedNodes: this.nSelectedNodes,
       nSelectedFiles: this.nSelectedFiles,
       nTotalNodes: this.expandedFlat.length,
+      nOpenDirs: this.nOpenDirs,
       nSurfaceNodes,
       visibleNodes,
     };
@@ -138,6 +141,7 @@ export class TreeManager {
    *  - this.expandedFlat;
    *  - this.nSelectedNodes;
    *  - this.nSelectedFiles;
+   *  - this.nOpenDirs;
    * For every node, updates:
    *  - depth;
    *  - nDesc;
@@ -149,6 +153,7 @@ export class TreeManager {
     this.expandedFlat.length = 0;
     this.nSelectedNodes = 0;
     this.nSelectedFiles = 0;
+    this.nOpenDirs = 0;
     this.flatten(dirHead, 0, this.expandedFlat);
     this.flatten(fileHead, 0, this.expandedFlat);
     this._proxy!.queueWrite();
@@ -256,7 +261,7 @@ export class TreeManager {
     const parent = this.getParent(newNode, true);
     if (parent) {
       newNode.selected = parent.selected;
-      parent.open = true;
+      this.openDir(parent);
       this.appendNode(newNode, parent);
     } else {
       this.appendNode(newNode, this.proxy.rootController);
@@ -264,11 +269,33 @@ export class TreeManager {
     this.refresh();
   }
 
-  // --- Toggle directory open: ---
+  // --- Handle directory open/closed state: ---
+
+  private openDir(node: DirNode) {
+    if (!node.open) {
+      node.open = true;
+      this.nOpenDirs++;
+    }
+  }
+
+  private closeDir(node: DirNode) {
+    if (node.open) {
+      node.open = false;
+      this.nOpenDirs--;
+    }
+  }
 
   public toggleDirOpen(nodeId: string) {
     const node = this.proxy.idToNode[nodeId] as DirNode;
-    node.open = !node.open;
+    if (!node.open) this.openDir(node);
+    else this.closeDir(node);
+  }
+
+  public collapseAll() {
+    this.nOpenDirs = 0;
+    for (const node of this.expandedFlat) {
+      if (node.type === 'dir') node.open = false;
+    }
   }
 
   // --- Rename node: ---
@@ -434,7 +461,7 @@ export class TreeManager {
           const parent = this.getParent(node, false);
           if (parent) {
             parent.hidden = false;
-            parent.open = true;
+            this.openDir(parent);
           }
         }
       } else {
@@ -442,7 +469,7 @@ export class TreeManager {
           const parent = this.getParent(node, false);
           if (parent) {
             parent.hidden = false;
-            parent.open = true;
+            this.openDir(parent);
           }
         }
       }

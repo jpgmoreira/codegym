@@ -26,6 +26,7 @@ export const allowedInvokeChannels = Object.freeze([
   TreeChannels.deleteNode,
   TreeChannels.deleteSelectedNodes,
   TreeChannels.search,
+  TreeChannels.collapseAll,
 ] as const);
 export const allowedOnChannels = Object.freeze([Channels.loadStartupData] as const);
 

@@ -10,4 +10,5 @@ export enum TreeChannels {
   deleteNode = 'delete-node',
   deleteSelectedNodes = 'delete-selected-nodes',
   search = 'search',
+  collapseAll = 'collapse-all',
 }

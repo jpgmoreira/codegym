@@ -5,5 +5,6 @@ export type TreeOperationResponseDTO = {
   nSurfaceNodes: number;
   nSelectedNodes: number;
   nSelectedFiles: number;
+  nOpenDirs: number;
   visibleNodes: Node[];
 };

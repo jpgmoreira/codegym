@@ -8,6 +8,7 @@
     visible: boolean;
     type: NodeType | 'root';
     nSelectedNodes: number;
+    nOpenDirs: number;
     searchText: string;
     x: number;
     y: number;
@@ -18,6 +19,7 @@
     (e: 'renameNode'): void;
     (e: 'deleteNode'): void;
     (e: 'deleteSelectedNodes'): void;
+    (e: 'collapseAll'): void;
   }>();
 
   const props = defineProps<ContextProps>();
@@ -45,6 +47,7 @@
       <div v-if="!isSearching" @click="emit('createNode', 'file')">New contest</div>
       <div v-if="!isSearching" @click="emit('createNode', 'dir')">New folder</div>
       <div v-if="props.nSelectedNodes" @click="emit('deleteSelectedNodes')">Delete selected</div>
+      <div v-if="props.nOpenDirs" @click="emit('collapseAll')">Collapse all</div>
     </div>
     <div v-else-if="props.type === 'dir'">
       <div v-if="!isSearching" @click="emit('createNode', 'file')">New contest</div>

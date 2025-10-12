@@ -77,3 +77,11 @@ ipcMain.handle(
     return TreeManager.instance.buildResult(anchor);
   }
 );
+
+ipcMain.handle(
+  TreeChannels.collapseAll,
+  (_: IpcMainInvokeEvent, anchor: number): TreeOperationResponseDTO => {
+    TreeManager.instance.collapseAll();
+    return TreeManager.instance.buildResult(anchor);
+  }
+);

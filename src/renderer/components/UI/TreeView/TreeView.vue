@@ -186,12 +186,21 @@
     }, 40);
   }
 
+  async function collapseAll() {
+    tree.value = await window.api.invoke(TreeChannels.collapseAll, anchor.value);
+  }
+
   function isCheckIndeterminate(node: Node) {
     return Boolean(node.type === 'dir' && node.nSelDesc && node.nSelDesc < node.nDesc);
   }
 
   function isNodeDisabled(node: Node) {
     return node.type === 'dir' && isSearching.value;
+  }
+
+  function nFoldersSelected() {
+    if (!tree.value) return 0;
+    return tree.value.nSelectedNodes - tree.value.nSelectedFiles;
   }
 
   function containerMouseEnter() {
@@ -238,16 +247,19 @@
       class="z-30"
       :tree="tree"
       :n-selected-nodes="tree?.nSelectedNodes || 0"
+      :n-open-dirs="tree?.nOpenDirs || 0"
       :search-text="searchText"
       v-bind="contextState"
       @create-node="createNode"
       @rename-node="startRenaming"
       @delete-node="deleteNode"
       @delete-selected-nodes="deleteSelectedNodes"
+      @collapse-all="collapseAll"
     />
     <Transition name="badge-fade">
       <div v-show="showFilesSelectedBadge" class="z-20 files-selected-badge text-sm font-bold">
-        {{ toLocaleNumber(tree!.nSelectedFiles) }} files selected
+        <div>{{ toLocaleNumber(tree!.nSelectedFiles) }} files and</div>
+        <div>{{ toLocaleNumber(nFoldersSelected()) }} folders selected</div>
       </div>
     </Transition>
     <div
