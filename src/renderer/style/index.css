@@ -1,0 +1,5 @@
+@import './lib/tailwind.css';
+@import './common/common.css';
+@import './common/multiselect.css';
+@import './themes/theme-dark.css';
+@import './widgets/loader.css';

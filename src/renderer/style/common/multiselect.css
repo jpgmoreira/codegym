@@ -1,34 +1,4 @@
-button {
-  padding: 5px 10px;
-  border-radius: 5px;
-  cursor: pointer;
-}
-button:disabled {
-  cursor: not-allowed;
-}
-
-input,
-select {
-  padding: 5px 10px;
-  border-radius: 5px;
-}
-
-input[type='checkbox'] {
-  width: 15px;
-  height: 15px;
-}
-
-input[type='number']::-webkit-inner-spin-button {
-  appearance: none;
-}
-
-td {
-  padding: 6px 10px;
-}
-th {
-  text-align: left;
-  padding: 8px 10px;
-}
+/* Common styles to control the Multiselect component */
 
 .multiselect .context-menu {
   border-radius: 10px;
