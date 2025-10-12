@@ -318,47 +318,22 @@
   .list-move,
   .list-enter-active,
   .list-leave-active {
-    transition: all 0.25s ease;
-    overflow: hidden;
+    transition: opacity 0.25s ease;
   }
 
   /* Entering */
   .list-enter-from {
     opacity: 0;
-    transform: translateY(-10px);
-    max-height: 0;
   }
   .list-enter-to {
     opacity: 1;
-    transform: translateY(0);
-    max-height: 40px; /* adjust for maximum item height */
   }
 
   /* Leaving */
   .list-leave-from {
     opacity: 1;
-    transform: translateY(0);
-    max-height: 40px;
   }
   .list-leave-to {
     opacity: 0;
-    transform: translateY(10px);
-    max-height: 0;
-  }
-
-  /* --- Smoother staggering --- */
-  .list-enter-active,
-  .list-leave-active {
-    transition-property: opacity, transform, max-height;
-    transition-duration: 0.25s;
-    transition-timing-function: ease;
-  }
-
-  /* Smaller delay */
-  .list-enter-active {
-    transition-delay: calc(var(--index) * 1ms);
-  }
-  .list-leave-active {
-    transition-delay: 1ms;
   }
 </style>
