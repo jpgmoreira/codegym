@@ -15,6 +15,7 @@
   import AutoLengthInput from '../AutoLengthInput.vue';
   import { GenericResponseDTO } from '@common/dto/genericResponseDTO';
   import { useUIStore } from '@renderer/store/ui';
+  import { toLocaleNumber } from '@common/utils/utils';
 
   type ContextState = {
     type: NodeType | 'root';
@@ -246,7 +247,7 @@
     />
     <Transition name="badge-fade">
       <div v-show="showFilesSelectedBadge" class="z-20 files-selected-badge text-sm font-bold">
-        {{ tree?.nSelectedFiles }} files selected
+        {{ toLocaleNumber(tree!.nSelectedFiles) }} files selected
       </div>
     </Transition>
     <div
