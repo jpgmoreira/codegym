@@ -42,7 +42,12 @@
       required: false,
       default: false,
     },
-    icons: {
+    dirIcon: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
+    fileIcon: {
       type: Boolean,
       required: false,
       default: false,
@@ -407,14 +412,18 @@
                   indeterminate: isCheckIndeterminate(node),
                 }"
               />
+
               <span
-                v-if="props.icons"
-                :class="{
-                  'file-icon': node.type === 'file',
-                  'dir-icon': node.type === 'dir',
-                  'cursor-not-allowed': isNodeDisabled(node),
-                }"
+                v-if="node.type === 'file' && props.fileIcon"
+                class="file-icon"
+                :class="{ 'cursor-not-allowed': isNodeDisabled(node) }"
               ></span>
+              <span
+                v-if="node.type === 'dir' && props.dirIcon"
+                class="dir-icon"
+                :class="{ 'cursor-not-allowed': isNodeDisabled(node) }"
+              ></span>
+
               <AutoLengthInput
                 class="node-input"
                 :class="{ selected: node.selected, 'cursor-not-allowed': isNodeDisabled(node) }"
