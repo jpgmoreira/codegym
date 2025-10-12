@@ -30,7 +30,7 @@
     <SettingsPageHeader />
     <div class="flex grow">
       <div :style="{ width: `${treeAreaWidth}px` }">
-        <TreeView class="select-none" files-hint search />
+        <TreeView class="select-none" files-hint search checkbox />
       </div>
       <div class="separator" :class="{ resizing: isResizing }" @mousedown="isResizing = true"></div>
       <div>CONTEST!</div>

@@ -402,18 +402,30 @@
 <style scoped>
   .node-input {
     height: 28px;
+    padding-left: 2px;
+    padding-right: 5px;
+    cursor: pointer;
+    background-color: transparent;
   }
 
   .node-caret {
     transition: transform 0.2s ease;
     display: inline-block;
     transform: rotate(0deg);
+    cursor: pointer;
+    background-position: center;
+    background-size: contain;
+    background-repeat: no-repeat;
+    width: 18px;
+    height: 18px;
   }
   .node-caret.closed {
     transform: rotate(-90deg);
   }
 
   .nodes-container {
+    padding-left: 5px;
+    padding-top: 5px;
     will-change: transform;
   }
 
@@ -425,6 +437,13 @@
     border-radius: 5px;
     padding: 1px 5px;
     white-space: nowrap;
+    padding: 3px 5px;
+  }
+
+  .files-hint {
+    font-size: 0.92rem;
+    font-weight: 500;
+    padding-left: 3px;
   }
 
   /* --- Transitions --- */
