@@ -215,7 +215,7 @@
   background-image: url('@renderer/assets/images/folder.png');
 }
 .theme-dark .treeview .file-icon {
-  background-image: url('@renderer/assets/images/document.png');
+  background-image: url('@renderer/assets/images/file.png');
 }
 
 .theme-dark .treeview .files-hint {
