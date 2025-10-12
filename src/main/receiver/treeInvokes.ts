@@ -20,6 +20,34 @@ ipcMain.handle(
 );
 
 ipcMain.handle(
+  TreeChannels.createNodeAbove,
+  (
+    _: IpcMainInvokeEvent,
+    anchor: number,
+    type: NodeType,
+    prefix: string,
+    siblingId: string
+  ): TreeOperationResponseDTO => {
+    TreeManager.instance.createNodeAbove(type, prefix, siblingId);
+    return TreeManager.instance.buildResult(anchor);
+  }
+);
+
+ipcMain.handle(
+  TreeChannels.createNodeBelow,
+  (
+    _: IpcMainInvokeEvent,
+    anchor: number,
+    type: NodeType,
+    prefix: string,
+    siblingId: string
+  ): TreeOperationResponseDTO => {
+    TreeManager.instance.createNodeBelow(type, prefix, siblingId);
+    return TreeManager.instance.buildResult(anchor);
+  }
+);
+
+ipcMain.handle(
   TreeChannels.getState,
   (_: IpcMainInvokeEvent, anchor: number): TreeOperationResponseDTO => {
     return TreeManager.instance.buildResult(anchor);

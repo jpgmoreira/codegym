@@ -3,6 +3,8 @@
  */
 export enum TreeChannels {
   createNode = 'create-node',
+  createNodeAbove = 'create-node-above',
+  createNodeBelow = 'create-node-below',
   getState = 'get-state',
   toggleDirOpen = 'toggle-dir-open',
   renameNode = 'rename-node',

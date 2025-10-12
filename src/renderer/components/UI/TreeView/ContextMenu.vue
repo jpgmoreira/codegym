@@ -16,6 +16,8 @@
 
   const emit = defineEmits<{
     (e: 'createNode', type: NodeType): void;
+    (e: 'createNodeAbove', type: NodeType): void;
+    (e: 'createNodeBelow', type: NodeType): void;
     (e: 'renameNode'): void;
     (e: 'deleteNode'): void;
     (e: 'deleteSelectedNodes'): void;
@@ -52,10 +54,14 @@
     <div v-else-if="props.type === 'dir'">
       <div v-if="!isSearching" @click="emit('createNode', 'file')">New contest</div>
       <div v-if="!isSearching" @click="emit('createNode', 'dir')">New folder</div>
+      <div v-if="!isSearching" @click="emit('createNodeAbove', 'dir')">Create folder above</div>
+      <div v-if="!isSearching" @click="emit('createNodeBelow', 'dir')">Create folder below</div>
       <div @click="emit('renameNode')">Rename</div>
       <div v-if="!isSearching" @click="emit('deleteNode')">Delete</div>
     </div>
     <div v-else-if="props.type === 'file'">
+      <div v-if="!isSearching" @click="emit('createNodeAbove', 'file')">Create file above</div>
+      <div v-if="!isSearching" @click="emit('createNodeBelow', 'file')">Create file below</div>
       <div @click="emit('renameNode')">Rename</div>
       <div @click="emit('deleteNode')">Delete</div>
     </div>

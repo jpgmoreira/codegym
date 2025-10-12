@@ -249,8 +249,8 @@ export class TreeManager {
       sub.headId = node.id;
       sub.tailId = node.id;
     } else {
-      const tail = this.getTail(sub, true)!;
-      const next = this.getNext(tail, true);
+      const tail = this.getTail(sub, false)!;
+      const next = this.getNext(tail, false);
       node.nextId = tail.nextId;
       tail.nextId = node.id;
       node.prevId = tail.id;
@@ -259,7 +259,27 @@ export class TreeManager {
     }
   }
 
-  public createNode(type: NodeType, prefix: string, parentId: string | null) {
+  private appendNodeAbove(node: Node, sibling: Node, control: NodeController) {
+    const sub = node.type === 'dir' ? control.dirs : control.files;
+    const prev = this.getPrev(sibling, false);
+    node.nextId = sibling.id;
+    node.prevId = sibling.prevId;
+    sibling.prevId = node.id;
+    if (prev) prev.nextId = node.id;
+    else sub.headId = node.id;
+  }
+
+  private appendNodeBelow(node: Node, sibling: Node, control: NodeController) {
+    const sub = node.type === 'dir' ? control.dirs : control.files;
+    const next = this.getNext(sibling, false);
+    node.prevId = sibling.id;
+    node.nextId = sibling.nextId;
+    sibling.nextId = node.id;
+    if (next) next.prevId = node.id;
+    else sub.tailId = node.id;
+  }
+
+  private createNodeHelper(type: NodeType, prefix: string, parentId: string | null) {
     let newNode: Node;
     if (type === 'dir') {
       newNode = this.createDirNode(prefix, parentId);
@@ -269,13 +289,46 @@ export class TreeManager {
       this.proxy.rootController.nextFile++;
     }
     this.proxy.idToNode[newNode.id] = newNode;
-    const parent = this.getParent(newNode, true);
+    return newNode;
+  }
+
+  public createNode(type: NodeType, prefix: string, parentId: string | null) {
+    const newNode = this.createNodeHelper(type, prefix, parentId);
+    const parent = this.getParent(newNode, false);
     if (parent) {
       newNode.selected = parent.selected;
       this.openDir(parent);
       this.appendNode(newNode, parent);
     } else {
-      this.appendNode(newNode, this.proxy.rootController);
+      this.appendNode(newNode, this.target.rootController);
+    }
+    this.refresh();
+  }
+
+  public createNodeAbove(type: NodeType, prefix: string, siblingId: string) {
+    const sibling = this.target.idToNode[siblingId];
+    if (!sibling) return;
+    const parent = this.getParent(sibling, false);
+    const newNode = this.createNodeHelper(type, prefix, parent?.id || null);
+    if (parent) {
+      newNode.selected = parent.selected;
+      this.appendNodeAbove(newNode, sibling, parent);
+    } else {
+      this.appendNodeAbove(newNode, sibling, this.target.rootController);
+    }
+    this.refresh();
+  }
+
+  public createNodeBelow(type: NodeType, prefix: string, siblingId: string) {
+    const sibling = this.target.idToNode[siblingId];
+    if (!sibling) return;
+    const parent = this.getParent(sibling, false);
+    const newNode = this.createNodeHelper(type, prefix, parent?.id || null);
+    if (parent) {
+      newNode.selected = parent.selected;
+      this.appendNodeBelow(newNode, sibling, parent);
+    } else {
+      this.appendNodeBelow(newNode, sibling, this.target.rootController);
     }
     this.refresh();
   }

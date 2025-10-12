@@ -97,6 +97,32 @@
     );
   }
 
+  async function createNodeAbove(type: NodeType) {
+    const node = contextState.activeNode;
+    if (!node) return;
+    const prefix = type === 'dir' ? 'Folder' : 'File';
+    tree.value = await window.api.invoke(
+      TreeChannels.createNodeAbove,
+      tree.value?.anchor || 0,
+      type,
+      prefix,
+      node.id
+    );
+  }
+
+  async function createNodeBelow(type: NodeType) {
+    const node = contextState.activeNode;
+    if (!node) return;
+    const prefix = type === 'dir' ? 'Folder' : 'File';
+    tree.value = await window.api.invoke(
+      TreeChannels.createNodeBelow,
+      tree.value?.anchor || 0,
+      type,
+      prefix,
+      node.id
+    );
+  }
+
   async function toggleDirOpen(node: Node) {
     animateFolders.value = true;
     tree.value = await window.api.invoke(
@@ -268,6 +294,8 @@
       :search-text="searchText"
       v-bind="contextState"
       @create-node="createNode"
+      @create-node-above="createNodeAbove"
+      @create-node-below="createNodeBelow"
       @rename-node="startRenaming"
       @delete-node="deleteNode"
       @delete-selected-nodes="deleteSelectedNodes"

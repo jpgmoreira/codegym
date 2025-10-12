@@ -19,6 +19,8 @@ export const allowedInvokeChannels = Object.freeze([
   Channels.renameCurrProfile,
   // Channels to perform treeview operations:
   TreeChannels.createNode,
+  TreeChannels.createNodeAbove,
+  TreeChannels.createNodeBelow,
   TreeChannels.getState,
   TreeChannels.toggleDirOpen,
   TreeChannels.renameNode,
