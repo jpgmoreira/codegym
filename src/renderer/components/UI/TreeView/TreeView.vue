@@ -59,8 +59,8 @@
   const anchor = ref(0);
 
   const animateFolders = ref(false);
-
   const isSearching = ref(false);
+  const showFilesSelectedBadge = ref(false);
 
   const scrollContainer = useTemplateRef('scroll-container');
 
@@ -173,6 +173,7 @@
   }
 
   function handleScroll() {
+    contextState.visible = false;
     clearTimeout(scrollTimer.value);
     setTimeout(async () => {
       const container = scrollContainer.value;
@@ -190,6 +191,16 @@
 
   function isNodeDisabled(node: Node) {
     return node.type === 'dir' && isSearching.value;
+  }
+
+  function containerMouseEnter() {
+    if (tree.value?.nTotalNodes) {
+      showFilesSelectedBadge.value = true;
+    }
+  }
+
+  function containerMouseLeave() {
+    showFilesSelectedBadge.value = false;
   }
 
   function windowKeyDown(e: KeyboardEvent) {
@@ -219,9 +230,11 @@
     class="relative z-0 h-full"
     @click.right="(e) => showContextMenu('root', null, e)"
     @click="() => (contextState.visible = false)"
+    @mouseenter="containerMouseEnter"
+    @mouseleave="containerMouseLeave"
   >
     <ContextMenu
-      class="z-20"
+      class="z-30"
       :tree="tree"
       :n-selected-nodes="tree?.nSelectedNodes || 0"
       :search-text="searchText"
@@ -231,6 +244,11 @@
       @delete-node="deleteNode"
       @delete-selected-nodes="deleteSelectedNodes"
     />
+    <Transition name="badge-fade">
+      <div v-show="showFilesSelectedBadge" class="z-20 files-selected-badge text-sm font-bold">
+        {{ tree?.nSelectedFiles }} files selected
+      </div>
+    </Transition>
     <div
       v-if="!isSearching && !tree?.visibleNodes.length"
       class="absolute-center whitespace-nowrap text-lg opacity-70"
@@ -314,26 +332,48 @@
     will-change: transform;
   }
 
+  .files-selected-badge {
+    position: absolute;
+    bottom: 10px;
+    right: 30px;
+    display: inline;
+    border-radius: 5px;
+    padding: 1px 5px;
+    white-space: nowrap;
+  }
+
   /* --- Transitions --- */
+
+  /* List: */
   .list-move,
   .list-enter-active,
   .list-leave-active {
     transition: opacity 0.12s ease;
   }
-
-  /* Entering */
   .list-enter-from {
     opacity: 0;
   }
   .list-enter-to {
     opacity: 1;
   }
-
-  /* Leaving */
   .list-leave-from {
     opacity: 1;
   }
   .list-leave-to {
     opacity: 0;
+  }
+
+  /* Badge fade: */
+  .badge-fade-enter-active,
+  .badge-fade-leave-active {
+    transition: opacity 0.25s ease;
+  }
+  .badge-fade-enter-from,
+  .badge-fade-leave-to {
+    opacity: 0;
+  }
+  .badge-fade-enter-to,
+  .badge-fade-leave-from {
+    opacity: 1;
   }
 </style>
