@@ -31,9 +31,11 @@ contextBridge.exposeInMainWorld(
       return ipcRenderer.invoke(channel, ...data);
     },
     on: (channel: OnChannel, func: (...data: unknown[]) => void) => {
-      if (allowedOnChannels.includes(channel)) {
-        ipcRenderer.on(channel, (_, ...args) => func(...args));
+      if (!allowedOnChannels.includes(channel)) {
+        console.warn(`[api.on] Channel "${channel}" is not allowed.`);
+        return;
       }
+      ipcRenderer.on(channel, (_, ...args) => func(...args));
     },
   } as ElectronAPI)
 );
