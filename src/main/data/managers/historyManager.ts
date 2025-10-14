@@ -3,7 +3,7 @@ import { DATA_DIR } from '../constants';
 import { HISTORY_MAX_SIZE, HISTORY_PAGE_SIZE } from '../constants';
 import { Oj } from '@common/types/oj';
 import { EventEmitter } from '@common/helpers/eventEmitter';
-import { Events } from '@main/events/events';
+import { Events } from '@main/utils/events';
 import Datastore from '@seald-io/nedb';
 import path from 'path';
 import { FetchHistoryPageResponseDTO } from '@common/dto/fetchHistoryPageResponseDTO';

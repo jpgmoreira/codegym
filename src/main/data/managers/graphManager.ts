@@ -4,7 +4,7 @@ import Datastore from '@seald-io/nedb';
 import path from 'path';
 import { OjWithContests } from '@common/types/oj';
 import { EventEmitter } from '@common/helpers/eventEmitter';
-import { Events } from '@main/events/events';
+import { Events } from '@main/utils/events';
 
 EventEmitter.instance.on(Events.clearProfileData, () => {
   GraphManager.instance.clear();

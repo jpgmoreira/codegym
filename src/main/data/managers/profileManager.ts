@@ -16,7 +16,7 @@ import { loadStartupData } from '../startup';
 import { OjContext } from '@common/schemas/ojContext';
 import { OjProblem } from '@common/schemas/problems';
 import { EventEmitter } from '@common/helpers/eventEmitter';
-import { Events } from '@main/events/events';
+import { Events } from '@main/utils/events';
 import { GenericResponseDTO } from '@common/dto/genericResponseDTO';
 import fs from 'fs';
 

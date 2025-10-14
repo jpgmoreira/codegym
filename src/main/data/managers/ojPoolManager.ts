@@ -6,7 +6,7 @@ import { CacheManager } from './cacheManager';
 import { shuffleArray, toBase62 } from '@common/utils/utils';
 import { HistoryManager } from './historyManager';
 import { EventEmitter } from '@common/helpers/eventEmitter';
-import { Events } from '@main/events/events';
+import { Events } from '@main/utils/events';
 
 EventEmitter.instance.on(Events.clearProfileData, () => {
   OjPoolManager.instance.clear();
