@@ -1,4 +1,9 @@
 <script lang="ts" setup>
+  /**
+   * Here race-conditions should not be a problem because all calls to the main process
+   * operate on the same tree structure.
+   */
+
   import ContextMenu from './ContextMenu.vue';
   import { TreeOperationResponseDTO } from '@common/dto/treeOperationResponseDTO';
   import { NodeType, Node, ModifierKeys } from '@common/types/tree';
