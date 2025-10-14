@@ -11,7 +11,9 @@
   "homepage": "https://github.com/jpgmoreira/codegym",
   "scripts": {
     "start": "electron-forge start",
+    "start:perf": "ENABLE_PERFORMANCE_LOGS=true electron-forge start",
     "debug": "electron-forge start -- --inspect=9229 --remote-debugging-port=9222",
+    "debug:perf": "ENABLE_PERFORMANCE_LOGS=true electron-forge start -- --inspect=9229 --remote-debugging-port=9222",
     "make": "electron-forge make",
     "pretty": "prettier . --write",
     "check": "vue-tsc --noEmit",
