@@ -1,0 +1,17 @@
+/* Multiselect */
+
+.theme-dark .multiselect .context-menu {
+  background-color: #3f444b;
+}
+.theme-dark .multiselect .context-menu .highlight {
+  background-color: #525a63;
+}
+.theme-dark .multiselect .badge {
+  background-color: #0072c7;
+}
+.theme-dark .multiselect .badge:focus {
+  outline-color: #fa9907a8;
+}
+.theme-dark .multiselect .badge .close-button {
+  border-color: #025391;
+}

@@ -1,0 +1,47 @@
+/* TreeView */
+
+.theme-dark .treeview .node-caret {
+  background-image: url('@renderer/assets/images/arrow-down.png');
+}
+.theme-dark .treeview {
+  background-color: #282828;
+}
+.theme-dark .treeview .node-input {
+  color: #dedede;
+}
+.theme-dark .treeview .node-input:hover {
+  background-color: #3e444b;
+}
+.theme-dark .treeview .node-input.selected {
+  box-shadow: inset 0 0 0 2px #2b6db9b9;
+}
+
+.theme-dark .indent-span::after {
+  background-color: #606368;
+}
+
+.theme-dark .treeview .dir-icon {
+  background-image: url('@renderer/assets/images/folder.png');
+}
+.theme-dark .treeview .file-icon {
+  background-image: url('@renderer/assets/images/file.png');
+}
+
+.theme-dark .treeview .files-hint {
+  color: #8e8e8e;
+}
+
+/* Files selected badge - same style as context menu */
+.theme-dark .treeview .files-selected-badge {
+  background-color: #1e1e1e; /* same as context menu background */
+  color: #e2e2e2; /* same text color as context menu */
+  border: 1px solid #2e2e2e; /* same border as context menu */
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.45); /* same shadow as context menu */
+}
+
+/* Optional hover effect */
+.theme-dark .treeview .files-selected-badge:hover {
+  background-color: #2a2d2f; /* same hover as context menu */
+  color: #fff;
+  border-color: #3a3d3f;
+}

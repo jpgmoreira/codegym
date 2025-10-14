@@ -67,10 +67,6 @@
 </template>
 
 <style scoped>
-  footer {
-    background-color: var(--footer-bg);
-  }
-
   :deep(.filters) input[type='number'] {
     width: 130px;
   }

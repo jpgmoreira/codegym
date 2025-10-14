@@ -107,7 +107,7 @@
       ></div>
 
       <div v-if="rootSections.delete">
-        <div class="item" @click="emit('deleteSelectedNodes')">Delete selected</div>
+        <div class="item danger" @click="emit('deleteSelectedNodes')">Delete selected</div>
       </div>
     </div>
 
@@ -139,7 +139,7 @@
 
       <div v-if="dirSections.change">
         <div class="item" @click="emit('renameNode')">Rename</div>
-        <div v-if="!isSearching" class="item" @click="emit('deleteNode')">Delete</div>
+        <div v-if="!isSearching" class="item danger" @click="emit('deleteNode')">Delete</div>
       </div>
     </div>
 
@@ -162,7 +162,7 @@
 
       <div v-if="fileSections.change">
         <div class="item" @click="emit('renameNode')">Rename</div>
-        <div class="item" @click="emit('deleteNode')">Delete</div>
+        <div class="item danger" @click="emit('deleteNode')">Delete</div>
       </div>
     </div>
   </div>

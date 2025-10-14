@@ -13,7 +13,4 @@
     cursor: pointer;
     padding: 8px;
   }
-  a:hover {
-    background-color: var(--header-btn-hover-bg);
-  }
 </style>
