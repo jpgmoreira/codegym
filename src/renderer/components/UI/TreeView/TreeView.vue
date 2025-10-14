@@ -1,7 +1,6 @@
 <script lang="ts" setup>
   /**
-   * Here race-conditions should not be a problem because all calls to the main process
-   * operate on the same tree structure.
+   * Could race conditions be a problem here? - After using the component a lot, it seems to me that no.
    */
 
   import ContextMenu from './ContextMenu.vue';

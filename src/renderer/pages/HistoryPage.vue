@@ -16,33 +16,31 @@
   const loaded = ref(false);
 
   const scrollTimer = ref<NodeJS.Timeout | undefined>(undefined);
-  const fetchSeq = ref(0);
-  const total = ref(0);
-  const top = ref(0);
-  const key = ref(0);
+  const nTotalRows = ref(0);
+  const anchor = ref(0);
+  const tableOffset = ref(0); // This is important. If we use a computed property, a lot of bugs happen.
 
-  const paddingBottom = 100;
+  const paddingBottom = 200;
   const rowHeight = 40;
 
   const scrollContainer = useTemplateRef('scroll-container');
 
   const currOj = computed(() => profileStore.currProfile!.currOj);
 
-  const ghostStyle = computed(() => ({ height: `${total.value * rowHeight + paddingBottom}px` }));
-  const tableStyle = computed(() => ({ transform: `translateY(${top.value * rowHeight}px)` }));
+  const ghostStyle = computed(() => ({
+    height: `${nTotalRows.value * rowHeight + paddingBottom}px`,
+  }));
 
-  async function fetchHistory(newTop: number) {
-    const seq = ++fetchSeq.value;
+  async function fetchHistory(newAnchor: number) {
     const result = await window.api.invoke<FetchHistoryPageResponseDTO<typeof currOj.value>>(
       Channels.fetchHistoryPage,
       currOj.value,
-      newTop
+      newAnchor
     );
-    if (seq !== fetchSeq.value) return;
     problems.value = result.data;
-    total.value = result.total;
-    key.value++;
-    top.value = newTop;
+    nTotalRows.value = result.total;
+    anchor.value = newAnchor;
+    tableOffset.value = newAnchor * rowHeight;
   }
 
   function handleClick(problem: OjProblem[Oj]) {
@@ -57,8 +55,8 @@
       const container = scrollContainer.value;
       if (!container) return;
       const scrollTop = container.scrollTop;
-      const newTop = Math.max(0, Math.floor(scrollTop / rowHeight) - 30);
-      fetchHistory(newTop);
+      const newAnchor = Math.max(0, Math.floor(scrollTop / rowHeight) - 30);
+      fetchHistory(newAnchor);
     }, 40);
   }
 
@@ -101,12 +99,11 @@
         <div class="ghost" :style="ghostStyle"></div>
         <table
           class="problems-table w-full absolute left-0 table-fixed"
-          :style="tableStyle"
-          :key="key"
+          :style="{ transform: `translateY(${tableOffset}px)` }"
         >
           <tbody>
             <tr v-for="(problem, index) in problems" :key="problem.id">
-              <td class="first-col">{{ index + top + 1 }}</td>
+              <td class="first-col">{{ index + anchor + 1 }}</td>
               <td class="overflow-hidden">
                 <a href="#" @click="handleClick(problem)">
                   {{ problem.name || '\<no name available\>' }}
