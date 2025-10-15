@@ -189,14 +189,14 @@
         {{ option.text }}
       </div>
     </div>
-    <div class="badges-container" ref="badges-container" @click="focusEditor">
+    <div class="badges-container" ref="badges-container" @mousedown.prevent="focusEditor">
       <span
         class="badge"
         v-for="option in selectedOptions"
         :key="option.value"
         tabindex="0"
         @keydown="badgeKeydown($event, option.value)"
-        @click.stop
+        @mousedown.stop
       >
         {{ option.text }}
         <button
