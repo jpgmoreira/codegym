@@ -592,6 +592,7 @@
     height: 17px;
     border: 1px solid #222;
     flex-shrink: 0;
+    margin-right: 2px;
   }
 
   .legend-item-content {
