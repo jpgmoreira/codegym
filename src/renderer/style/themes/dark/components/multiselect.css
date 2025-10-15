@@ -1,5 +1,9 @@
 /* Multiselect */
 
+.theme-dark .multiselect {
+  background-color: #3e444b;
+}
+
 .theme-dark .multiselect .context-menu {
   background-color: #3f444b;
 }

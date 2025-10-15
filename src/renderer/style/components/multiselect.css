@@ -1,5 +1,8 @@
 /* Common styles to control the Multiselect component */
 
+.multiselect {
+  border-radius: 5px;
+}
 .multiselect .context-menu {
   border-radius: 10px;
 }
@@ -20,6 +23,10 @@
   border-radius: 0px;
 }
 .multiselect .badges-container {
+  padding: 8px;
   padding-bottom: 4px;
   gap: 4px;
+}
+.multiselect .badges-container:empty {
+  padding: 0;
 }

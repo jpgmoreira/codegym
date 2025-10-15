@@ -83,7 +83,7 @@
     );
     state.highlightedContextIndex = Math.max(0, state.highlightedContextIndex);
   }
-  function handleEditorBlur(e: FocusEvent) {
+  function editorBlur(e: FocusEvent) {
     if (e.relatedTarget === contextMenu.value) {
       focusEditor();
       return;
@@ -92,7 +92,7 @@
     state.editorHasFocus = false;
     state.highlightedContextIndex = 0;
   }
-  function handleEditorEnter() {
+  function editorEnter() {
     const option = contextOptions.value[state.highlightedContextIndex];
     if (option) {
       selectOption(option.value);
@@ -102,7 +102,7 @@
       state.highlightedContextIndex = 0;
     }
   }
-  function handleEditorInput() {
+  function editorInput() {
     contextMenu.value?.scrollTo({
       top: 0,
       behavior: 'instant',
@@ -112,7 +112,7 @@
   function deselectOption(optionValue: string) {
     emit('deselectOption', optionValue);
   }
-  function handleBadgeKeydown(event: KeyboardEvent, optionValue: string) {
+  function badgeKeydown(event: KeyboardEvent, optionValue: string) {
     const badges = badgesContainer.value?.children as HTMLElement[] | undefined;
     if (!badges) return;
     const current = event.currentTarget as HTMLElement;
@@ -130,6 +130,10 @@
     } else if (event.key === 'ArrowRight' && index < badges.length - 1) {
       badges[index + 1].focus();
     }
+  }
+  function badgesContainerClick() {
+    if (!editor.value) return;
+    editor.value.focus();
   }
   function contextUp() {
     state.highlightedContextIndex = Math.max(0, state.highlightedContextIndex - 1);
@@ -189,13 +193,14 @@
         {{ option.text }}
       </div>
     </div>
-    <div class="badges-container" ref="badges-container">
+    <div class="badges-container" ref="badges-container" @click="badgesContainerClick">
       <span
         class="badge"
         v-for="option in selectedOptions"
         :key="option.value"
         tabindex="0"
-        @keydown.prevent="handleBadgeKeydown($event, option.value)"
+        @keydown="badgeKeydown($event, option.value)"
+        @click.stop
       >
         {{ option.text }}
         <button
@@ -204,6 +209,7 @@
           type="button"
           @click="deselectOption(option.value)"
           aria-label="remove option"
+          tabindex="-1"
         >
           <svg width="10" height="10" viewBox="0 0 10 10">
             <path d="M1 1 L9 9 M9 1 L1 9" stroke="currentColor" stroke-width="1" />
@@ -217,12 +223,12 @@
       ref="editor"
       :placeholder="props.placeholder"
       v-model="state.content"
-      @input="handleEditorInput"
+      @input="editorInput"
       @focus="state.editorHasFocus = true"
-      @blur="handleEditorBlur"
+      @blur="editorBlur"
       @keydown.up.prevent="contextUp"
       @keydown.down.prevent="contextDown"
-      @keydown.enter.prevent="handleEditorEnter"
+      @keydown.enter.prevent="editorEnter"
     />
   </div>
 </template>
@@ -242,7 +248,7 @@
     position: absolute;
     left: -1px;
     right: -1px;
-    max-height: 130px;
+    max-height: 250px;
     overflow-y: scroll;
   }
   .badge {
