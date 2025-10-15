@@ -49,13 +49,13 @@ export const useProfileStore = defineStore('profile', {
         name
       );
       if (result.status === 'success') {
-        this.initFromStartupData(result.data);
+        EventEmitter.instance.emit(Events.loadInitialData, result.data);
       }
       return result;
     },
     async login(profileId: string) {
       const result = await window.api.invoke<StartupData>(Channels.login, profileId);
-      this.initFromStartupData(result);
+      EventEmitter.instance.emit(Events.loadInitialData, result);
       return result;
     },
     logout() {
@@ -68,7 +68,7 @@ export const useProfileStore = defineStore('profile', {
     },
     deleteProfile() {
       const currProfileId = this.currProfile!.id;
-      this.clear();
+      EventEmitter.instance.emit(Events.clearProfileData);
       const { profileRecords } = this.registry;
       for (let i = 0; i < profileRecords.length; i++) {
         if (profileRecords[i].id === currProfileId) {
