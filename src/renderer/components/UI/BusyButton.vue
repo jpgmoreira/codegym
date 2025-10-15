@@ -1,41 +1,54 @@
 <script lang="ts" setup>
   /**
-   * This component is used for buttons that display a "loading" state when clicked.
-   * The goal is to avoid the flickering that may happen when the loading ends too fast.
-   * It waits for a few milliseconds before showing the "loading" state.
+   * BusyButton
+   *
+   * Displays a "busy" state with debounce on entry to prevent flickering during short tasks.
+   * The busy state is controlled externally via the "busy" prop.
    */
-  import { ref, onBeforeUnmount } from 'vue';
+  import { ref, watch, onBeforeUnmount } from 'vue';
   const props = defineProps<{
+    busy: boolean;
+    callback: () => void;
     debounce?: number;
-    callback: () => Promise<void>;
+    disabled?: boolean;
   }>();
-  const isBusy = ref(false);
-  const isRunning = ref(false);
-  const debounceTime = props.debounce ?? 200;
-  let timer: ReturnType<typeof setTimeout> | undefined;
-  async function onClick() {
-    if (isRunning.value) return;
-    isRunning.value = true;
-    clearTimeout(timer);
-    timer = setTimeout(() => {
-      isBusy.value = true;
-    }, debounceTime);
-    await props.callback().finally(() => {
-      isRunning.value = false;
-      isBusy.value = false;
-      clearTimeout(timer);
-    });
+  const debounceTime = props.debounce || 200;
+  const isBusy = ref(props.busy);
+  let timer: ReturnType<typeof setTimeout> | undefined = undefined;
+  function handleClick() {
+    if (isBusy.value || props.disabled) return;
+    props.callback();
   }
-  onBeforeUnmount(() => clearTimeout(timer));
+  watch(
+    () => props.busy,
+    (busyNow) => {
+      clearTimeout(timer);
+      if (busyNow) {
+        timer = setTimeout(() => (isBusy.value = true), debounceTime);
+      } else {
+        isBusy.value = false;
+      }
+    },
+    { immediate: true }
+  );
+  onBeforeUnmount(() => {
+    clearTimeout(timer);
+  });
 </script>
 
 <template>
-  <button type="button" @click="onClick" :disabled="isBusy">
-    <template v-if="isBusy">
-      <slot name="busy">Loading...</slot>
+  <button
+    type="button"
+    class="flex items-center btn-primary"
+    :disabled="isBusy || props.disabled"
+    @click="handleClick"
+  >
+    <template v-if="!isBusy">
+      <slot name="default"></slot>
     </template>
     <template v-else>
-      <slot name="default">Click</slot>
+      <slot name="busy"></slot>
+      <span v-if="isBusy" class="loader ml-1"></span>
     </template>
   </button>
 </template>

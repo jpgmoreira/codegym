@@ -3,6 +3,7 @@
   import { useProfileStore } from '@renderer/store/profile';
   import { useOjStatusStore } from '@renderer/store/ojStatus';
   import ProblemsPageHeader from '@renderer/components/Header/custom/ProblemsPageHeader.vue';
+  import BusyButton from '@renderer/components/UI/BusyButton.vue';
   import Filters from './Filters.vue';
   import Snapshot from './Snapshot.vue';
   const profileStore = useProfileStore();
@@ -39,15 +40,14 @@
     <Filters class="rounded-md m-1 flex-1" :curr-oj="currOj" :oj-context="ojContext" />
   </div>
   <footer class="mt-auto w-full flex justify-around py-1.5">
-    <button
-      type="button"
+    <BusyButton
       class="flex items-center btn-primary"
-      @click="handleNewProblemClick"
-      :disabled="isBusy"
+      :callback="handleNewProblemClick"
+      :busy="isBusy"
     >
-      {{ btnText }}
-      <span v-if="isBusy" class="loader ml-1"></span>
-    </button>
+      <template #default>New problem</template>
+      <template #busy>{{ btnText }}</template>
+    </BusyButton>
     <div class="my-auto flex items-center">
       <label for="solved-checkbox" class="pr-2">Solved?</label>
       <input
