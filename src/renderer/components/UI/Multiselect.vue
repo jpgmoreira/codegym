@@ -88,9 +88,7 @@
       focusEditor();
       return;
     }
-    state.content = '';
-    state.editorHasFocus = false;
-    state.highlightedContextIndex = 0;
+    clear();
   }
   function editorEnter() {
     const option = contextOptions.value[state.highlightedContextIndex];
@@ -101,6 +99,12 @@
       state.content = '';
       state.highlightedContextIndex = 0;
     }
+  }
+  function clear() {
+    state.content = '';
+    state.editorHasFocus = false;
+    state.highlightedContextIndex = 0;
+    (document.activeElement as HTMLElement | null)?.blur();
   }
   function editorInput() {
     contextMenu.value?.scrollTo({
@@ -227,6 +231,7 @@
       @keydown.up.prevent="contextUp"
       @keydown.down.prevent="contextDown"
       @keydown.enter.prevent="editorEnter"
+      @keydown.escape.prevent="clear"
     />
   </div>
 </template>
