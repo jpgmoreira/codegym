@@ -177,6 +177,7 @@
       v-if="showContextMenu"
       :style="contextMenuStyle"
       tabindex="0"
+      role="listbox"
     >
       <div
         class="option"
@@ -185,6 +186,7 @@
         :class="{ highlight: index === state.highlightedContextIndex }"
         @mouseover="state.highlightedContextIndex = index"
         @click="selectOption(option.value)"
+        role="option"
       >
         {{ option.text }}
       </div>
