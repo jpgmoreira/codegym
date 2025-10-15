@@ -5,12 +5,10 @@
   import { parseTimestamp } from '@common/utils/dateUtils';
   import Header from '@renderer/components/Header/Header.vue';
   import HeaderButton from '@renderer/components/Header/HeaderButton.vue';
-  import BusyButton from '@renderer/components/UI/BusyButton.vue';
   import { APP_NAME } from '@common/constants';
   const store = useProfileStore();
   const router = useRouter();
   const fetching = ref<string | null>(null);
-  const isBusy = ref(false);
   const profiles = computed(() => store.registry.profileRecords);
   async function onClick(profileId: string) {
     fetching.value = profileId;
@@ -42,15 +40,15 @@
             <td class="font-bold">{{ profile.name }}</td>
             <td class="whitespace-nowrap">{{ parseTimestamp(profile.createdAt) }}</td>
             <td class="flex justify-center">
-              <BusyButton
+              <button
+                type="button"
                 class="btn-primary flex items-center"
-                :busy-signal="fetching === profile.id"
-                @click="onClick(profile.id)"
-                v-model="isBusy"
+                @click="() => onClick(profile.id)"
+                :disabled="Boolean(fetching)"
               >
                 Login
-                <span v-if="fetching === profile.id && isBusy" class="ml-1 loader"></span>
-              </BusyButton>
+                <span v-if="fetching === profile.id" class="ml-1 loader"></span>
+              </button>
             </td>
           </tr>
         </tbody>

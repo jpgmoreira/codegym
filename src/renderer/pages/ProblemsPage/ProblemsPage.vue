@@ -3,7 +3,6 @@
   import { useProfileStore } from '@renderer/store/profile';
   import { useOjStatusStore } from '@renderer/store/ojStatus';
   import ProblemsPageHeader from '@renderer/components/Header/custom/ProblemsPageHeader.vue';
-  import BusyButton from '@renderer/components/UI/BusyButton.vue';
   import Filters from './Filters.vue';
   import Snapshot from './Snapshot.vue';
   const profileStore = useProfileStore();
@@ -13,13 +12,10 @@
   const snapshot = computed(() => ojContext.value[currOj.value].snapshot);
   const isRequestingProblem = computed(() => ojStatusStore[currOj.value].isRequestingProblem);
   const isUpdatingCache = computed(() => ojStatusStore[currOj.value].isUpdatingCache);
-  const isBusy = ref(isRequestingProblem.value || isUpdatingCache.value);
+  const isBusy = computed(() => isRequestingProblem.value || isUpdatingCache.value);
+  const btnText = computed(() => (isUpdatingCache.value ? 'Updating cache' : 'New problem'));
   const isSolved = ref(Boolean(snapshot.value?.solvedDate));
-  const btnText = computed(() => {
-    if (isBusy.value && isUpdatingCache.value) return 'Updating cache';
-    return 'New problem';
-  });
-  function handleNewProblemClick() {
+  async function handleNewProblemClick() {
     profileStore.requestNewProblem();
   }
   function handleSolvedChange(event: Event) {
@@ -43,15 +39,15 @@
     <Filters class="rounded-md m-1 flex-1" :curr-oj="currOj" :oj-context="ojContext" />
   </div>
   <footer class="mt-auto w-full flex justify-around py-1.5">
-    <BusyButton
+    <button
+      type="button"
       class="flex items-center btn-primary"
       @click="handleNewProblemClick"
-      :busy-signal="isRequestingProblem || isUpdatingCache"
-      v-model="isBusy"
+      :disabled="isBusy"
     >
       {{ btnText }}
       <span v-if="isBusy" class="loader ml-1"></span>
-    </BusyButton>
+    </button>
     <div class="my-auto flex items-center">
       <label for="solved-checkbox" class="pr-2">Solved?</label>
       <input

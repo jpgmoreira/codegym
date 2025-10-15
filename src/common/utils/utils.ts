@@ -47,3 +47,7 @@ export function randomId() {
 export function isAuthPage(page: string): page is AuthPage {
   return (authPageList as readonly string[]).includes(page);
 }
+
+export async function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}

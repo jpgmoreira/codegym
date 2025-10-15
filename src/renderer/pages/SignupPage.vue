@@ -5,18 +5,17 @@
   import { useProfileStore } from '@renderer/store/profile';
   import Header from '@renderer/components/Header/Header.vue';
   import HeaderButton from '@renderer/components/Header/HeaderButton.vue';
-  import BusyButton from '@renderer/components/UI/BusyButton.vue';
   import { APP_NAME } from '@common/constants';
   const profileStore = useProfileStore();
   const uiStore = useUIStore();
   const router = useRouter();
   const name = ref('');
   const fetching = ref(false);
-  const isBusy = ref(false);
   async function createProfile() {
     fetching.value = true;
-    const result = await profileStore.createProfile(name.value);
-    fetching.value = false;
+    const result = await profileStore
+      .createProfile(name.value)
+      .finally(() => (fetching.value = false));
     if (result.status === 'error') {
       uiStore.showToast(result.errorMsg, 'error');
     } else {
@@ -36,14 +35,14 @@
       <label for="profile-name" class="text-lg mr-2">Create a new profile:</label>
       <input type="text" v-model.trim="name" placeholder="Profile name" />
     </div>
-    <BusyButton
+    <button
+      type="button"
       class="btn-primary mt-5 flex items-center"
       @click="createProfile"
-      :busy-signal="fetching"
-      v-model="isBusy"
+      :disabled="fetching"
     >
       Create
-      <span v-if="isBusy" class="loader ml-1"></span>
-    </BusyButton>
+      <span v-if="fetching" class="loader ml-1"></span>
+    </button>
   </div>
 </template>

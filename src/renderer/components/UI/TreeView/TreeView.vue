@@ -383,7 +383,7 @@
           type="text"
           placeholder="Search for files..."
         />
-        <button class="btn-primary rounded-none" @click="search">Search</button>
+        <button type="button" class="btn-primary rounded-none" @click="search">Search</button>
       </div>
       <div class="relative">
         <div :style="ghostStyle"></div>

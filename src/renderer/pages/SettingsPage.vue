@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-  import { reactive, ref, computed } from 'vue';
+  import { ref, computed } from 'vue';
   import { OjNames, OjList, Oj } from '@common/types/oj';
   import { useProfileStore } from '@renderer/store/profile';
   import { useOjMetaStore } from '@renderer/store/ojMeta';
@@ -8,7 +8,6 @@
   import { parseTimestamp } from '@common/utils/dateUtils';
   import { useRouter } from 'vue-router';
   import packageJson from '../../../package.json';
-  import BusyButton from '@renderer/components/UI/BusyButton.vue';
   import SettingsPageHeader from '@renderer/components/Header/custom/SettingsPageHeader.vue';
   import Modal from '@renderer/components/UI/Modal.vue';
   import { APP_NAME } from '@common/constants';
@@ -19,11 +18,12 @@
   const router = useRouter();
   const name = ref<string>(profileStore.currProfile!.name);
   const modalVisible = ref<boolean>(false);
-  const isUpdatingCache: Record<Oj, boolean> = reactive(
-    Object.fromEntries(OjList.map((oj) => [oj, ojStatusStore[oj].isUpdatingCache])) as Record<
-      Oj,
-      boolean
-    >
+  const isUpdatingCache = computed(
+    () =>
+      Object.fromEntries(OjList.map((oj) => [oj, ojStatusStore[oj].isUpdatingCache])) as Record<
+        Oj,
+        boolean
+      >
   );
   const currProfileName = computed(() => profileStore.currProfile?.name);
   function lastCacheUpdate(oj: Oj): string | null {
@@ -103,19 +103,19 @@
           <td>{{ OjNames[oj] }}</td>
           <td>{{ lastCacheUpdate(oj) || 'Never' }}</td>
           <td>
-            <BusyButton
+            <!-- Interestingly, we don't need an arrow function here: -->
+            <button
               type="button"
               class="btn-primary"
-              :busy-signal="ojStatusStore[oj].isUpdatingCache"
-              v-model="isUpdatingCache[oj]"
+              :disabled="isUpdatingCache[oj]"
               @click="updateCache(oj)"
             >
-              <span v-if="isUpdatingCache[oj]">
+              <span class="flex items-center" v-if="isUpdatingCache[oj]">
                 Updating...
                 <span class="loader ml-1"></span>
               </span>
               <span v-else>Update</span>
-            </BusyButton>
+            </button>
           </td>
         </tr>
       </tbody>
