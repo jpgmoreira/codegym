@@ -9,6 +9,7 @@
   color: #ccc;
 }
 
-.theme-dark header a:hover {
+.theme-dark header a:hover,
+.theme-dark header a.router-link-exact-active {
   background-color: #51565e;
 }
