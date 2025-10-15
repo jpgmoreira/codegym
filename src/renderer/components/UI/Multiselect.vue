@@ -84,7 +84,7 @@
     state.highlightedContextIndex = Math.max(0, state.highlightedContextIndex);
   }
   function editorBlur(e: FocusEvent) {
-    if (e.relatedTarget === contextMenu.value) {
+    if (showContextMenu.value && e.relatedTarget === contextMenu.value) {
       focusEditor();
       return;
     }
@@ -130,10 +130,6 @@
     } else if (event.key === 'ArrowRight' && index < badges.length - 1) {
       badges[index + 1].focus();
     }
-  }
-  function badgesContainerClick() {
-    if (!editor.value) return;
-    editor.value.focus();
   }
   function contextUp() {
     state.highlightedContextIndex = Math.max(0, state.highlightedContextIndex - 1);
@@ -193,7 +189,7 @@
         {{ option.text }}
       </div>
     </div>
-    <div class="badges-container" ref="badges-container" @click="badgesContainerClick">
+    <div class="badges-container" ref="badges-container" @click="focusEditor">
       <span
         class="badge"
         v-for="option in selectedOptions"
