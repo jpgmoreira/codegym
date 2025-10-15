@@ -206,8 +206,18 @@
   function canvasMouseDown() {
     isDragging.value = true;
   }
+  function resetGraph() {
+    offsetX = 0;
+    offsetY = 0;
+    scaleX = 1;
+    scaleY = 1;
+    requestDraw();
+    resetContextState();
+    if (hoverCtx) clear(hoverCtx);
+  }
   function windowKeyDown(e: KeyboardEvent) {
     if (e.key === 'Control') isPressingCtrl = true;
+    else if (e.key === 'Escape') resetGraph();
   }
   function windowKeyUp(e: KeyboardEvent) {
     if (e.key === 'Control') isPressingCtrl = false;
