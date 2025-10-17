@@ -363,7 +363,9 @@
           continue;
         }
         xAxisToLabel.set(x, xLabel);
-        drawCircle(mainCtx, x, y, LINE_CIRCLE_RADIUS, series.color);
+        if (scaleX > 0.2) {
+          drawCircle(mainCtx, x, y, LINE_CIRCLE_RADIUS, series.color);
+        }
         if (i > 0) {
           mainCtx.beginPath();
           mainCtx.moveTo(prevX, prevY);
