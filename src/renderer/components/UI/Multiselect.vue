@@ -42,6 +42,8 @@
    *        .multiselect
    *        .multiselect .context-menu
    *        .multiselect .context-menu .option
+   *        .multiselect .context-menu .option .text-part
+   *        .multiselect .context-menu .option .text-part.match
    *        .multiselect .context-menu .option .option-index
    *        .multiselect .context-menu .highlight
    *        .multiselect .badge
@@ -66,6 +68,7 @@
     badgeNumbers?: boolean;
     optionNumbers?: boolean;
   };
+  type SearchSegment = { text: string; match: boolean };
   const emit = defineEmits<{
     (e: 'selectOption', optionValue: string): void;
     (e: 'createOption', optionText: string): void;
@@ -204,6 +207,26 @@
       scrollOffset.value = optionHeight * anchor.value;
     }, 40);
   }
+  function searchParts(text: string) {
+    const result: SearchSegment[] = [];
+    const term = state.content.trim();
+    if (!term) return [{ text, match: false }];
+    const regex = new RegExp(term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
+    let lastIndex = 0;
+    for (const match of text.matchAll(regex)) {
+      const start = match.index!;
+      const end = start + match[0].length;
+      if (start > lastIndex) {
+        result.push({ text: text.slice(lastIndex, start), match: false });
+      }
+      result.push({ text: match[0], match: true });
+      lastIndex = end;
+    }
+    if (lastIndex < text.length) {
+      result.push({ text: text.slice(lastIndex), match: false });
+    }
+    return result;
+  }
   watch(showContextMenu, () => {
     anchor.value = 0;
     scrollOffset.value = 0;
@@ -237,7 +260,14 @@
           role="option"
         >
           <span v-if="props.optionNumbers" class="option-index">{{ i + anchor + 1 }}</span>
-          <span>{{ option.text }}</span>
+          <span
+            v-for="(part, index) in searchParts(option.text)"
+            class="text-part"
+            :key="`${option.value}-${part.text}-${index}`"
+            :class="{ match: part.match }"
+          >
+            {{ part.text }}
+          </span>
         </div>
       </div>
     </div>
@@ -251,9 +281,7 @@
         @mousedown.stop
       >
         <span v-if="props.badgeNumbers" class="badge-index">({{ index + 1 }})</span>
-        <span>
-          {{ option.text }}
-        </span>
+        <span>{{ option.text }}</span>
         <button
           class="close-button"
           v-if="props.close"
@@ -273,7 +301,7 @@
       class="editor"
       ref="editor"
       :placeholder="props.placeholder"
-      v-model="state.content"
+      v-model.trim="state.content"
       @input="editorInput"
       @focus="state.editorHasFocus = true"
       @blur="editorBlur"

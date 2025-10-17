@@ -15,6 +15,17 @@
   font-weight: 500;
   opacity: 0.5;
 }
+.multiselect .context-menu .option .text-part.match {
+  background-color: #fff3b0;
+  color: #2d2d2d;
+  border-radius: 4px;
+  padding: 0 2px;
+  box-shadow: 0 0 0 1px #f4c542 inset;
+  font-weight: 500;
+  transition:
+    background-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
 .theme-dark .multiselect .badge {
   background-color: #0072c7;
 }
