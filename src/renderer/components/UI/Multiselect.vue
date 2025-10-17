@@ -49,7 +49,7 @@
    *        .multiselect .badges-container
    *        .multiselect .editor
    */
-  import { computed, reactive, useTemplateRef, ref } from 'vue';
+  import { computed, reactive, useTemplateRef, ref, watch } from 'vue';
   export type MultiselectOption = {
     text: string;
     value: string;
@@ -199,6 +199,10 @@
       scrollOffset.value = optionHeight * anchor.value;
     }, 40);
   }
+  watch(showContextMenu, () => {
+    anchor.value = 0;
+    scrollOffset.value = 0;
+  });
 </script>
 
 <template>
