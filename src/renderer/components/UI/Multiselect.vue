@@ -77,6 +77,7 @@
   const props = defineProps<MultiselectProps>();
   const editor = useTemplateRef('editor');
   const contextMenu = useTemplateRef('context-menu');
+  const optionsContainer = useTemplateRef('options-container');
   const badgesContainer = useTemplateRef('badges-container');
   const state = reactive({
     content: '',
@@ -172,7 +173,7 @@
   }
   function contextUp() {
     state.highlightedContextIndex = Math.max(0, state.highlightedContextIndex - 1);
-    const child = contextMenu.value?.children[state.highlightedContextIndex] as
+    const child = optionsContainer.value?.children[state.highlightedContextIndex - anchor.value] as
       | HTMLElement
       | undefined;
     if (child) {
@@ -184,7 +185,7 @@
       contextOptions.value.length - 1,
       state.highlightedContextIndex + 1
     );
-    const child = contextMenu.value?.children[state.highlightedContextIndex] as
+    const child = optionsContainer.value?.children[state.highlightedContextIndex - anchor.value] as
       | HTMLElement
       | undefined;
     if (child) {
@@ -219,7 +220,11 @@
       @scroll="contextScroll"
     >
       <div class="ghost" :style="{ height: `${contextOptions.length * optionHeight}px` }"></div>
-      <div class="options-container" :style="{ transform: `translateY(${scrollOffset}px)` }">
+      <div
+        class="options-container"
+        ref="options-container"
+        :style="{ transform: `translateY(${scrollOffset}px)` }"
+      >
         <div
           class="option"
           v-for="(option, i) in contextOptions.slice(anchor, anchor + pageSize)"
