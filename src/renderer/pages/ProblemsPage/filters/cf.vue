@@ -62,6 +62,8 @@
       class="mt-2"
       :options="tagsOptions"
       :selected="selectedTags"
+      :badge-numbers="true"
+      :option-numbers="true"
       @select-option="handleSelectTag"
       @deselect-option="handleDeselectTag"
       close

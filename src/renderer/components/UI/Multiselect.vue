@@ -26,11 +26,13 @@
    *    - create-option   (passes an option name);
    *
    * Optional props:
-   *   - placeholder <string>         A placeholder for the text input;
-   *   - selected    <string[]>       An array of string containing the pre-selected values;
-   *   - create:     <boolean>        Used to allow the creation of new options. Default is false.
-   *   - close:      <boolean>        Display or not close buttons inside the badges. Default is false;
-   *   - direction:  <"up" | "down">  The opening direction for the context menu. Default is down.
+   *   - placeholder     <string>         A placeholder for the text input;
+   *   - selected        <string[]>       An array of string containing the pre-selected values;
+   *   - create:         <boolean>        Used to allow the creation of new options. Default is false.
+   *   - close:          <boolean>        Display or not close buttons inside the badges. Default is false;
+   *   - direction:      <"up" | "down">  The opening direction for the context menu. Default is down.
+   *   - badgeNumbers:   <boolean>        Show a small index in front of the badge text. Default is false.
+   *   - optionNumbers:  <boolean>        Show a small index in front of the option text. Default is false.
    *
    * Styling:
    *   - You can apply the styling for this component's elements using the
@@ -38,8 +40,10 @@
    *        .multiselect
    *        .multiselect .context-menu
    *        .multiselect .context-menu .option
+   *        .multiselect .context-menu .option .option-index
    *        .multiselect .context-menu .highlight
    *        .multiselect .badge
+   *        .multiselect .badge .badge-index
    *        .multiselect .badge .close-button
    *        .multiselect .badge .close-button svg path  (set the "stroke" CSS property to change X color)
    *        .multiselect .badges-container
@@ -57,7 +61,14 @@
     create?: boolean;
     close?: boolean;
     direction?: 'up' | 'down';
+    badgeNumbers?: boolean;
+    optionNumbers?: boolean;
   };
+  const emit = defineEmits<{
+    (e: 'selectOption', optionValue: string): void;
+    (e: 'createOption', optionText: string): void;
+    (e: 'deselectOption', optionValue: string): void;
+  }>();
   const props = defineProps<MultiselectProps>();
   const editor = useTemplateRef('editor');
   const contextMenu = useTemplateRef('context-menu');
@@ -67,29 +78,46 @@
     editorHasFocus: false,
     highlightedContextIndex: 0,
   });
-  const emit = defineEmits<{
-    (e: 'selectOption', optionValue: string): void;
-    (e: 'createOption', optionText: string): void;
-    (e: 'deselectOption', optionValue: string): void;
-  }>();
+  const selectedValues = computed<Set<string>>(() => new Set(props.selected));
+  const selectedOptions = computed(() =>
+    props.options.filter((op) => selectedValues.value.has(op.value))
+  );
+  const contextOptions = computed(() =>
+    props.options.filter((op) => {
+      if (selectedValues.value.has(op.value)) return false;
+      if (!state.content) return true;
+      return op.text.toLowerCase().includes(state.content.toLowerCase());
+    })
+  );
+  const showContextMenu = computed(() => state.editorHasFocus && contextOptions.value.length);
+  const contextMenuStyle = computed(() => {
+    if (props.direction === 'up') return { bottom: '100%' };
+    return { top: '100%' };
+  });
+
   function focusEditor() {
     editor.value?.focus();
   }
+  function clamp(min: number, max: number, val: number) {
+    let res = Math.min(val, max);
+    res = Math.max(res, min);
+    return res;
+  }
   function selectOption(optionValue: string) {
     emit('selectOption', optionValue);
-    state.highlightedContextIndex = Math.min(
+    state.highlightedContextIndex = clamp(
+      0,
       contextOptions.value.length - 1,
       state.highlightedContextIndex
     );
-    state.highlightedContextIndex = Math.max(0, state.highlightedContextIndex);
   }
-  function editorBlur(e: FocusEvent) {
-    if (showContextMenu.value && e.relatedTarget === contextMenu.value) {
-      focusEditor();
-      return;
-    }
-    clear();
-  }
+  // function editorBlur(e: FocusEvent) {
+  //   if (showContextMenu.value && e.relatedTarget === contextMenu.value) {
+  //     focusEditor();
+  //     return;
+  //   }
+  //   clear();
+  // }
   function editorEnter() {
     const option = contextOptions.value[state.highlightedContextIndex];
     if (option) {
@@ -156,21 +184,6 @@
       child.scrollIntoView({ behavior: 'instant', block: 'nearest' });
     }
   }
-  const selectedOptions = computed(() =>
-    props.options.filter((op) => props.selected?.some((val) => op.value === val))
-  );
-  const contextOptions = computed(() =>
-    props.options.filter((op) => {
-      if (props.selected?.some((val) => val === op.value)) return false;
-      if (!state.content) return true;
-      return op.text.toLowerCase().includes(state.content.toLowerCase());
-    })
-  );
-  const showContextMenu = computed(() => state.editorHasFocus && contextOptions.value.length);
-  const contextMenuStyle = computed(() => {
-    if (props.direction === 'up') return { bottom: '100%' };
-    return { top: '100%' };
-  });
 </script>
 
 <template>
@@ -192,19 +205,23 @@
         @click="selectOption(option.value)"
         role="option"
       >
-        {{ option.text }}
+        <span v-if="props.optionNumbers" class="option-index">{{ index + 1 }}</span>
+        <span>{{ option.text }}</span>
       </div>
     </div>
     <div class="badges-container" ref="badges-container" @mousedown.prevent="focusEditor">
       <span
         class="badge"
-        v-for="option in selectedOptions"
+        v-for="(option, index) in selectedOptions"
         :key="option.value"
         tabindex="0"
         @keydown="badgeKeydown($event, option.value)"
         @mousedown.stop
       >
-        {{ option.text }}
+        <span v-if="props.badgeNumbers" class="badge-index">({{ index + 1 }})</span>
+        <span>
+          {{ option.text }}
+        </span>
         <button
           class="close-button"
           v-if="props.close"
