@@ -3,7 +3,7 @@
   import SettingsPageHeader from '@renderer/components/Header/custom/SettingsPageHeader.vue';
   import LineChart, { LineChartProps } from '@renderer/components/UI/LineChart.vue';
   import { OjList, OjNames, OjColors } from '@common/types/oj';
-  import { parseNumericDate, incrementDate } from '@common/utils/dateUtils';
+  import { parseNumericDate, incrementDate, getTodayDate } from '@common/utils/dateUtils';
   import { randomId } from '@common/utils/utils';
   import { useGraphStore } from '@renderer/store/graph';
   const content: LineChartProps = {
@@ -17,7 +17,7 @@
   function setContent() {
     if (!graph.length) return;
     const firstDate = graph[0].date;
-    const lastDate = graph.at(-1)!.date;
+    const lastDate = getTodayDate();
     const names = { ...OjNames, contests: 'Contests', total: 'Total' } as const;
     const list = [...OjList, 'contests', 'total'] as const;
     const ojToSeries = list.reduce(
@@ -36,8 +36,8 @@
     for (let date = firstDate, i = 0, j = 0; date <= lastDate; date = incrementDate(date), i++) {
       content.allXValues.push(i);
       content.allXLabels.push(parseNumericDate(date));
-      const record = graph[j];
-      if (record.date === date) {
+      const record = j < graph.length ? graph[j] : null;
+      if (record && record.date === date) {
         let total = 0;
         for (const oj of list) {
           if (oj === 'total') continue;
