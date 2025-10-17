@@ -49,7 +49,7 @@
    *        .multiselect .badges-container
    *        .multiselect .editor
    */
-  import { computed, reactive, useTemplateRef } from 'vue';
+  import { computed, reactive, useTemplateRef, ref } from 'vue';
   export type MultiselectOption = {
     text: string;
     value: string;
@@ -69,6 +69,9 @@
     (e: 'createOption', optionText: string): void;
     (e: 'deselectOption', optionValue: string): void;
   }>();
+  const optionHeight = 30;
+  const pageSize = 10;
+  const anchor = ref(0);
   const props = defineProps<MultiselectProps>();
   const editor = useTemplateRef('editor');
   const contextMenu = useTemplateRef('context-menu');
@@ -111,13 +114,13 @@
       state.highlightedContextIndex
     );
   }
-  // function editorBlur(e: FocusEvent) {
-  //   if (showContextMenu.value && e.relatedTarget === contextMenu.value) {
-  //     focusEditor();
-  //     return;
-  //   }
-  //   clear();
-  // }
+  function editorBlur(e: FocusEvent) {
+    if (showContextMenu.value && e.relatedTarget === contextMenu.value) {
+      focusEditor();
+      return;
+    }
+    clear();
+  }
   function editorEnter() {
     const option = contextOptions.value[state.highlightedContextIndex];
     if (option) {
@@ -196,17 +199,20 @@
       tabindex="0"
       role="listbox"
     >
-      <div
-        class="option"
-        v-for="(option, index) in contextOptions"
-        :key="option.value"
-        :class="{ highlight: index === state.highlightedContextIndex }"
-        @mouseover="state.highlightedContextIndex = index"
-        @click="selectOption(option.value)"
-        role="option"
-      >
-        <span v-if="props.optionNumbers" class="option-index">{{ index + 1 }}</span>
-        <span>{{ option.text }}</span>
+      <div class="ghost" :style="{ height: `${contextOptions.length * optionHeight}px` }"></div>
+      <div class="options-container">
+        <div
+          class="option"
+          v-for="n in pageSize"
+          :key="contextOptions[n - 1 + anchor].value"
+          :class="{ highlight: n - 1 + anchor === state.highlightedContextIndex }"
+          @mouseover="state.highlightedContextIndex = n - 1 + anchor"
+          @click="selectOption(contextOptions[n - 1 + anchor].value)"
+          role="option"
+        >
+          <span v-if="props.optionNumbers" class="option-index">{{ n + anchor }}</span>
+          <span>{{ contextOptions[n - 1 + anchor].text }}</span>
+        </div>
       </div>
     </div>
     <div class="badges-container" ref="badges-container" @mousedown.prevent="focusEditor">
@@ -280,5 +286,16 @@
     display: flex;
     align-items: center;
     height: 100%;
+  }
+  .option {
+    height: 30px;
+  }
+  .options-container {
+    border: 1px solid red;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    will-change: transform;
   }
 </style>
