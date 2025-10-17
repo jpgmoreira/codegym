@@ -313,9 +313,12 @@
   }
   .option {
     height: 30px;
+    display: flex;
+    align-items: center;
+    white-space: nowrap;
+    overflow: hidden;
   }
   .options-container {
-    border: 1px solid red;
     position: absolute;
     top: 0;
     left: 0;
