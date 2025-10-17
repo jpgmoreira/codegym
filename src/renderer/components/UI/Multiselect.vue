@@ -53,6 +53,7 @@
    *        .multiselect .badges-container
    *        .multiselect .editor
    */
+  import { toLocaleNumber } from '@common/utils/utils';
   import { computed, reactive, useTemplateRef, ref, watch } from 'vue';
   export type MultiselectOption = {
     text: string;
@@ -259,7 +260,9 @@
           @click="selectOption(option.value)"
           role="option"
         >
-          <span v-if="props.optionNumbers" class="option-index">{{ i + anchor + 1 }}</span>
+          <span v-if="props.optionNumbers" class="option-index">
+            {{ toLocaleNumber(i + anchor + 1) }}
+          </span>
           <span
             v-for="(part, index) in searchParts(option.text)"
             class="text-part"
@@ -280,7 +283,7 @@
         @keydown="badgeKeydown($event, option.value)"
         @mousedown.stop
       >
-        <span v-if="props.badgeNumbers" class="badge-index">({{ index + 1 }})</span>
+        <span v-if="props.badgeNumbers" class="badge-index">({{ toLocaleNumber(index + 1) }})</span>
         <span>{{ option.text }}</span>
         <button
           class="close-button"
