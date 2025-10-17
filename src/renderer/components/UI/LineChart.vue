@@ -3,7 +3,7 @@
    * [12/Sep/2025]
    * Line chart component.
    * Supports plotting several series, panning and zooming.
-   * Worked reasonably well with ~5k - 10k points.
+   * Worked reasonably well with 10k points.
    * I didn't test changing the props on the parent component to see what happens.
    */
   import { useTemplateRef, onMounted, onBeforeUnmount, ref, reactive, computed, watch } from 'vue';

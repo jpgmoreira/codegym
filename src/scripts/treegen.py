@@ -131,17 +131,11 @@ def create_random_tree(total_nodes: int):
 
 
 def main():
-    try:
-        total = int(sys.argv[1]) if len(sys.argv) > 1 else 100
-    except ValueError:
-        print("Usage: python gen_tree.py [total_number_of_nodes]")
-        return
-
-    tree_data = create_random_tree(total)
+    N = int(input("How many nodes? "))
+    tree_data = create_random_tree(N)
     with open("tree.json", "w", encoding="utf-8") as f:
         json.dump(tree_data, f, indent=2)
-
-    print(f"File 'tree.json' generated with {len(tree_data['idToNode'])} nodes.")
+    print(f"🌳 File 'tree.json' generated with {len(tree_data['idToNode'])} nodes.")
 
 
 if __name__ == "__main__":
