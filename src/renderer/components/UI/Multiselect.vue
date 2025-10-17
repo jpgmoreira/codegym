@@ -70,8 +70,10 @@
     (e: 'deselectOption', optionValue: string): void;
   }>();
   const optionHeight = 30;
-  const pageSize = 10;
+  const pageSize = 100;
   const anchor = ref(0);
+  const scrollOffset = ref(0);
+  const scrollTimer = ref<ReturnType<typeof setTimeout> | undefined>(undefined);
   const props = defineProps<MultiselectProps>();
   const editor = useTemplateRef('editor');
   const contextMenu = useTemplateRef('context-menu');
@@ -187,6 +189,16 @@
       child.scrollIntoView({ behavior: 'instant', block: 'nearest' });
     }
   }
+  function contextScroll() {
+    clearTimeout(scrollTimer.value);
+    scrollTimer.value = setTimeout(() => {
+      const context = contextMenu.value;
+      if (!context) return;
+      const scrollTop = context.scrollTop;
+      anchor.value = Math.max(0, Math.floor(scrollTop / optionHeight) - 40);
+      scrollOffset.value = optionHeight * anchor.value;
+    }, 40);
+  }
 </script>
 
 <template>
@@ -198,20 +210,21 @@
       :style="contextMenuStyle"
       tabindex="0"
       role="listbox"
+      @scroll="contextScroll"
     >
       <div class="ghost" :style="{ height: `${contextOptions.length * optionHeight}px` }"></div>
-      <div class="options-container">
+      <div class="options-container" :style="{ transform: `translateY(${scrollOffset}px)` }">
         <div
           class="option"
-          v-for="n in pageSize"
-          :key="contextOptions[n - 1 + anchor].value"
-          :class="{ highlight: n - 1 + anchor === state.highlightedContextIndex }"
-          @mouseover="state.highlightedContextIndex = n - 1 + anchor"
-          @click="selectOption(contextOptions[n - 1 + anchor].value)"
+          v-for="(option, i) in contextOptions.slice(anchor, anchor + pageSize)"
+          :key="option.value"
+          :class="{ highlight: i + anchor === state.highlightedContextIndex }"
+          @mouseover="state.highlightedContextIndex = i + anchor"
+          @click="selectOption(option.value)"
           role="option"
         >
-          <span v-if="props.optionNumbers" class="option-index">{{ n + anchor }}</span>
-          <span>{{ contextOptions[n - 1 + anchor].text }}</span>
+          <span v-if="props.optionNumbers" class="option-index">{{ i + anchor + 1 }}</span>
+          <span>{{ option.text }}</span>
         </div>
       </div>
     </div>
