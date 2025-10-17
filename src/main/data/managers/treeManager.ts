@@ -469,9 +469,7 @@ export class TreeManager {
     }
   }
 
-  private deleteCallback(node: Node) {
-    // console.log('- node deleted:', node.text);
-  }
+  private deleteCallback(_node: Node) {}
 
   public setDeleteCallback(callback: (node: Node) => void) {
     this.deleteCallback = callback;
