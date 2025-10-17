@@ -94,7 +94,9 @@
       return op.text.toLowerCase().includes(state.content.toLowerCase());
     })
   );
-  const showContextMenu = computed(() => state.editorHasFocus && contextOptions.value.length);
+  const showContextMenu = computed(() =>
+    Boolean(state.editorHasFocus && contextOptions.value.length)
+  );
   const contextMenuStyle = computed(() => {
     if (props.direction === 'up') return { bottom: '100%' };
     return { top: '100%' };
