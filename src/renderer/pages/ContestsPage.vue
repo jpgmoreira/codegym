@@ -165,7 +165,7 @@
               placeholder="Contest notes"
               class="p-1"
               v-model="contest.notes"
-              :min-rows="10"
+              :min-height="80"
             />
             <table class="w-full">
               <colgroup>
