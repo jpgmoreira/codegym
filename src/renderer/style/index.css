@@ -35,3 +35,4 @@
 
 /* Themed page-specific styles */
 @import './themes/dark/pages/problemsPage.css';
+@import './themes/dark/pages/contestsPage.css';

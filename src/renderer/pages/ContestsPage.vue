@@ -100,7 +100,7 @@
         >
           <span class="text-xl opacity-70 whitespace-nowrap">Create or select a contest</span>
         </div>
-        <div class="border border-red-400 w-full overflow-auto" v-else-if="loaded && contest">
+        <div class="border w-full overflow-auto" v-else-if="loaded && contest">
           <section class="px-3 py-1">
             <div>
               Contest:
@@ -114,8 +114,8 @@
               <button type="button" class="btn-primary btn-small">Add problem</button>
             </div>
           </section>
-          <div class="border border-emerald-300">
-            <AutoHeightTextArea placeholder="Contest notes" />
+          <div>
+            <AutoHeightTextArea placeholder="Contest notes" class="p-1" />
           </div>
         </div>
       </div>
