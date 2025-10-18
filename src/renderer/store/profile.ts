@@ -16,6 +16,7 @@ import { OjProblem } from '@common/schemas/problems';
 import { GenericResponseDTO } from '@common/dto/genericResponseDTO';
 import { EventEmitter } from '@common/helpers/eventEmitter';
 import { Events } from '@renderer/events/events';
+import { Contest } from '@common/schemas/contests';
 
 EventEmitter.instance.on(Events.loadInitialData, (data: StartupData) => {
   useProfileStore().initFromStartupData(data);
@@ -144,6 +145,11 @@ export const useProfileStore = defineStore('profile', {
         record!.name = newName;
       }
       return result;
+    },
+    async getCurrContest() {
+      const currContestId = this.currProfile?.currContestId;
+      if (!currContestId) return null;
+      return window.api.invoke<Contest | null>(Channels.getContest, currContestId);
     },
   },
 });

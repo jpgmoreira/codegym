@@ -186,4 +186,9 @@ export class ProfileManager {
   public updateOjFilters<T extends Oj>(oj: T, filters: OjContext[T]['filters']) {
     this.currProfileProxy!.proxy.ojContext[oj].filters = filters;
   }
+
+  public setCurrContest(contestId: string | null) {
+    if (!this.currProfileProxy) return;
+    this.currProfileProxy.proxy.currContestId = contestId;
+  }
 }

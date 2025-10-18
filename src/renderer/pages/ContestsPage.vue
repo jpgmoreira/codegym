@@ -1,10 +1,18 @@
 <script lang="ts" setup>
-  import { ref, onMounted, onBeforeUnmount } from 'vue';
+  import { ref, onMounted, onBeforeUnmount, watch, computed } from 'vue';
+  import { Contest } from '@common/schemas/contests';
+  import { useProfileStore } from '@renderer/store/profile';
   import TreeView from '@renderer/components/UI/TreeView/TreeView.vue';
   import SettingsPageHeader from '@renderer/components/Header/custom/SettingsPageHeader.vue';
 
+  const store = useProfileStore();
+
   const treeAreaWidth = ref(300);
   const isResizing = ref(false);
+
+  const contest = ref<Contest | null>(null);
+
+  const currContestId = computed(() => store.currProfile?.currContestId);
 
   function windowMouseUp() {
     isResizing.value = false;
@@ -15,6 +23,13 @@
     treeAreaWidth.value = e.clientX;
   }
 
+  watch(
+    currContestId,
+    async () => {
+      contest.value = await store.getCurrContest();
+    },
+    { immediate: true }
+  );
   onMounted(() => {
     window.addEventListener('mouseup', windowMouseUp);
     window.addEventListener('mousemove', windowMouseMove);

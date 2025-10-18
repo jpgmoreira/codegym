@@ -12,6 +12,8 @@ import { loadStartupData } from '@main/data/startup';
 import { HistoryManager } from '@main/data/managers/historyManager';
 import { GenericResponseDTO } from '@common/dto/genericResponseDTO';
 import { FetchHistoryPageResponseDTO } from '@common/dto/fetchHistoryPageResponseDTO';
+import { Contest } from '@common/schemas/contests';
+import { ContestsManager } from '@main/data/managers/contestsManager';
 
 ipcMain.handle(
   Channels.createProfile,
@@ -50,3 +52,9 @@ ipcMain.handle(
   async (_, newName: string): Promise<GenericResponseDTO> =>
     ProfileManager.instance.renameCurrProfile(newName)
 );
+
+ipcMain.handle(Channels.getContest, async (_, contestId: string): Promise<Contest | null> => {
+  const contest = ContestsManager.instance.getContest(contestId);
+  ProfileManager.instance.setCurrContest(contestId);
+  return contest;
+});

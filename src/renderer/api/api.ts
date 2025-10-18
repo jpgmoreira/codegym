@@ -17,6 +17,7 @@ export const allowedInvokeChannels = Object.freeze([
   Channels.login,
   Channels.fetchHistoryPage,
   Channels.renameCurrProfile,
+  Channels.getContest,
   // Channels to perform treeview operations:
   TreeChannels.createNode,
   TreeChannels.createNodeAbove,

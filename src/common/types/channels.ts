@@ -16,4 +16,5 @@ export enum Channels {
   setCurrOjSnapshot = 'set-curr-oj-snapshot',
   renameCurrProfile = 'rename-curr-profile',
   deleteCurrProfile = 'delete-curr-profile',
+  getContest = 'get-contest',
 }
