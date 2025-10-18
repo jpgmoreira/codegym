@@ -1,17 +1,9 @@
 <script lang="ts" setup>
-  import { onMounted, useTemplateRef, watch } from 'vue';
+  import { useTemplateRef, watch } from 'vue';
 
   const props = defineProps({
-    minHeight: {
-      type: Number,
-      required: false,
-      default: 0,
-    },
-    maxHeight: {
-      type: Number,
-      required: false,
-      default: 200,
-    },
+    minHeight: { type: Number, default: 0 },
+    maxHeight: { type: Number, default: 200 },
   });
 
   const modelValue = defineModel<string>({ default: '' });
@@ -28,16 +20,10 @@
   }
 
   watch(modelValue, adjustHeight, { immediate: true });
-  onMounted(adjustHeight);
 </script>
 
 <template>
-  <textarea
-    class="autoheight-textarea"
-    ref="textarea"
-    :value="modelValue"
-    @input="adjustHeight"
-  ></textarea>
+  <textarea class="autoheight-textarea" ref="textarea" v-model="modelValue"></textarea>
 </template>
 
 <style scoped>
