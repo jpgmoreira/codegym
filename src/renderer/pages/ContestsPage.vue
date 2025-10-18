@@ -51,7 +51,9 @@
         <TreeView class="select-none" files-hint search file-icon />
       </div>
       <div class="separator" :class="{ resizing: isResizing }" @mousedown="isResizing = true"></div>
-      <div>CONTESTS</div>
+      <div v-if="!contest" class="flex grow items-center justify-center">
+        <span class="text-xl opacity-70">Create or select a contest</span>
+      </div>
     </div>
   </div>
 </template>
