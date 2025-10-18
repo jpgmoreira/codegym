@@ -12,7 +12,7 @@ import { loadStartupData } from '@main/data/startup';
 import { HistoryManager } from '@main/data/managers/historyManager';
 import { GenericResponseDTO } from '@common/dto/genericResponseDTO';
 import { FetchHistoryPageResponseDTO } from '@common/dto/fetchHistoryPageResponseDTO';
-import { Contest } from '@common/schemas/contests';
+import { Contest, ContestProblem } from '@common/schemas/contests';
 import { ContestsManager } from '@main/data/managers/contestsManager';
 
 ipcMain.handle(
@@ -57,4 +57,8 @@ ipcMain.handle(Channels.getContest, async (_, contestId: string): Promise<Contes
   const contest = ContestsManager.instance.getContest(contestId);
   ProfileManager.instance.setCurrContest(contestId);
   return contest;
+});
+
+ipcMain.handle(Channels.addCurrContestProblem, async (): Promise<ContestProblem> => {
+  return ContestsManager.instance.addCurrContestProblem();
 });

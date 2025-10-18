@@ -12,6 +12,6 @@
   border-left: none;
   border-right: none;
 }
-.theme-dark tbody tr:hover {
+.theme-dark tbody tr:not(.no-hover):hover {
   background-color: #3f4344;
 }

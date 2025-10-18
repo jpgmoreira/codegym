@@ -1,11 +1,12 @@
 <script lang="ts" setup>
   import { ref, onMounted, onBeforeUnmount, watch, computed } from 'vue';
-  import { Contest } from '@common/schemas/contests';
+  import { Contest, ContestProblem } from '@common/schemas/contests';
   import { useProfileStore } from '@renderer/store/profile';
   import { parseTimestamp } from '@common/utils/dateUtils';
   import TreeView from '@renderer/components/UI/TreeView/TreeView.vue';
   import SettingsPageHeader from '@renderer/components/Header/custom/SettingsPageHeader.vue';
   import AutoHeightTextArea from '@renderer/components/UI/AutoHeightTextArea.vue';
+  import { Channels } from '@common/types/channels';
 
   const store = useProfileStore();
 
@@ -38,6 +39,11 @@
 
   async function handleDeleteSelectedContests() {
     contest.value = await store.getCurrContest();
+  }
+
+  async function addProblem() {
+    const problem = await window.api.invoke<ContestProblem>(Channels.addCurrContestProblem);
+    contest.value?.problems.push(problem);
   }
 
   function windowMouseUp() {
@@ -111,7 +117,9 @@
                 Created at:
                 <strong>{{ parseTimestamp(contest.createdAt) }}</strong>
               </div>
-              <button type="button" class="btn-primary btn-small">Add problem</button>
+              <button type="button" class="btn-primary btn-small" @click="addProblem">
+                Add problem
+              </button>
             </div>
           </section>
           <div v-if="contest.problems.length">
@@ -124,7 +132,13 @@
                   <th>Notes</th>
                 </tr>
               </thead>
-              <tbody></tbody>
+              <tbody>
+                <tr v-for="problem in contest.problems" :key="problem.id" class="no-hover">
+                  <td>{{ problem.title }}</td>
+                  <td>{{ problem.accepted }}</td>
+                  <td>{{ problem.notes }}</td>
+                </tr>
+              </tbody>
             </table>
           </div>
           <div class="flex grow items-center justify-center text-lg opacity-70" v-else>
@@ -148,5 +162,11 @@
   .separator.resizing {
     background: #007bd1;
     cursor: ew-resize;
+  }
+  td {
+    height: 45px;
+  }
+  tbody tr:hover {
+    background-color: auto;
   }
 </style>

@@ -1,3 +1,5 @@
+import { randomId } from '@common/utils/utils';
+
 export type ContestProblem = {
   id: string;
   title: string;
@@ -28,5 +30,18 @@ export function getEmptyContest(id: string, name: string, createdAt: number): Co
     nSolved: 0,
     nTodo: 0,
     problems: [],
+  };
+}
+
+export function getEmptyContestProblem() {
+  const id = randomId();
+  return {
+    id,
+    title: '',
+    accepted: '',
+    notes: '',
+    solved: false,
+    todo: false,
+    favorite: false,
   };
 }

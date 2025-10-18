@@ -8,3 +8,8 @@
   background-color: #282b30;
   border: 1px solid #40444b;
 }
+
+.theme-dark .contests-page td,
+.theme-dark .contests-page th {
+  border: 1px solid #40444b;
+}

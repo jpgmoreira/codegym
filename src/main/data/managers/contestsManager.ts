@@ -1,5 +1,5 @@
 import { DATA_DIR } from '../constants';
-import { Contest, getEmptyContest } from '@common/schemas/contests';
+import { Contest, getEmptyContest, getEmptyContestProblem } from '@common/schemas/contests';
 import { ensureDirExists } from '../utils';
 import { FileProxy } from '../fileProxy';
 import { buildId } from '@common/utils/utils';
@@ -94,5 +94,11 @@ export class ContestsManager {
       `${contestId}.json`
     );
     fs.unlinkSync(contestPath);
+  }
+
+  public addCurrContestProblem() {
+    const newProblem = getEmptyContestProblem();
+    this.proxy?.proxy.problems.push(newProblem);
+    return newProblem;
   }
 }
