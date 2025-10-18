@@ -19,7 +19,6 @@
   import AutoLengthInput from '../AutoLengthInput.vue';
   import { GenericResponseDTO } from '@common/dto/genericResponseDTO';
   import { useUIStore } from '@renderer/store/ui';
-  import { useProfileStore } from '@renderer/store/profile';
   import { toLocaleNumber } from '@common/utils/utils';
 
   type ContextState = {
@@ -62,6 +61,8 @@
   const emit = defineEmits<{
     (e: 'setActive', contestId: string): void;
     (e: 'rename', contestId: string, newName: string): void;
+    (e: 'deleteContest', contestId: string): void;
+    (e: 'deleteSelectedContests'): void;
   }>();
 
   const rowHeight = 28;
@@ -240,10 +241,14 @@
     const node = contextState.activeNode;
     if (!node) return;
     tree.value = await window.api.invoke(TreeChannels.deleteNode, tree.value?.anchor || 0, node.id);
+    if (node.type === 'file') {
+      emit('deleteContest', node.contestId);
+    }
   }
 
   async function deleteSelectedNodes() {
     tree.value = await window.api.invoke(TreeChannels.deleteSelectedNodes, tree.value?.anchor || 0);
+    emit('deleteSelectedContests');
   }
 
   async function clearSelection() {

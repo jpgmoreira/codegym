@@ -149,7 +149,12 @@ export const useProfileStore = defineStore('profile', {
     async getCurrContest() {
       const currContestId = this.currProfile?.currContestId;
       if (!currContestId) return null;
-      return window.api.invoke<Contest | null>(Channels.getContest, currContestId);
+      const result = window.api.invoke<Contest | null>(Channels.getContest, currContestId);
+      if (currContestId && !result) {
+        // Contest was deleted.
+        this.currProfile!.currContestId = null;
+      }
+      return result;
     },
     setCurrContest(contestId: string | null) {
       if (!this.currProfile) return;

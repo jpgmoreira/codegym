@@ -40,6 +40,10 @@ export class ContestsManager {
       'contests',
       `${contestId}.json`
     );
+    if (!fs.existsSync(contestPath)) {
+      // Contest was deleted.
+      return null;
+    }
     this.proxy = new FileProxy(contestPath, getEmptyContest(contestId, '', 0));
     return this.proxy.target;
   }

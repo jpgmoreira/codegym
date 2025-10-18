@@ -25,6 +25,17 @@
     }
   }
 
+  function handleDeleteContest(contestId: string) {
+    if (contest.value?.id === contestId) {
+      contest.value = null;
+      store.setCurrContest(null);
+    }
+  }
+
+  async function handleDeleteSelectedContests() {
+    contest.value = await store.getCurrContest();
+  }
+
   function windowMouseUp() {
     isResizing.value = false;
   }
@@ -66,6 +77,8 @@
           file-icon
           @set-active="handleSetActive"
           @rename="handleRename"
+          @delete-contest="handleDeleteContest"
+          @delete-selected-contests="handleDeleteSelectedContests"
         />
       </div>
       <div class="separator" :class="{ resizing: isResizing }" @mousedown="isResizing = true"></div>
