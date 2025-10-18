@@ -434,11 +434,11 @@
       <template #header>
         <div v-if="!modalState.multiple && modalState.currentNode?.type === 'dir'">
           Delete folder
-          <strong>{{ modalState.currentNode.text }}</strong>
+          <strong>"{{ modalState.currentNode.text }}"</strong>
         </div>
         <div v-else-if="!modalState.multiple && modalState.currentNode?.type === 'file'">
           Delete contest
-          <strong>{{ modalState.currentNode.text }}</strong>
+          <strong>"{{ modalState.currentNode.text }}"</strong>
         </div>
         <div v-else>Delete selection</div>
       </template>
