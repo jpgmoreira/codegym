@@ -28,3 +28,10 @@
 .theme-dark button.btn-secondary:hover:not(:disabled) {
   background-color: #596168;
 }
+
+.theme-dark button.btn-small {
+  font-size: 0.9rem;
+  padding: 6px;
+  border-radius: 4px;
+  line-height: 1.2rem;
+}

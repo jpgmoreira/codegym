@@ -2,12 +2,14 @@
   import { ref, onMounted, onBeforeUnmount, watch, computed } from 'vue';
   import { Contest } from '@common/schemas/contests';
   import { useProfileStore } from '@renderer/store/profile';
+  import { parseTimestamp } from '@common/utils/dateUtils';
   import TreeView from '@renderer/components/UI/TreeView/TreeView.vue';
   import SettingsPageHeader from '@renderer/components/Header/custom/SettingsPageHeader.vue';
 
   const store = useProfileStore();
 
   const treeAreaWidth = ref(300);
+  const contestsAreaWidth = ref(window.innerWidth - 300);
   const isResizing = ref(false);
 
   const contest = ref<Contest | null>(null);
@@ -44,6 +46,8 @@
   function windowMouseMove(e: MouseEvent) {
     if (!isResizing.value) return;
     treeAreaWidth.value = e.clientX;
+    contestsAreaWidth.value = window.innerWidth - e.clientX;
+    window.getSelection()?.removeAllRanges();
   }
 
   watch(
@@ -83,12 +87,33 @@
           @delete-selected-contests="handleDeleteSelectedContests"
         />
       </div>
-      <div class="separator" :class="{ resizing: isResizing }" @mousedown="isResizing = true"></div>
-      <div v-if="loaded && !contest" class="flex grow items-center justify-center">
-        <span class="text-xl opacity-70">Create or select a contest</span>
-      </div>
-      <div v-else-if="loaded && contest">
-        {{ contest.name }}
+      <div
+        class="separator shrink-0"
+        :class="{ resizing: isResizing }"
+        @mousedown="isResizing = true"
+      ></div>
+      <div class="flex grow" :style="{ width: `${contestsAreaWidth}px` }">
+        <div
+          v-if="loaded && !contest"
+          class="flex grow items-center justify-center overflow-hidden select-none"
+        >
+          <span class="text-xl opacity-70 whitespace-nowrap">Create or select a contest</span>
+        </div>
+        <div class="border border-red-400 w-full overflow-auto" v-else-if="loaded && contest">
+          <section class="px-3 py-1">
+            <div>
+              Contest:
+              <strong>{{ contest.name }}</strong>
+            </div>
+            <div class="flex whitespace-nowrap items-center justify-between">
+              <div class="truncate">
+                Created at:
+                <strong>{{ parseTimestamp(contest.createdAt) }}</strong>
+              </div>
+              <button type="button" class="btn-primary btn-small">Add problem</button>
+            </div>
+          </section>
+        </div>
       </div>
     </div>
   </div>
