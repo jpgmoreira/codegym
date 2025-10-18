@@ -14,7 +14,8 @@
 
 /* Inputs */
 .theme-dark input,
-.theme-dark select {
+.theme-dark select,
+.theme-dark textarea {
   background-color: #3f444b;
 }
 

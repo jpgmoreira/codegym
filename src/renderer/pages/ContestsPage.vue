@@ -5,6 +5,7 @@
   import { parseTimestamp } from '@common/utils/dateUtils';
   import TreeView from '@renderer/components/UI/TreeView/TreeView.vue';
   import SettingsPageHeader from '@renderer/components/Header/custom/SettingsPageHeader.vue';
+  import AutoHeightTextArea from '@renderer/components/UI/AutoHeightTextArea.vue';
 
   const store = useProfileStore();
 
@@ -113,6 +114,9 @@
               <button type="button" class="btn-primary btn-small">Add problem</button>
             </div>
           </section>
+          <div class="border border-emerald-300">
+            <AutoHeightTextArea placeholder="Contest notes" />
+          </div>
         </div>
       </div>
     </div>
