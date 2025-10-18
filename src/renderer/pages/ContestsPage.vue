@@ -11,6 +11,7 @@
   const isResizing = ref(false);
 
   const contest = ref<Contest | null>(null);
+  const loaded = ref(false);
 
   const currContestId = computed(() => store.currProfile?.currContestId);
 
@@ -49,6 +50,7 @@
     currContestId,
     async () => {
       contest.value = await store.getCurrContest();
+      loaded.value = true;
     },
     { immediate: true }
   );
@@ -82,10 +84,10 @@
         />
       </div>
       <div class="separator" :class="{ resizing: isResizing }" @mousedown="isResizing = true"></div>
-      <div v-if="!contest" class="flex grow items-center justify-center">
+      <div v-if="loaded && !contest" class="flex grow items-center justify-center">
         <span class="text-xl opacity-70">Create or select a contest</span>
       </div>
-      <div v-else>
+      <div v-else-if="loaded && contest">
         {{ contest.name }}
       </div>
     </div>

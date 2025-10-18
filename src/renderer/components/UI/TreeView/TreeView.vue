@@ -98,7 +98,11 @@
     y: 0,
   });
 
-  const modalState = reactive<ModalState>({});
+  const modalState = reactive<ModalState>({
+    currentNode: null,
+    multiple: false,
+    visible: false,
+  });
 
   const renamingNode = ref<Node | null>(null);
   const originalName = ref('');
