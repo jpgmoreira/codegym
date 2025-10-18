@@ -100,8 +100,8 @@
         >
           <span class="text-xl opacity-70 whitespace-nowrap">Create or select a contest</span>
         </div>
-        <div class="border w-full overflow-auto" v-else-if="loaded && contest">
-          <section class="px-3 py-1">
+        <div class="w-full overflow-auto flex flex-col" v-else-if="loaded && contest">
+          <section class="header-section px-3 py-1">
             <div>
               Contest:
               <strong>{{ contest.name }}</strong>
@@ -114,8 +114,21 @@
               <button type="button" class="btn-primary btn-small">Add problem</button>
             </div>
           </section>
-          <div>
+          <div v-if="contest.problems.length">
             <AutoHeightTextArea placeholder="Contest notes" class="p-1" />
+            <table class="w-full">
+              <thead>
+                <tr>
+                  <th>Problem</th>
+                  <th>#Accepted</th>
+                  <th>Notes</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+          <div class="flex grow items-center justify-center text-lg opacity-70" v-else>
+            Add a new problem
           </div>
         </div>
       </div>

@@ -3,3 +3,8 @@
 .theme-dark .contests-page .autoheight-textarea {
   border: 1px solid #282b30;
 }
+
+.theme-dark .contests-page .header-section {
+  background-color: #282b30;
+  border: 1px solid #40444b;
+}
