@@ -1,5 +1,6 @@
 <script lang="ts" setup>
   import { onMounted, useTemplateRef, watch } from 'vue';
+
   const props = defineProps({
     minHeight: {
       type: Number,
@@ -11,16 +12,11 @@
       required: false,
       default: 200,
     },
-    modelValue: {
-      type: String,
-      required: false,
-      default: '',
-    },
   });
-  const emit = defineEmits<{
-    (e: 'update:modelValue', value: string): void;
-  }>();
+
+  const modelValue = defineModel<string>({ default: '' });
   const textareaRef = useTemplateRef('textarea');
+
   function adjustHeight() {
     if (!textareaRef.value) return;
     textareaRef.value.style.height = 'auto';
@@ -30,12 +26,14 @@
     );
     textareaRef.value.style.height = newHeight + 'px';
   }
+
   function onInput(e: Event) {
     const target = e.target as HTMLTextAreaElement;
-    emit('update:modelValue', target.value);
+    modelValue.value = target.value.trim();
     adjustHeight();
   }
-  watch(() => props.modelValue, adjustHeight, { immediate: true });
+
+  watch(modelValue, adjustHeight, { immediate: true });
   onMounted(adjustHeight);
 </script>
 
