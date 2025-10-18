@@ -32,7 +32,13 @@ export class ContestsManager {
 
   public getContest(contestId: string): Contest | null {
     if (!this.profileId) return null;
-    const contestPath = path.join(DATA_DIR, 'profileData', this.profileId, 'contests', contestId);
+    const contestPath = path.join(
+      DATA_DIR,
+      'profileData',
+      this.profileId,
+      'contests',
+      `${contestId}.json`
+    );
     this.proxy = new FileProxy(contestPath, getEmptyContest(contestId, '', 0));
     return this.proxy.target;
   }
@@ -42,14 +48,26 @@ export class ContestsManager {
     const now = Date.now();
     const id = buildId(name, now);
     const contest = getEmptyContest(id, name, now);
-    const contestPath = path.join(DATA_DIR, 'profileData', this.profileId!, 'contests', id);
+    const contestPath = path.join(
+      DATA_DIR,
+      'profileData',
+      this.profileId!,
+      'contests',
+      `${id}.json`
+    );
     new FileProxy(contestPath, contest);
     return id;
   }
 
   public renameContest(contestId: string, newName: string) {
     newName = newName.trim();
-    const contestPath = path.join(DATA_DIR, 'profileData', this.profileId!, 'contests', contestId);
+    const contestPath = path.join(
+      DATA_DIR,
+      'profileData',
+      this.profileId!,
+      'contests',
+      `${contestId}.json`
+    );
     const fp = new FileProxy(contestPath, getEmptyContest(contestId, newName, 0));
     fp.proxy.name = newName;
   }

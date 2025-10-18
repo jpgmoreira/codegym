@@ -34,6 +34,7 @@ export type FileNode = BaseNode & {
   type: 'file';
   // -- Custom fields:
   contestId: string;
+  active: boolean;
 };
 
 export type Node = DirNode | FileNode;

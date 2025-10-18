@@ -245,6 +245,7 @@ export class TreeManager {
       nextId: null,
       prevId: null,
       contestId,
+      active: false,
     } as const;
   }
 
@@ -397,9 +398,10 @@ export class TreeManager {
 
   // --- Selection handling: ---
 
-  public clearSelection() {
+  public clearSelection(clearActive: boolean) {
     for (const node of this.expandedFlat) {
       node.selected = false;
+      if (clearActive && node.type === 'file') node.active = false;
       if (node.type === 'dir') node.nSelDesc = 0;
     }
     this.nSelectedFiles = 0;
@@ -426,13 +428,18 @@ export class TreeManager {
   public handleSelection(nodeId: string, keys: ModifierKeys) {
     const node = this.target.idToNode[nodeId];
     const nextState = !node.selected;
+    const newActive = Boolean(!keys.ctrl && node.type === 'file' && nextState);
     if (!keys.ctrl) {
-      this.clearSelection();
+      this.clearSelection(newActive);
       if (!nextState) return;
     }
     node.selected = nextState;
     if (node.type === 'dir') {
       this.setSubtreeSelection(node, nextState);
+    }
+    if (node.type === 'file' && newActive) {
+      node.active = true;
+      ProfileManager.instance.setCurrContest(node.contestId);
     }
     this.refresh();
   }

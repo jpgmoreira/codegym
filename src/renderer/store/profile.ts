@@ -151,5 +151,9 @@ export const useProfileStore = defineStore('profile', {
       if (!currContestId) return null;
       return window.api.invoke<Contest | null>(Channels.getContest, currContestId);
     },
+    setCurrContest(contestId: string | null) {
+      if (!this.currProfile) return;
+      this.currProfile.currContestId = contestId;
+    },
   },
 });

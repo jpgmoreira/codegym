@@ -54,6 +54,9 @@
       <div v-if="!contest" class="flex grow items-center justify-center">
         <span class="text-xl opacity-70">Create or select a contest</span>
       </div>
+      <div v-else>
+        {{ contest.name }}
+      </div>
     </div>
   </div>
 </template>

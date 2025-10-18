@@ -19,6 +19,7 @@
   import AutoLengthInput from '../AutoLengthInput.vue';
   import { GenericResponseDTO } from '@common/dto/genericResponseDTO';
   import { useUIStore } from '@renderer/store/ui';
+  import { useProfileStore } from '@renderer/store/profile';
   import { toLocaleNumber } from '@common/utils/utils';
 
   type ContextState = {
@@ -62,6 +63,7 @@
   const paddingBottom = 250;
 
   const uiStore = useUIStore();
+  const profileStore = useProfileStore();
 
   const keys: ModifierKeys = {
     ctrl: false,
@@ -215,12 +217,17 @@
     if (isNodeDisabled(node)) return; // Do not allow folder selection while searching.
     const localKeys = { ...keys };
     if (props.checkbox) localKeys.ctrl = true;
+    const nextState = !node.selected;
+    const newActive = Boolean(!keys.ctrl && node.type === 'file' && nextState);
     tree.value = await window.api.invoke(
       TreeChannels.handleSelection,
       tree.value?.anchor || 0,
       node.id,
       localKeys
     );
+    if (newActive && node.type === 'file') {
+      profileStore.setCurrContest(node.contestId);
+    }
   }
 
   async function deleteNode() {
@@ -442,7 +449,11 @@
 
               <AutoLengthInput
                 class="node-input"
-                :class="{ selected: node.selected, 'cursor-not-allowed': isNodeDisabled(node) }"
+                :class="{
+                  selected: node.selected,
+                  active: node.type === 'file' && node.active,
+                  'cursor-not-allowed': isNodeDisabled(node),
+                }"
                 v-model="node.text"
                 :readonly="renamingNode !== node"
                 @keydown.enter="applyRenaming"
