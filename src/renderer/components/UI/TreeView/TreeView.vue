@@ -519,7 +519,7 @@
       ref="scroll-container"
       @scroll="handleScroll"
     >
-      <div v-if="props.search" class="flex w-full">
+      <div v-if="props.search" class="flex w-full sticky left-0 right-0">
         <input
           v-model.trim="searchText"
           class="w-full rounded-none"
