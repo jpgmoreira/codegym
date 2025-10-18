@@ -185,4 +185,10 @@ export class ProfileManager {
     if (!this.currProfileProxy) return;
     this.currProfileProxy.proxy.currContestId = contestId;
   }
+
+  public contestDeleted(contestId: string) {
+    if (contestId === this.currProfileProxy?.proxy.currContestId) {
+      this.currProfileProxy.proxy.currContestId = null;
+    }
+  }
 }

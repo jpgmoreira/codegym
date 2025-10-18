@@ -484,10 +484,10 @@ export class TreeManager {
     }
   }
 
-  private deleteCallback(_node: Node) {}
-
-  public setDeleteCallback(callback: (node: Node) => void) {
-    this.deleteCallback = callback;
+  private deleteCallback(node: Node) {
+    if (node.type !== 'file') return;
+    ProfileManager.instance.contestDeleted(node.contestId);
+    ContestsManager.instance.deleteContest(node.contestId);
   }
 
   public deleteNode(nodeId: string) {

@@ -4,6 +4,7 @@ import { ensureDirExists } from '../utils';
 import { FileProxy } from '../fileProxy';
 import { buildId } from '@common/utils/utils';
 import path from 'path';
+import fs from 'fs';
 
 /**
  * Singleton for managing contests.
@@ -55,6 +56,7 @@ export class ContestsManager {
       'contests',
       `${id}.json`
     );
+    // We do not set a contest as active upon creation.
     new FileProxy(contestPath, contest);
     return id;
   }
@@ -74,5 +76,19 @@ export class ContestsManager {
     );
     const fp = new FileProxy(contestPath, getEmptyContest(contestId, newName, 0));
     fp.proxy.name = newName;
+  }
+
+  public deleteContest(contestId: string) {
+    if (this.proxy?.proxy.id === contestId) {
+      this.proxy = null;
+    }
+    const contestPath = path.join(
+      DATA_DIR,
+      'profileData',
+      this.profileId!,
+      'contests',
+      `${contestId}.json`
+    );
+    fs.unlinkSync(contestPath);
   }
 }
