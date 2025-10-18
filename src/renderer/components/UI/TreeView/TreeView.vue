@@ -97,9 +97,9 @@
   }));
 
   const selectedFilesText = computed(() => {
-    if (!tree.value) return '0 files';
+    if (!tree.value) return '0 contests';
     const val = toLocaleNumber(tree.value.nSelectedFiles);
-    return val === '1' ? '1 file' : `${val} files`;
+    return val === '1' ? '1 contest' : `${val} contests`;
   });
 
   const nSelectedFolders = computed(() => {
@@ -299,8 +299,8 @@
   }
 
   function fileHintText(nFiles: number) {
-    if (nFiles === 1) return '1 file';
-    return `${toLocaleNumber(nFiles)} files`;
+    if (nFiles === 1) return '1 contest';
+    return `${toLocaleNumber(nFiles)} contests`;
   }
 
   function containerMouseEnter() {
