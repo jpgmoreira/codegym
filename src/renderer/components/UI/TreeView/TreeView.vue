@@ -361,8 +361,13 @@
 
   // --- Events: ---
 
+  let lastScrollTop = 0;
   function handleScroll() {
+    if (!scrollContainer.value) return;
     contextState.visible = false;
+    const scrollTop = scrollContainer.value.scrollTop;
+    if (scrollTop === lastScrollTop) return; // Do not react on x scroll;
+    lastScrollTop = scrollTop;
     clearTimeout(scrollTimer.value);
     setTimeout(async () => {
       const container = scrollContainer.value;
