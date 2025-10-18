@@ -2,6 +2,9 @@
   /**
    * Auto-length text input.
    * Can be used with v-model.
+   *
+   * -- Observation: Is not needed anymore if you use field-sizing CSS prop:
+   *    [https://developer.mozilla.org/en-US/docs/Web/CSS/field-sizing]
    */
   import { onMounted, useTemplateRef } from 'vue';
 

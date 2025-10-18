@@ -17,7 +17,6 @@
     useTemplateRef,
     computed,
   } from 'vue';
-  import AutoLengthInput from '../AutoLengthInput.vue';
   import { GenericResponseDTO } from '@common/dto/genericResponseDTO';
   import { useUIStore } from '@renderer/store/ui';
   import { toLocaleNumber } from '@common/utils/utils';
@@ -571,7 +570,7 @@
                 :class="{ 'cursor-not-allowed': isNodeDisabled(node) }"
               ></span>
 
-              <AutoLengthInput
+              <input
                 class="node-input"
                 :class="{
                   selected: node.selected,
@@ -623,6 +622,7 @@
     padding-right: 5px;
     cursor: pointer;
     background-color: transparent;
+    field-sizing: content; /** CSS experimental. On modern electron should work fine. */
   }
 
   .node-caret {
