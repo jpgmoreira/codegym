@@ -122,9 +122,14 @@
               </button>
             </div>
           </section>
-          <div v-if="contest.problems.length">
+          <div v-if="contest.problems.length" class="pb-20">
             <AutoHeightTextArea placeholder="Contest notes" class="p-1" />
             <table class="w-full">
+              <colgroup>
+                <col class="col-problem" />
+                <col class="col-accepted" />
+                <col class="col-notes" />
+              </colgroup>
               <thead>
                 <tr>
                   <th>Problem</th>
@@ -135,19 +140,19 @@
               <tbody>
                 <tr v-for="problem in contest.problems" :key="problem.id" class="no-hover">
                   <td>
-                    <input type="text" v-model="problem.title"></input>
+                    <input type="text" v-model="problem.title" />
                   </td>
                   <td>
-                    <input type="text" v-model="problem.accepted"></input>                    
+                    <input type="text" v-model="problem.accepted" />
                   </td>
                   <td>
-                    <AutoHeightTextArea v-model="problem.notes" :min-height="45" />
+                    <AutoHeightTextArea class="p-1" v-model="problem.notes" :min-height="45" />
                   </td>
                 </tr>
               </tbody>
             </table>
           </div>
-          <div class="flex grow items-center justify-center text-lg opacity-70" v-else>
+          <div v-else class="flex grow items-center justify-center text-lg opacity-70">
             Add a new problem
           </div>
         </div>
@@ -177,9 +182,16 @@
   tbody tr:hover {
     background-color: auto;
   }
-  input[type="text"] {
+  input[type='text'] {
     height: 100%;
     width: 100%;
     border-radius: 0;
+    text-align: center;
+  }
+  .col-problem {
+    width: 30%;
+  }
+  .col-accepted {
+    width: 15%;
   }
 </style>

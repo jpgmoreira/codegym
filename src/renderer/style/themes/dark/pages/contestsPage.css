@@ -1,9 +1,5 @@
 /* Contests page */
 
-.theme-dark .contests-page .autoheight-textarea {
-  border: 1px solid #282b30;
-}
-
 .theme-dark .contests-page .header-section {
   background-color: #282b30;
   border: 1px solid #40444b;
@@ -12,6 +8,7 @@
 .theme-dark .contests-page td,
 .theme-dark .contests-page th {
   border: 1px solid #40444b;
+  background-color: #26292b;
 }
 
 .theme-dark .contests-page thead {
@@ -20,5 +17,5 @@
 
 .theme-dark .contests-page td input,
 .theme-dark .contests-page td textarea {
-  background-color: #232627;
+  background-color: #26292b;
 }
