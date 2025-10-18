@@ -3,6 +3,7 @@
    * Could race conditions be a problem here? - After using the component a lot, it seems to me that no.
    */
 
+  import Modal from '../Modal.vue';
   import ContextMenu from './ContextMenu.vue';
   import { TreeOperationResponseDTO } from '@common/dto/treeOperationResponseDTO';
   import { NodeType, Node, ModifierKeys } from '@common/types/tree';
@@ -21,6 +22,8 @@
   import { useUIStore } from '@renderer/store/ui';
   import { toLocaleNumber } from '@common/utils/utils';
 
+  // --- Types: ---
+
   type ContextState = {
     type: NodeType | 'root';
     visible: boolean;
@@ -29,6 +32,14 @@
     x: number;
     y: number;
   };
+
+  type ModalState = {
+    visible: boolean;
+    currentNode: Node | null;
+    multiple: boolean;
+  };
+
+  // --- Props and emits: ---
 
   const props = defineProps({
     checkbox: {
@@ -65,6 +76,8 @@
     (e: 'deleteSelectedContests'): void;
   }>();
 
+  // --- Variables: ---
+
   const rowHeight = 28;
   const paddingBottom = 250;
 
@@ -84,6 +97,8 @@
     x: 0,
     y: 0,
   });
+
+  const modalState = reactive<ModalState>({});
 
   const renamingNode = ref<Node | null>(null);
   const originalName = ref('');
@@ -118,6 +133,8 @@
     return val === '1' ? '1 folder' : `${val} folders`;
   });
 
+  // --- Context menu: ---
+
   function showContextMenu(type: ContextState['type'], targetNode: Node | null, e: MouseEvent) {
     contextState.visible = true;
     contextState.type = type;
@@ -126,6 +143,8 @@
     contextState.activeNode = targetNode;
     contextState.activeDomNode = e.target as HTMLInputElement;
   }
+
+  // --- Node creation: ---
 
   async function createNode(type: NodeType) {
     const node = contextState.activeNode;
@@ -166,6 +185,8 @@
     );
   }
 
+  // --- Toggle dir open: ---
+
   async function toggleDirOpen(node: Node) {
     tree.value = await window.api.invoke(
       TreeChannels.toggleDirOpen,
@@ -173,6 +194,12 @@
       node.id
     );
   }
+
+  async function collapseAll() {
+    tree.value = await window.api.invoke(TreeChannels.collapseAll, tree.value?.anchor || 0);
+  }
+
+  // --- Renaming: ---
 
   function startRenaming() {
     const node = contextState.activeNode;
@@ -220,6 +247,8 @@
     });
   }
 
+  // --- Selection: ---
+
   async function handleSelection(node: Node) {
     if (isNodeDisabled(node)) return; // Do not allow folder selection while searching.
     const localKeys = { ...keys };
@@ -237,8 +266,14 @@
     }
   }
 
+  async function clearSelection() {
+    tree.value = await window.api.invoke(TreeChannels.clearSelection, tree.value?.anchor || 0);
+  }
+
+  // --- Deletion: ---
+
   async function deleteNode() {
-    const node = contextState.activeNode;
+    const node = modalState.currentNode;
     if (!node) return;
     tree.value = await window.api.invoke(TreeChannels.deleteNode, tree.value?.anchor || 0, node.id);
     if (node.type === 'file') {
@@ -251,9 +286,31 @@
     emit('deleteSelectedContests');
   }
 
-  async function clearSelection() {
-    tree.value = await window.api.invoke(TreeChannels.clearSelection, tree.value?.anchor || 0);
+  function handleDeletion() {
+    if (modalState.multiple) deleteSelectedNodes();
+    else deleteNode();
+    closeModal();
   }
+
+  function openDeleteNodeModal() {
+    modalState.currentNode = contextState.activeNode;
+    modalState.visible = true;
+    modalState.multiple = false;
+  }
+
+  function openDeleteSelectedNodesModal() {
+    modalState.currentNode = null;
+    modalState.visible = true;
+    modalState.multiple = true;
+  }
+
+  function closeModal() {
+    modalState.currentNode = null;
+    modalState.visible = false;
+    modalState.multiple = false;
+  }
+
+  // --- Search: ---
 
   async function search() {
     const text = searchText.value.trim();
@@ -263,25 +320,7 @@
     });
   }
 
-  function handleScroll() {
-    contextState.visible = false;
-    clearTimeout(scrollTimer.value);
-    setTimeout(async () => {
-      const container = scrollContainer.value;
-      if (!container) return;
-      const scrollTop = container.scrollTop;
-      const newAnchor = Math.max(0, Math.floor(scrollTop / rowHeight) - 30);
-      tree.value = await window.api.invoke<TreeOperationResponseDTO>(
-        TreeChannels.getState,
-        newAnchor
-      );
-      nodeContainerOffset.value = tree.value.anchor * rowHeight; // This is the key! Using a computed-value causes flickering.
-    }, 40);
-  }
-
-  async function collapseAll() {
-    tree.value = await window.api.invoke(TreeChannels.collapseAll, tree.value?.anchor || 0);
-  }
+  // --- Selection: ---
 
   async function moveSelection(channel: TreeChannels) {
     if (!tree.value) return;
@@ -301,6 +340,8 @@
     );
   }
 
+  // --- Helpers: ---
+
   function isCheckIndeterminate(node: Node) {
     return Boolean(node.type === 'dir' && node.nSelDesc && node.nSelDesc < node.nDesc);
   }
@@ -312,6 +353,24 @@
   function fileHintText(nFiles: number) {
     if (nFiles === 1) return '1 contest';
     return `${toLocaleNumber(nFiles)} contests`;
+  }
+
+  // --- Events: ---
+
+  function handleScroll() {
+    contextState.visible = false;
+    clearTimeout(scrollTimer.value);
+    setTimeout(async () => {
+      const container = scrollContainer.value;
+      if (!container) return;
+      const scrollTop = container.scrollTop;
+      const newAnchor = Math.max(0, Math.floor(scrollTop / rowHeight) - 30);
+      tree.value = await window.api.invoke<TreeOperationResponseDTO>(
+        TreeChannels.getState,
+        newAnchor
+      );
+      nodeContainerOffset.value = tree.value.anchor * rowHeight; // This is the key! Using a computed-value causes flickering.
+    }, 40);
   }
 
   function containerMouseEnter() {
@@ -340,6 +399,8 @@
     }
   }
 
+  // --- Hooks: ---
+
   onMounted(async () => {
     tree.value = await window.api.invoke(TreeChannels.getState, 0);
     hasLoaded.value = true;
@@ -365,6 +426,49 @@
     @mouseleave="containerMouseLeave"
     ref="tree-view"
   >
+    <Modal :visible="modalState.visible" @close="closeModal">
+      <template #header>
+        <div v-if="!modalState.multiple && modalState.currentNode?.type === 'dir'">
+          Delete folder
+          <strong>{{ modalState.currentNode.text }}</strong>
+        </div>
+        <div v-else-if="!modalState.multiple && modalState.currentNode?.type === 'file'">
+          Delete contest
+          <strong>{{ modalState.currentNode.text }}</strong>
+        </div>
+        <div v-else>Delete selection</div>
+      </template>
+      <template #body>
+        <div class="flex flex-col text-center">
+          <template v-if="!modalState.multiple && modalState.currentNode">
+            <span>
+              Are you sure you want to delete the
+              <strong>"{{ modalState.currentNode.text }}"</strong>
+              {{ modalState.currentNode.type === 'dir' ? 'folder' : 'contest' }}?
+            </span>
+            <span class="text-danger text-xl my-2">This action cannot be undone!</span>
+          </template>
+          <template v-else>
+            <span>
+              Are you sure you want to delete
+              <strong>{{ tree?.nSelectedFiles || 0 }}</strong>
+              {{ tree?.nSelectedFiles === 1 ? 'contest' : 'contests' }}
+              and
+              <strong>{{ nSelectedFolders }}</strong>
+              {{ nSelectedFolders === 1 ? 'folder' : 'folders' }}?
+            </span>
+            <span class="text-danger text-xl my-2">This action cannot be undone!</span>
+          </template>
+        </div>
+      </template>
+      <template #footer>
+        <div class="flex justify-between">
+          <button type="button" class="btn-secondary" @click="closeModal">Cancel</button>
+          <button type="button" class="btn-danger" @click="handleDeletion">Delete</button>
+        </div>
+      </template>
+    </Modal>
+
     <ContextMenu
       class="z-30"
       :tree="tree"
@@ -377,8 +481,8 @@
       @create-node-above="createNodeAbove"
       @create-node-below="createNodeBelow"
       @rename-node="startRenaming"
-      @delete-node="deleteNode"
-      @delete-selected-nodes="deleteSelectedNodes"
+      @delete-node="openDeleteNodeModal"
+      @delete-selected-nodes="openDeleteSelectedNodesModal"
       @collapse-all="collapseAll"
       @clear-selection="clearSelection"
       @move-selected-files-above="() => moveSelection(TreeChannels.moveSelectedFilesAbove)"
