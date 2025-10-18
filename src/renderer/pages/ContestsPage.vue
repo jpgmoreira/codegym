@@ -161,7 +161,12 @@
             </div>
           </section>
           <div v-if="contest.problems.length" class="pb-20">
-            <AutoHeightTextArea placeholder="Contest notes" class="p-1" :min-height="80" />
+            <AutoHeightTextArea
+              placeholder="Contest notes"
+              class="p-1"
+              v-model="contest.notes"
+              :min-rows="10"
+            />
             <table class="w-full">
               <colgroup>
                 <col class="col-problem" />
