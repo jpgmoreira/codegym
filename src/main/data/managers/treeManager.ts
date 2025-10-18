@@ -389,6 +389,9 @@ export class TreeManager {
       }
     }
     node.text = newName;
+    if (node.type === 'file') {
+      ContestsManager.instance.renameContest(node.contestId, newName);
+    }
     return { status: 'success' };
   }
 
