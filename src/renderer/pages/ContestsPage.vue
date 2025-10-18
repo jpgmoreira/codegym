@@ -19,6 +19,24 @@
 
   const currContestId = computed(() => store.currProfile?.currContestId);
 
+  const sortedContestProblems = computed(() => {
+    if (contest.value && contest.value.problems.length) {
+      return contest.value.problems.sort(compareProblems);
+    }
+    return [];
+  });
+
+  function compareProblems(a: ContestProblem, b: ContestProblem) {
+    const numA = Number(a.accepted);
+    const numB = Number(b.accepted);
+    const isNumA = !isNaN(numA);
+    const isNumB = !isNaN(numB);
+    if (isNumA && isNumB) return numB - numA;
+    else if (isNumA) return -1;
+    else if (isNumB) return 1;
+    return 0;
+  }
+
   function handleSetActive(contestId: string) {
     store.setCurrContest(contestId);
   }
@@ -138,15 +156,22 @@
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="problem in contest.problems" :key="problem.id" class="no-hover">
+                <tr v-for="problem in sortedContestProblems" :key="problem.id" class="no-hover">
                   <td>
                     <input type="text" v-model="problem.title" />
                   </td>
                   <td>
-                    <input type="text" v-model="problem.accepted" />
+                    <input
+                      type="text"
+                      :value="problem.accepted"
+                      @change="
+                        (e: Event) =>
+                          (problem.accepted = (e.target as HTMLInputElement).value.trim())
+                      "
+                    />
                   </td>
                   <td>
-                    <AutoHeightTextArea class="p-1" v-model="problem.notes" :min-height="45" />
+                    <AutoHeightTextArea class="p-1" v-model="problem.notes" :min-height="20" />
                   </td>
                 </tr>
               </tbody>
@@ -175,7 +200,7 @@
     cursor: ew-resize;
   }
   td {
-    height: 45px;
+    height: 20px;
     padding: 0;
     margin: 0;
   }
