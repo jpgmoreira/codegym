@@ -4,7 +4,7 @@
     minHeight: {
       type: Number,
       required: false,
-      default: 100,
+      default: 0,
     },
     maxHeight: {
       type: Number,

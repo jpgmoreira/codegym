@@ -161,7 +161,7 @@
             </div>
           </section>
           <div v-if="contest.problems.length" class="pb-20">
-            <AutoHeightTextArea placeholder="Contest notes" class="p-1" />
+            <AutoHeightTextArea placeholder="Contest notes" class="p-1" :min-height="80" />
             <table class="w-full">
               <colgroup>
                 <col class="col-problem" />
@@ -189,7 +189,7 @@
                     />
                   </td>
                   <td>
-                    <AutoHeightTextArea class="p-1" v-model="problem.notes" :min-height="20" />
+                    <AutoHeightTextArea class="p-1" v-model="problem.notes" />
                   </td>
                 </tr>
               </tbody>
@@ -218,7 +218,7 @@
     cursor: ew-resize;
   }
   td {
-    height: 20px;
+    height: 1px;
     padding: 0;
     margin: 0;
   }
