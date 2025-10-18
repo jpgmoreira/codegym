@@ -61,6 +61,10 @@ export class ContestsManager {
 
   public renameContest(contestId: string, newName: string) {
     newName = newName.trim();
+    if (contestId === this.proxy?.proxy.id) {
+      this.proxy.proxy.name = newName;
+      return;
+    }
     const contestPath = path.join(
       DATA_DIR,
       'profileData',
