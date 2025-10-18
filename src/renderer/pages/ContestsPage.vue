@@ -5,7 +5,6 @@
   import { parseTimestamp } from '@common/utils/dateUtils';
   import TreeView from '@renderer/components/UI/TreeView/TreeView.vue';
   import SettingsPageHeader from '@renderer/components/Header/custom/SettingsPageHeader.vue';
-  import AutoHeightTextArea from '@renderer/components/UI/AutoHeightTextArea.vue';
   import { Channels } from '@common/types/channels';
 
   const store = useProfileStore();
@@ -161,12 +160,11 @@
             </div>
           </section>
           <div v-if="contest.problems.length" class="pb-20">
-            <AutoHeightTextArea
+            <textarea
               placeholder="Contest notes"
-              class="p-1"
+              class="p-1 contest-notes"
               v-model="contest.notes"
-              :min-height="80"
-            />
+            ></textarea>
             <table class="w-full">
               <colgroup>
                 <col class="col-problem" />
@@ -194,7 +192,7 @@
                     />
                   </td>
                   <td>
-                    <AutoHeightTextArea class="p-1" v-model="problem.notes" />
+                    <textarea class="p-1 problem-notes" v-model="problem.notes"></textarea>
                   </td>
                 </tr>
               </tbody>
@@ -223,7 +221,6 @@
     cursor: ew-resize;
   }
   td {
-    height: 1px;
     padding: 0;
     margin: 0;
   }
@@ -241,5 +238,18 @@
   }
   .col-accepted {
     width: 15%;
+  }
+  textarea {
+    field-sizing: content; /** CSS experimental. Should work fine on current electron versions. */
+    resize: none;
+    display: block;
+    width: 100%;
+  }
+  .contest-notes {
+    min-height: 100px;
+    max-height: 300px;
+  }
+  .problem-notes {
+    max-height: 200px;
   }
 </style>

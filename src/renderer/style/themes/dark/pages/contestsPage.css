@@ -15,6 +15,9 @@
   border-bottom: 2px solid #f1f1f1;
 }
 
+.theme-dark .contests-page textarea {
+  background-color: #373b41;
+}
 .theme-dark .contests-page td input,
 .theme-dark .contests-page td textarea {
   background-color: #26292b;
