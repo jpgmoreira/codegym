@@ -64,6 +64,26 @@
     contest.value?.problems.push(problem);
   }
 
+  function acceptedInputChange(problem: ContestProblem, e: Event) {
+    problem.accepted = (e.target as HTMLInputElement).value.trim();
+  }
+
+  function acceptedInputKeydown(e: KeyboardEvent) {
+    const allowedKeys = [
+      'Backspace',
+      'Delete',
+      'ArrowLeft',
+      'ArrowRight',
+      'Tab',
+      'Enter',
+      'Home',
+      'End',
+    ];
+    if (!allowedKeys.includes(e.key) && !/^\d$/.test(e.key)) {
+      e.preventDefault();
+    }
+  }
+
   function windowMouseUp() {
     isResizing.value = false;
   }
@@ -157,17 +177,15 @@
               </thead>
               <tbody>
                 <tr v-for="problem in sortedContestProblems" :key="problem.id" class="no-hover">
-                  <td>
+                  <td class="font-bold">
                     <input type="text" v-model="problem.title" />
                   </td>
                   <td>
                     <input
                       type="text"
                       :value="problem.accepted"
-                      @change="
-                        (e: Event) =>
-                          (problem.accepted = (e.target as HTMLInputElement).value.trim())
-                      "
+                      @change="(e: Event) => acceptedInputChange(problem, e)"
+                      @keydown="acceptedInputKeydown"
                     />
                   </td>
                   <td>
