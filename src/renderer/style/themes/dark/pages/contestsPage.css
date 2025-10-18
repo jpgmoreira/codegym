@@ -13,3 +13,12 @@
 .theme-dark .contests-page th {
   border: 1px solid #40444b;
 }
+
+.theme-dark .contests-page thead {
+  border-bottom: 2px solid #f1f1f1;
+}
+
+.theme-dark .contests-page td input,
+.theme-dark .contests-page td textarea {
+  background-color: #232627;
+}

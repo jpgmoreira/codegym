@@ -134,9 +134,15 @@
               </thead>
               <tbody>
                 <tr v-for="problem in contest.problems" :key="problem.id" class="no-hover">
-                  <td>{{ problem.title }}</td>
-                  <td>{{ problem.accepted }}</td>
-                  <td>{{ problem.notes }}</td>
+                  <td>
+                    <input type="text" v-model="problem.title"></input>
+                  </td>
+                  <td>
+                    <input type="text" v-model="problem.accepted"></input>                    
+                  </td>
+                  <td>
+                    <AutoHeightTextArea v-model="problem.notes" :min-height="45" />
+                  </td>
                 </tr>
               </tbody>
             </table>
@@ -165,8 +171,15 @@
   }
   td {
     height: 45px;
+    padding: 0;
+    margin: 0;
   }
   tbody tr:hover {
     background-color: auto;
+  }
+  input[type="text"] {
+    height: 100%;
+    width: 100%;
+    border-radius: 0;
   }
 </style>
