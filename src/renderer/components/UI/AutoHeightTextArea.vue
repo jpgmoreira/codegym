@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-  import { useTemplateRef, watch } from 'vue';
+  import { onMounted, useTemplateRef, watch } from 'vue';
 
   const props = defineProps({
     minHeight: { type: Number, default: 0 },
@@ -19,7 +19,8 @@
     textareaRef.value.style.height = newHeight + 'px';
   }
 
-  watch(modelValue, adjustHeight, { immediate: true });
+  watch(modelValue, adjustHeight);
+  onMounted(adjustHeight);
 </script>
 
 <template>
