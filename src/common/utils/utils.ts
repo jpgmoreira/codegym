@@ -1,4 +1,5 @@
 import { type AuthPage, authPageList } from '@common/types/authPage';
+import slugify from 'slugify';
 
 const ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 
@@ -42,6 +43,19 @@ export function throttle<T extends (...args: any[]) => void>(fn: T, wait: number
  */
 export function randomId() {
   return Date.now().toString(36) + Math.random().toString(36).substring(1);
+}
+
+/**
+ * Builds a randomized id based on a name and millisecond-based unix timestmap.
+ */
+export function buildId(name: string, timestamp: number) {
+  const slug = slugify(name, {
+    strict: true,
+    lower: true,
+  });
+  const code = toBase62(timestamp);
+  const id = `${slug}-${code}`;
+  return id;
 }
 
 export function isAuthPage(page: string): page is AuthPage {

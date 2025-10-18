@@ -2,6 +2,7 @@ import { DATA_DIR } from '../constants';
 import { Contest, getEmptyContest } from '@common/schemas/contests';
 import { ensureDirExists } from '../utils';
 import { FileProxy } from '../fileProxy';
+import { buildId } from '@common/utils/utils';
 import path from 'path';
 
 /**
@@ -32,7 +33,17 @@ export class ContestsManager {
   public getContest(contestId: string): Contest | null {
     if (!this.profileId) return null;
     const contestPath = path.join(DATA_DIR, 'profileData', this.profileId, 'contests', contestId);
-    this.proxy = new FileProxy(contestPath, getEmptyContest(contestId));
+    this.proxy = new FileProxy(contestPath, getEmptyContest(contestId, '', 0));
     return this.proxy.target;
+  }
+
+  public createContest(name: string): string {
+    name = name.trim();
+    const now = Date.now();
+    const id = buildId(name, now);
+    const contest = getEmptyContest(id, name, now);
+    const contestPath = path.join(DATA_DIR, 'profileData', this.profileId!, 'contests', id);
+    new FileProxy(contestPath, contest);
+    return id;
   }
 }

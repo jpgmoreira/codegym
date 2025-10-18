@@ -10,15 +10,20 @@ export type ContestProblem = {
 
 export type Contest = {
   id: string;
+  name: string;
+  createdAt: number;
   notes: string;
   nSolved: number;
   nTodo: number;
   problems: ContestProblem[];
 };
 
-export function getEmptyContest(id: string): Contest {
+export function getEmptyContest(id: string, name: string, createdAt: number): Contest {
+  name = name.trim();
   return {
     id,
+    name,
+    createdAt,
     notes: '',
     nSolved: 0,
     nTodo: 0,

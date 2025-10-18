@@ -32,6 +32,8 @@ export type DirNode = BaseNode &
 
 export type FileNode = BaseNode & {
   type: 'file';
+  // -- Custom fields:
+  contestId: string;
 };
 
 export type Node = DirNode | FileNode;

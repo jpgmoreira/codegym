@@ -10,8 +10,7 @@ import { DATA_DIR } from '../constants';
 import { Oj } from '@common/types/oj';
 import { AuthPage } from '@common/types/authPage';
 import { CreateProfileResponseDTO } from '@common/dto/createProfileResponseDTO';
-import slugify from 'slugify';
-import { toBase62 } from '@common/utils/utils';
+import { buildId } from '@common/utils/utils';
 import { loadStartupData } from '../startup';
 import { OjContext } from '@common/schemas/ojContext';
 import { OjProblem } from '@common/schemas/problems';
@@ -164,12 +163,7 @@ export class ProfileManager {
       return validationResult;
     }
     const now = Date.now();
-    const slug = slugify(name, {
-      strict: true,
-      lower: true,
-    });
-    const code = toBase62(now);
-    const id = `${slug}-${code}`;
+    const id = buildId(name, now);
     this.registryProxy!.proxy.profileRecords.push({
       id,
       name,

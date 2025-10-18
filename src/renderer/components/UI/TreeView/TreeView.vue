@@ -123,7 +123,7 @@
   async function createNode(type: NodeType) {
     const node = contextState.activeNode;
     const parentId = node ? node.id : null;
-    const prefix = type === 'dir' ? 'Folder' : 'File';
+    const prefix = type === 'dir' ? 'Folder' : 'Contest';
     tree.value = await window.api.invoke(
       TreeChannels.createNode,
       tree.value?.anchor || 0,
@@ -136,7 +136,7 @@
   async function createNodeAbove(type: NodeType) {
     const node = contextState.activeNode;
     if (!node) return;
-    const prefix = type === 'dir' ? 'Folder' : 'File';
+    const prefix = type === 'dir' ? 'Folder' : 'Contest';
     tree.value = await window.api.invoke(
       TreeChannels.createNodeAbove,
       tree.value?.anchor || 0,
@@ -149,7 +149,7 @@
   async function createNodeBelow(type: NodeType) {
     const node = contextState.activeNode;
     if (!node) return;
-    const prefix = type === 'dir' ? 'Folder' : 'File';
+    const prefix = type === 'dir' ? 'Folder' : 'Contest';
     tree.value = await window.api.invoke(
       TreeChannels.createNodeBelow,
       tree.value?.anchor || 0,
@@ -393,7 +393,7 @@
           v-model.trim="searchText"
           class="w-full rounded-none"
           type="text"
-          placeholder="Search for files..."
+          placeholder="Search for contests..."
         />
         <button type="button" class="btn-primary rounded-none" @click="search">Search</button>
       </div>

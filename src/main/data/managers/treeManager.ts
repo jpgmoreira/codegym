@@ -12,7 +12,9 @@ import {
 } from '@common/types/tree';
 import { TreeOperationResponseDTO } from '@common/dto/treeOperationResponseDTO';
 import { GenericResponseDTO } from '@common/dto/genericResponseDTO';
+import { ContestsManager } from './contestsManager';
 import path from 'path';
+import { ProfileManager } from './profileManager';
 
 type RootController = NodeController & {
   nextDir: number;
@@ -230,16 +232,19 @@ export class TreeManager {
   }
 
   private createFileNode(prefix: string, parentId: string | null): FileNode {
+    const text = `${prefix} ${this.target.rootController.nextFile}`;
+    const contestId = ContestsManager.instance.createContest(text);
     return {
       id: randomId(),
       type: 'file',
-      text: `${prefix} ${this.target.rootController.nextFile}`,
+      text,
       depth: 0,
       selected: false,
       hidden: false,
       parentId,
       nextId: null,
       prevId: null,
+      contestId,
     } as const;
   }
 
