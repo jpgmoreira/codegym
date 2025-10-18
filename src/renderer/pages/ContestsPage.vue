@@ -14,6 +14,17 @@
 
   const currContestId = computed(() => store.currProfile?.currContestId);
 
+  function handleSetActive(contestId: string) {
+    store.setCurrContest(contestId);
+  }
+
+  function handleRename(contestId: string, newName: string) {
+    newName = newName.trim();
+    if (contest.value?.id === contestId) {
+      contest.value.name = newName;
+    }
+  }
+
   function windowMouseUp() {
     isResizing.value = false;
   }
@@ -48,7 +59,14 @@
     <SettingsPageHeader />
     <div class="flex grow">
       <div :style="{ width: `${treeAreaWidth}px` }">
-        <TreeView class="select-none" files-hint search file-icon />
+        <TreeView
+          class="select-none"
+          files-hint
+          search
+          file-icon
+          @set-active="handleSetActive"
+          @rename="handleRename"
+        />
       </div>
       <div class="separator" :class="{ resizing: isResizing }" @mousedown="isResizing = true"></div>
       <div v-if="!contest" class="flex grow items-center justify-center">

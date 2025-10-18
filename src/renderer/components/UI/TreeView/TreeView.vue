@@ -59,11 +59,15 @@
     },
   });
 
+  const emit = defineEmits<{
+    (e: 'setActive', contestId: string): void;
+    (e: 'rename', contestId: string, newName: string): void;
+  }>();
+
   const rowHeight = 28;
   const paddingBottom = 250;
 
   const uiStore = useUIStore();
-  const profileStore = useProfileStore();
 
   const keys: ModifierKeys = {
     ctrl: false,
@@ -194,6 +198,8 @@
       if (result.status === 'error') {
         uiStore.showToast(result.errorMsg, 'error');
         node.text = originalName.value;
+      } else if (node.type === 'file') {
+        emit('rename', node.contestId, newName);
       }
     }
     renamingNode.value = null;
@@ -226,7 +232,7 @@
       localKeys
     );
     if (newActive && node.type === 'file') {
-      profileStore.setCurrContest(node.contestId);
+      emit('setActive', node.contestId);
     }
   }
 
