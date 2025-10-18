@@ -27,12 +27,6 @@
     textareaRef.value.style.height = newHeight + 'px';
   }
 
-  function onInput(e: Event) {
-    const target = e.target as HTMLTextAreaElement;
-    modelValue.value = target.value.trim();
-    adjustHeight();
-  }
-
   watch(modelValue, adjustHeight, { immediate: true });
   onMounted(adjustHeight);
 </script>
@@ -42,7 +36,7 @@
     class="autoheight-textarea"
     ref="textarea"
     :value="modelValue"
-    @input="onInput"
+    @input="adjustHeight"
   ></textarea>
 </template>
 
