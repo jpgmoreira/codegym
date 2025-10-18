@@ -88,6 +88,7 @@
   const nodeContainerOffset = ref(0);
 
   const scrollContainer = useTemplateRef('scroll-container');
+  const treeView = useTemplateRef('tree-view');
 
   const ghostStyle = computed(() => ({
     height: `${rowHeight * (tree.value?.nSurfaceNodes || 0) + paddingBottom}px`,
@@ -313,14 +314,24 @@
     if (e.key === 'Control') keys.ctrl = false;
   }
 
+  function windowClick(e: MouseEvent) {
+    const root = treeView.value;
+    if (!root) return;
+    if (contextState.visible && !root.contains(e.target as globalThis.Node)) {
+      contextState.visible = false;
+    }
+  }
+
   onMounted(async () => {
     tree.value = await window.api.invoke(TreeChannels.getState, 0);
     hasLoaded.value = true;
+    window.addEventListener('click', windowClick);
     window.addEventListener('keydown', windowKeyDown);
     window.addEventListener('keyup', windowKeyUp);
   });
   onBeforeUnmount(async () => {
     await window.api.invoke(TreeChannels.search, 0, ''); // Clear search when leaving.
+    window.removeEventListener('click', windowClick);
     window.removeEventListener('keydown', windowKeyDown);
     window.removeEventListener('keyup', windowKeyUp);
   });
@@ -334,6 +345,7 @@
     @click="() => (contextState.visible = false)"
     @mouseenter="containerMouseEnter"
     @mouseleave="containerMouseLeave"
+    ref="tree-view"
   >
     <ContextMenu
       class="z-30"

@@ -26,7 +26,10 @@
 </script>
 
 <template>
-  <div class="main-container flex flex-col h-[100vh]" :class="{ resizing: isResizing }">
+  <div
+    class="contests-page main-container flex flex-col h-[100vh]"
+    :class="{ resizing: isResizing }"
+  >
     <SettingsPageHeader />
     <div class="flex grow">
       <div :style="{ width: `${treeAreaWidth}px` }">
@@ -43,12 +46,12 @@
     cursor: ew-resize;
   }
   .separator {
-    width: 10px;
+    width: 5px;
     background: gray;
   }
   .separator:hover,
   .separator.resizing {
-    background: blue;
+    background: #007bd1;
     cursor: ew-resize;
   }
 </style>
