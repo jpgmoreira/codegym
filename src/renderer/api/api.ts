@@ -10,6 +10,7 @@ export const allowedSendChannels = Object.freeze([
   Channels.logout,
   Channels.deleteCurrProfile,
   Channels.updateCurrContestNotes,
+  Channels.updateCurrContestProblem,
 ] as const);
 export const allowedInvokeChannels = Object.freeze([
   Channels.createProfile,

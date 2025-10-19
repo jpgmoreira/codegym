@@ -1,5 +1,10 @@
 import { DATA_DIR } from '../constants';
-import { Contest, getEmptyContest, getEmptyContestProblem } from '@common/schemas/contests';
+import {
+  Contest,
+  ContestProblem,
+  getEmptyContest,
+  getEmptyContestProblem,
+} from '@common/schemas/contests';
 import { ensureDirExists } from '../utils';
 import { FileProxy } from '../fileProxy';
 import { buildId } from '@common/utils/utils';
@@ -105,5 +110,12 @@ export class ContestsManager {
   public updateCurrContestNotes(notes: string) {
     if (!this.proxy) return;
     this.proxy.proxy.notes = notes;
+  }
+
+  public updateCurrContestProblem(problem: ContestProblem) {
+    if (!this.proxy) return;
+    const problemToUpdate = this.proxy.proxy.problems.find((p) => p.id === problem.id);
+    if (!problemToUpdate) return;
+    Object.assign(problemToUpdate, problem);
   }
 }

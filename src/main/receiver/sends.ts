@@ -9,6 +9,7 @@ import { OjContext } from '@common/schemas/ojContext';
 import { OjPoolManager } from '@main/data/managers/ojPoolManager';
 import { OjProblem } from '@common/schemas/problems';
 import { ContestsManager } from '@main/data/managers/contestsManager';
+import { ContestProblem } from '@common/schemas/contests';
 
 ipcMain.on(Channels.updateCurrOj, (_, newOj: Oj) => ProfileManager.instance.updateCurrOj(newOj));
 
@@ -50,4 +51,8 @@ ipcMain.on(
 
 ipcMain.on(Channels.updateCurrContestNotes, (_, notes: string) =>
   ContestsManager.instance.updateCurrContestNotes(notes)
+);
+
+ipcMain.on(Channels.updateCurrContestProblem, (_, problem: ContestProblem) =>
+  ContestsManager.instance.updateCurrContestProblem(problem)
 );

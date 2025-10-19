@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-  import { ref, onMounted, onBeforeUnmount, watch, computed } from 'vue';
+  import { ref, onMounted, onBeforeUnmount, watch, computed, toRaw } from 'vue';
   import { Contest, ContestProblem } from '@common/schemas/contests';
   import { useProfileStore } from '@renderer/store/profile';
   import { parseTimestamp } from '@common/utils/dateUtils';
@@ -68,8 +68,13 @@
     window.api.send(Channels.updateCurrContestNotes, contest.value.notes);
   }
 
+  function updateCurrContestProblem(problem: ContestProblem) {
+    window.api.send(Channels.updateCurrContestProblem, toRaw(problem));
+  }
+
   function acceptedInputChange(problem: ContestProblem, e: Event) {
     problem.accepted = (e.target as HTMLInputElement).value.trim();
+    updateCurrContestProblem(problem);
   }
 
   function acceptedInputKeydown(e: KeyboardEvent) {
@@ -187,7 +192,11 @@
               <tbody>
                 <tr v-for="problem in sortedContestProblems" :key="problem.id" class="no-hover">
                   <td class="font-bold">
-                    <input type="text" v-model="problem.title" />
+                    <input
+                      type="text"
+                      v-model="problem.title"
+                      @change="updateCurrContestProblem(problem)"
+                    />
                   </td>
                   <td>
                     <input
@@ -198,7 +207,11 @@
                     />
                   </td>
                   <td>
-                    <textarea class="p-1 problem-notes" v-model="problem.notes"></textarea>
+                    <textarea
+                      class="p-1 problem-notes"
+                      v-model="problem.notes"
+                      @change="updateCurrContestProblem(problem)"
+                    ></textarea>
                   </td>
                 </tr>
               </tbody>

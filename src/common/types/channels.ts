@@ -19,4 +19,5 @@ export enum Channels {
   getContest = 'get-contest',
   addCurrContestProblem = 'add-curr-contest-problem',
   updateCurrContestNotes = 'update-curr-contest-notes',
+  updateCurrContestProblem = 'update-curr-contest-problem',
 }
