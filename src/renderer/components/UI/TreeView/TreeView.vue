@@ -645,14 +645,6 @@
     background-repeat: no-repeat;
   }
 
-  .file-icon,
-  .dir-icon {
-    margin-left: 4px;
-    margin-right: 2px;
-    width: 20px;
-    height: 20px;
-  }
-
   .nodes-container {
     padding-left: 5px;
     padding-top: 5px;

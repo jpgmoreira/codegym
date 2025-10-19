@@ -3,7 +3,7 @@
   import { useProfileStore } from '@renderer/store/profile';
   import { useOjMetaStore } from '@renderer/store/ojMeta';
   import { toLocaleNumber } from '@common/utils/utils';
-  import star from '@renderer/assets/images/star.svg';
+  import star from '@renderer/assets/images/star.png';
   const profileStore = useProfileStore();
   const ojMetaStore = useOjMetaStore();
   const snapshot = computed(() => profileStore.currProfile!.ojContext['uva'].snapshot!);

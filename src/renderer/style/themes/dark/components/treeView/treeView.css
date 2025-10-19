@@ -76,10 +76,14 @@
 
 /* Icons */
 .theme-dark .treeview .dir-icon {
-  background-image: url('@renderer/assets/images/folder.png');
+  background-image: url('@renderer/assets/images/folder2.png');
+  width: 22px;
+  height: 22px;
 }
 .theme-dark .treeview .file-icon {
-  background-image: url('@renderer/assets/images/file.png');
+  background-image: url('@renderer/assets/images/manual.png');
+  width: 27px;
+  height: 27px;
 }
 
 /* Hint text */
