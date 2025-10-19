@@ -26,6 +26,7 @@
 @import './themes/dark/modal.css';
 @import './themes/dark/table.css';
 @import './themes/dark/toast.css';
+@import './themes/dark/tooltip.css';
 
 /* Themed component overrides */
 @import './themes/dark/components/multiselect.css';

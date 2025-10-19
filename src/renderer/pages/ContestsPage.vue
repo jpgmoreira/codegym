@@ -1,6 +1,6 @@
 <script lang="ts" setup>
   import { ref, onMounted, onBeforeUnmount, watch, computed, toRaw } from 'vue';
-  import { Contest, ContestProblem } from '@common/schemas/contests';
+  import { Contest, ContestProblem, ContestProblemFlag } from '@common/schemas/contests';
   import { useProfileStore } from '@renderer/store/profile';
   import { parseTimestamp } from '@common/utils/dateUtils';
   import TreeView from '@renderer/components/UI/TreeView/TreeView.vue';
@@ -74,6 +74,10 @@
 
   function updateCurrContestProblem(problem: ContestProblem) {
     window.api.send(Channels.updateCurrContestProblem, toRaw(problem));
+  }
+
+  function toggleFlag(problem: ContestProblem, flag: ContestProblemFlag) {
+    problem[flag] = !problem[flag];
   }
 
   function acceptedInputChange(problem: ContestProblem, e: Event) {
@@ -198,6 +202,11 @@
                   v-for="problem in sortedContestProblems"
                   :key="problem.id"
                   class="no-hover problem-tr"
+                  :class="{
+                    todo: problem.todo,
+                    solved: problem.solved,
+                    favorite: problem.favorite,
+                  }"
                 >
                   <td class="font-bold relative">
                     <input
@@ -206,10 +215,22 @@
                       v-model="problem.title"
                       @change="updateCurrContestProblem(problem)"
                     />
-                    <span class="absolute icon solved z-10"><img :src="solved" /></span>
-                    <span class="absolute icon todo z-10"><img :src="todo" /></span>
-                    <span class="absolute icon star z-10"><img :src="star" /></span>
-                    <span class="absolute icon trash z-10"><img :src="trash" /></span>
+                    <span class="absolute icon solved z-10" @click="toggleFlag(problem, 'solved')">
+                      <img :src="solved" />
+                    </span>
+                    <span class="absolute icon todo z-10" @click="toggleFlag(problem, 'todo')">
+                      <img :src="todo" />
+                    </span>
+                    <span
+                      class="absolute icon favorite z-10"
+                      @click="toggleFlag(problem, 'favorite')"
+                    >
+                      <img :src="star" />
+                    </span>
+                    <span class="absolute icon trash z-10">
+                      <img :src="trash" />
+                      <span class="tooltip select-none absolute">Double-click to delete</span>
+                    </span>
                   </td>
                   <td>
                     <input
@@ -283,6 +304,7 @@
     max-height: 300px;
   }
   .problem-notes {
+    height: 100%;
     max-height: 200px;
   }
   .icon img {
@@ -300,6 +322,12 @@
     visibility: visible;
     opacity: 0.5;
   }
+  .problem-tr.todo .icon.todo,
+  .problem-tr.solved .icon.solved,
+  .problem-tr.favorite .icon.favorite {
+    visibility: visible;
+    opacity: 1;
+  }
   .icon:hover {
     opacity: 1 !important;
   }
@@ -309,10 +337,18 @@
   .icon.todo {
     right: calc(5px + 23px + 3px);
   }
-  .icon.star {
+  .icon.favorite {
     right: calc(5px + 23px + 3px + 23px + 3px);
   }
   .icon.trash {
     left: 5px;
+  }
+  .tooltip {
+    visibility: hidden;
+    width: 80px;
+    top: calc(100% + 3px);
+  }
+  .icon:hover .tooltip {
+    visibility: visible;
   }
 </style>

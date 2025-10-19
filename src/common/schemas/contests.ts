@@ -1,5 +1,7 @@
 import { randomId } from '@common/utils/utils';
 
+export type ContestProblemFlag = 'todo' | 'favorite' | 'solved';
+
 export type ContestProblem = {
   id: string;
   title: string;
