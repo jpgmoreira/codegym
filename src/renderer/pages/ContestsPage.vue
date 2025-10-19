@@ -6,6 +6,10 @@
   import TreeView from '@renderer/components/UI/TreeView/TreeView.vue';
   import SettingsPageHeader from '@renderer/components/Header/custom/SettingsPageHeader.vue';
   import { Channels } from '@common/types/channels';
+  import solved from '@renderer/assets/images/solved.png';
+  import todo from '@renderer/assets/images/to-do-list.png';
+  import trash from '@renderer/assets/images/trash.png';
+  import star from '@renderer/assets/images/star.png';
 
   const store = useProfileStore();
 
@@ -190,13 +194,22 @@
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="problem in sortedContestProblems" :key="problem.id" class="no-hover">
-                  <td class="font-bold">
+                <tr
+                  v-for="problem in sortedContestProblems"
+                  :key="problem.id"
+                  class="no-hover problem-tr"
+                >
+                  <td class="font-bold relative">
                     <input
+                      class="absolute top-0 bottom-0 left-0 right-0 z-0"
                       type="text"
                       v-model="problem.title"
                       @change="updateCurrContestProblem(problem)"
                     />
+                    <span class="absolute icon solved z-10"><img :src="solved" /></span>
+                    <span class="absolute icon todo z-10"><img :src="todo" /></span>
+                    <span class="absolute icon star z-10"><img :src="star" /></span>
+                    <span class="absolute icon trash z-10"><img :src="trash" /></span>
                   </td>
                   <td>
                     <input
@@ -242,6 +255,7 @@
   td {
     padding: 0;
     margin: 0;
+    height: 45px;
   }
   tbody tr:hover {
     background-color: auto;
@@ -270,5 +284,35 @@
   }
   .problem-notes {
     max-height: 200px;
+  }
+  .icon img {
+    width: 23px;
+    height: 23px;
+  }
+  .icon {
+    bottom: 2px;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease;
+    cursor: pointer;
+  }
+  .problem-tr:hover .icon {
+    visibility: visible;
+    opacity: 0.5;
+  }
+  .icon:hover {
+    opacity: 1 !important;
+  }
+  .icon.solved {
+    right: 5px;
+  }
+  .icon.todo {
+    right: calc(5px + 23px + 3px);
+  }
+  .icon.star {
+    right: calc(5px + 23px + 3px + 23px + 3px);
+  }
+  .icon.trash {
+    left: 5px;
   }
 </style>
