@@ -35,6 +35,10 @@ export type FileNode = BaseNode & {
   // -- Custom fields:
   contestId: string;
   active: boolean;
+  nTodo: number;
+  nFavorite: number;
+  nSolved: number;
+  nProblems: number;
 };
 
 export type Node = DirNode | FileNode;

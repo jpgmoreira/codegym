@@ -76,8 +76,25 @@
     window.api.send(Channels.updateCurrContestProblem, toRaw(problem));
   }
 
-  function toggleFlag(problem: ContestProblem, flag: ContestProblemFlag) {
+  async function toggleFlag(problem: ContestProblem, flag: ContestProblemFlag) {
+    if (!contest.value) return;
+    await window.api.invoke(Channels.toggleCurrContestProblemFlag, problem.id, flag);
     problem[flag] = !problem[flag];
+    if (flag === 'todo') {
+      contest.value.nTodo += problem['todo'] ? 1 : -1;
+    } else if (flag === 'solved') {
+      contest.value.nSolved += problem['solved'] ? 1 : -1;
+    } else if (flag === 'favorite') {
+      contest.value.nFavorite += problem['favorite'] ? 1 : -1;
+    }
+  }
+
+  function deleteProblem(problem: ContestProblem) {
+    if (!contest.value) return;
+    contest.value.problems = contest.value.problems.filter((p) => p.id !== problem.id);
+    if (problem.todo) contest.value.nTodo--;
+    if (problem.solved) contest.value.nSolved--;
+    if (problem.favorite) contest.value.nFavorite--;
   }
 
   function acceptedInputChange(problem: ContestProblem, e: Event) {
@@ -143,6 +160,7 @@
           files-hint
           search
           file-icon
+          :contest="contest"
           @set-active="handleSetActive"
           @rename="handleRename"
           @delete-contest="handleDeleteContest"
@@ -227,7 +245,7 @@
                     >
                       <img :src="star" />
                     </span>
-                    <span class="absolute icon trash z-10">
+                    <span class="absolute icon trash z-10" @dblclick="deleteProblem(problem)">
                       <img :src="trash" />
                       <span class="tooltip select-none absolute">Double-click to delete</span>
                     </span>

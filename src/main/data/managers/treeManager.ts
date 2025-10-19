@@ -15,6 +15,7 @@ import { GenericResponseDTO } from '@common/dto/genericResponseDTO';
 import { ContestsManager } from './contestsManager';
 import path from 'path';
 import { ProfileManager } from './profileManager';
+import { Contest } from '@common/schemas/contests';
 
 type RootController = NodeController & {
   nextDir: number;
@@ -59,6 +60,8 @@ export class TreeManager {
   private nOpenDirs = 0;
   private expandedFlat: Node[] = [];
 
+  private contestIdToNode: Record<string, Node> = {};
+
   // --- Setup methods: ---
 
   private getEmptyTreeData(): TreeData {
@@ -87,6 +90,9 @@ export class TreeManager {
     let nSub = 0,
       nSubSel = 0,
       nSubFiles = 0;
+    if (node && node.type === 'file') {
+      this.contestIdToNode[node.contestId] = node;
+    }
     while (curr) {
       array.push(curr);
       if (curr.type === 'dir') {
@@ -166,6 +172,7 @@ export class TreeManager {
     this.nSelectedNodes = 0;
     this.nSelectedFiles = 0;
     this.nOpenDirs = 0;
+    this.contestIdToNode = {};
     this.flatten(dirHead, 0, this.expandedFlat);
     this.flatten(fileHead, 0, this.expandedFlat);
     this._proxy!.queueWrite();
@@ -246,6 +253,10 @@ export class TreeManager {
       prevId: null,
       contestId,
       active: false,
+      nTodo: 0,
+      nFavorite: 0,
+      nSolved: 0,
+      nProblems: 0,
     } as const;
   }
 
@@ -635,5 +646,17 @@ export class TreeManager {
       }
     }
     this.refresh();
+  }
+
+  //  -- Application-specific: ---
+
+  public updateContestFlags(contest: Contest) {
+    const node = this.contestIdToNode[contest.id];
+    if (!node || node.type !== 'file') return;
+    node.nFavorite = contest.nFavorite;
+    node.nSolved = contest.nSolved;
+    node.nTodo = contest.nTodo;
+    node.nProblems = contest.problems.length;
+    this._proxy!.queueWrite();
   }
 }

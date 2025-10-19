@@ -2,6 +2,7 @@ import { DATA_DIR } from '../constants';
 import {
   Contest,
   ContestProblem,
+  ContestProblemFlag,
   getEmptyContest,
   getEmptyContestProblem,
 } from '@common/schemas/contests';
@@ -117,5 +118,25 @@ export class ContestsManager {
     const problemToUpdate = this.proxy.proxy.problems.find((p) => p.id === problem.id);
     if (!problemToUpdate) return;
     Object.assign(problemToUpdate, problem);
+  }
+
+  public toggleCurrContestProblemFlag(problemId: string, flag: ContestProblemFlag) {
+    if (!this.proxy) return;
+    const contest = this.proxy.proxy;
+    const problem = contest.problems.find((p) => p.id === problemId);
+    if (!problem) return;
+    problem[flag] = !problem[flag];
+    if (flag === 'todo') {
+      contest.nTodo += problem['todo'] ? 1 : -1;
+    } else if (flag === 'solved') {
+      contest.nSolved += problem['solved'] ? 1 : -1;
+    } else if (flag === 'favorite') {
+      contest.nFavorite += problem['favorite'] ? 1 : -1;
+    }
+  }
+
+  public getCurrContest() {
+    if (!this.proxy) return null;
+    return this.proxy.target;
   }
 }

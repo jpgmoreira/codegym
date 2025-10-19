@@ -16,10 +16,12 @@
     onBeforeUnmount,
     useTemplateRef,
     computed,
+    watch,
   } from 'vue';
   import { GenericResponseDTO } from '@common/dto/genericResponseDTO';
   import { useUIStore } from '@renderer/store/ui';
   import { toLocaleNumber } from '@common/utils/utils';
+  import { Contest } from '@common/schemas/contests';
 
   // --- Types: ---
 
@@ -40,33 +42,24 @@
 
   // --- Props and emits: ---
 
-  const props = defineProps({
-    checkbox: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-    filesHint: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-    search: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-    dirIcon: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-    fileIcon: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-  });
+  const props = withDefaults(
+    defineProps<{
+      checkbox?: boolean;
+      filesHint?: boolean;
+      search?: boolean;
+      dirIcon?: boolean;
+      fileIcon?: boolean;
+      contest?: Contest | null;
+    }>(),
+    {
+      checkbox: false,
+      filesHint: false,
+      search: false,
+      dirIcon: false,
+      fileIcon: false,
+      contest: null,
+    }
+  );
 
   const emit = defineEmits<{
     (e: 'setActive', contestId: string): void;
@@ -406,6 +399,25 @@
       contextState.visible = false;
     }
   }
+
+  // --- Watches: ---
+  watch(
+    [
+      () => props.contest?.id,
+      () => props.contest?.nSolved,
+      () => props.contest?.nTodo,
+      () => props.contest?.nFavorite,
+      () => props.contest?.problems.length,
+    ],
+    async (newVal, oldVal) => {
+      if (newVal[0] === oldVal[0]) {
+        // Some flag changed for a same contest:
+        console.clear();
+        console.log(oldVal, newVal);
+        tree.value = await window.api.invoke(TreeChannels.getState, tree.value?.anchor || 0);
+      }
+    }
+  );
 
   // --- Hooks: ---
 

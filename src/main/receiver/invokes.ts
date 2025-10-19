@@ -12,8 +12,9 @@ import { loadStartupData } from '@main/data/startup';
 import { HistoryManager } from '@main/data/managers/historyManager';
 import { GenericResponseDTO } from '@common/dto/genericResponseDTO';
 import { FetchHistoryPageResponseDTO } from '@common/dto/fetchHistoryPageResponseDTO';
-import { Contest, ContestProblem } from '@common/schemas/contests';
+import { Contest, ContestProblem, ContestProblemFlag } from '@common/schemas/contests';
 import { ContestsManager } from '@main/data/managers/contestsManager';
+import { TreeManager } from '@main/data/managers/treeManager';
 
 ipcMain.handle(
   Channels.createProfile,
@@ -60,5 +61,19 @@ ipcMain.handle(Channels.getContest, async (_, contestId: string): Promise<Contes
 });
 
 ipcMain.handle(Channels.addCurrContestProblem, async (): Promise<ContestProblem> => {
-  return ContestsManager.instance.addCurrContestProblem();
+  const problem = ContestsManager.instance.addCurrContestProblem();
+  const currContest = ContestsManager.instance.getCurrContest();
+  if (!currContest) return problem;
+  TreeManager.instance.updateContestFlags(currContest);
+  return problem;
 });
+
+ipcMain.handle(
+  Channels.toggleCurrContestProblemFlag,
+  async (_, problemId: string, flag: ContestProblemFlag): Promise<void> => {
+    ContestsManager.instance.toggleCurrContestProblemFlag(problemId, flag);
+    const currContest = ContestsManager.instance.getCurrContest();
+    if (!currContest) return;
+    TreeManager.instance.updateContestFlags(currContest);
+  }
+);
