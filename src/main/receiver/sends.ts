@@ -8,6 +8,7 @@ import { HistoryManager } from '@main/data/managers/historyManager';
 import { OjContext } from '@common/schemas/ojContext';
 import { OjPoolManager } from '@main/data/managers/ojPoolManager';
 import { OjProblem } from '@common/schemas/problems';
+import { ContestsManager } from '@main/data/managers/contestsManager';
 
 ipcMain.on(Channels.updateCurrOj, (_, newOj: Oj) => ProfileManager.instance.updateCurrOj(newOj));
 
@@ -45,4 +46,8 @@ ipcMain.on(Channels.logout, ProfileManager.instance.logout.bind(ProfileManager.i
 ipcMain.on(
   Channels.deleteCurrProfile,
   ProfileManager.instance.deleteCurrProfile.bind(ProfileManager.instance)
+);
+
+ipcMain.on(Channels.updateCurrContestNotes, (_, notes: string) =>
+  ContestsManager.instance.updateCurrContestNotes(notes)
 );

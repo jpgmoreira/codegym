@@ -18,4 +18,5 @@ export enum Channels {
   deleteCurrProfile = 'delete-curr-profile',
   getContest = 'get-contest',
   addCurrContestProblem = 'add-curr-contest-problem',
+  updateCurrContestNotes = 'update-curr-contest-notes',
 }

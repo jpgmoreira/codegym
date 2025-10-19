@@ -63,6 +63,11 @@
     contest.value?.problems.push(problem);
   }
 
+  function updateContestNotes() {
+    if (!contest.value) return;
+    window.api.send(Channels.updateCurrContestNotes, contest.value.notes);
+  }
+
   function acceptedInputChange(problem: ContestProblem, e: Event) {
     problem.accepted = (e.target as HTMLInputElement).value.trim();
   }
@@ -164,6 +169,7 @@
               placeholder="Contest notes"
               class="p-1 contest-notes"
               v-model="contest.notes"
+              @change="updateContestNotes"
             ></textarea>
             <table class="w-full">
               <colgroup>

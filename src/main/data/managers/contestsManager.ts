@@ -101,4 +101,9 @@ export class ContestsManager {
     this.proxy?.proxy.problems.push(newProblem);
     return newProblem;
   }
+
+  public updateCurrContestNotes(notes: string) {
+    if (!this.proxy) return;
+    this.proxy.proxy.notes = notes;
+  }
 }
