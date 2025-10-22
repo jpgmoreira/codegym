@@ -56,7 +56,7 @@
   const emit = defineEmits<{
     (e: 'setActive', contestId: string): void;
     (e: 'rename', newName: string): void;
-    (e: 'deleteSingle', contestId: Node): void;
+    (e: 'deleteSingle', contestId: string): void;
     (e: 'deleteMultiple'): void;
   }>();
 

@@ -77,6 +77,11 @@
     }
   }
 
+  async function deleteMultipleContests() {
+    // Get curr contest again, if it was deleted, back will return null.
+    contest.value = await store.getCurrContest();
+  }
+
   function acceptedInputKeydown(e: KeyboardEvent) {
     const allowedKeys = [
       'Backspace',
@@ -139,6 +144,7 @@
           @set-active="setActiveContest"
           @rename="renameContest"
           @delete-single="deleteSingleContest"
+          @delete-multiple="deleteMultipleContests"
         />
       </div>
       <div
