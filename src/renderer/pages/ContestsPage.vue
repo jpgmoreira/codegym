@@ -1,6 +1,6 @@
 <script lang="ts" setup>
   import { ref, onMounted, onBeforeUnmount, watch, computed, toRaw } from 'vue';
-  import { Contest, ContestProblem, ContestProblemFlag } from '@common/schemas/contests';
+  import { Contest, ContestProblem } from '@common/schemas/contests';
   import { useProfileStore } from '@renderer/store/profile';
   import { parseTimestamp } from '@common/utils/dateUtils';
   import TreeView from '@renderer/components/UI/TreeView/TreeView.vue';
@@ -40,28 +40,6 @@
     return 0;
   }
 
-  function handleSetActive(contestId: string) {
-    store.setCurrContest(contestId);
-  }
-
-  function handleRename(contestId: string, newName: string) {
-    newName = newName.trim();
-    if (contest.value?.id === contestId) {
-      contest.value.name = newName;
-    }
-  }
-
-  function handleDeleteContest(contestId: string) {
-    if (contest.value?.id === contestId) {
-      contest.value = null;
-      store.setCurrContest(null);
-    }
-  }
-
-  async function handleDeleteSelectedContests() {
-    contest.value = await store.getCurrContest();
-  }
-
   async function addProblem() {
     const problem = await window.api.invoke<ContestProblem>(Channels.addCurrContestProblem);
     contest.value?.problems.push(problem);
@@ -74,27 +52,6 @@
 
   function updateCurrContestProblem(problem: ContestProblem) {
     window.api.send(Channels.updateCurrContestProblem, toRaw(problem));
-  }
-
-  async function toggleFlag(problem: ContestProblem, flag: ContestProblemFlag) {
-    if (!contest.value) return;
-    await window.api.invoke(Channels.toggleCurrContestProblemFlag, problem.id, flag);
-    problem[flag] = !problem[flag];
-    if (flag === 'todo') {
-      contest.value.nTodo += problem['todo'] ? 1 : -1;
-    } else if (flag === 'solved') {
-      contest.value.nSolved += problem['solved'] ? 1 : -1;
-    } else if (flag === 'favorite') {
-      contest.value.nFavorite += problem['favorite'] ? 1 : -1;
-    }
-  }
-
-  function deleteProblem(problem: ContestProblem) {
-    if (!contest.value) return;
-    contest.value.problems = contest.value.problems.filter((p) => p.id !== problem.id);
-    if (problem.todo) contest.value.nTodo--;
-    if (problem.solved) contest.value.nSolved--;
-    if (problem.favorite) contest.value.nFavorite--;
   }
 
   function acceptedInputChange(problem: ContestProblem, e: Event) {
@@ -155,17 +112,7 @@
     <SettingsPageHeader />
     <div class="flex grow">
       <div :style="{ width: `${treeAreaWidth}px` }">
-        <TreeView
-          class="select-none"
-          files-hint
-          search
-          file-icon
-          :contest="contest"
-          @set-active="handleSetActive"
-          @rename="handleRename"
-          @delete-contest="handleDeleteContest"
-          @delete-selected-contests="handleDeleteSelectedContests"
-        />
+        <TreeView class="select-none" files-hint search file-icon :contest="contest" />
       </div>
       <div
         class="separator shrink-0"
@@ -233,19 +180,16 @@
                       v-model="problem.title"
                       @change="updateCurrContestProblem(problem)"
                     />
-                    <span class="absolute icon solved z-10" @click="toggleFlag(problem, 'solved')">
+                    <span class="absolute icon solved z-10">
                       <img :src="solved" />
                     </span>
-                    <span class="absolute icon todo z-10" @click="toggleFlag(problem, 'todo')">
+                    <span class="absolute icon todo z-10">
                       <img :src="todo" />
                     </span>
-                    <span
-                      class="absolute icon favorite z-10"
-                      @click="toggleFlag(problem, 'favorite')"
-                    >
+                    <span class="absolute icon favorite z-10">
                       <img :src="star" />
                     </span>
-                    <span class="absolute icon trash z-10" @dblclick="deleteProblem(problem)">
+                    <span class="absolute icon trash z-10">
                       <img :src="trash" />
                       <span class="tooltip select-none absolute">Double-click to delete</span>
                     </span>
