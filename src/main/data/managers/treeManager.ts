@@ -15,7 +15,6 @@ import { GenericResponseDTO } from '@common/dto/genericResponseDTO';
 import { ContestsManager } from './contestsManager';
 import path from 'path';
 import { ProfileManager } from './profileManager';
-import { Contest } from '@common/schemas/contests';
 
 type RootController = NodeController & {
   nextDir: number;
