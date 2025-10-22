@@ -59,6 +59,12 @@
     updateCurrContestProblem(problem);
   }
 
+  async function setActiveContest(contestId: string) {
+    // Sets the active contest and then retrieve it from back.
+    store.setCurrContest(contestId);
+    contest.value = await store.getCurrContest();
+  }
+
   function acceptedInputKeydown(e: KeyboardEvent) {
     const allowedKeys = [
       'Backspace',
@@ -112,7 +118,14 @@
     <SettingsPageHeader />
     <div class="flex grow">
       <div :style="{ width: `${treeAreaWidth}px` }">
-        <TreeView class="select-none" files-hint search file-icon :contest="contest" />
+        <TreeView
+          class="select-none"
+          files-hint
+          search
+          file-icon
+          :contest="contest"
+          @set-active-contest="setActiveContest"
+        />
       </div>
       <div
         class="separator shrink-0"

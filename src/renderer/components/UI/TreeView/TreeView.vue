@@ -53,6 +53,10 @@
     }
   );
 
+  const emit = defineEmits<{
+    (e: 'setActiveContest', contestId: string): void;
+  }>();
+
   // --- Variables: ---
 
   const rowHeight = 28;
@@ -231,6 +235,7 @@
   async function handleSelection(node: Node) {
     if (isNodeDisabled(node)) return; // Do not allow folder selection while searching.
     const localKeys = { ...keys };
+    const nextState = !node.selected;
     if (props.checkbox) localKeys.ctrl = true;
     tree.value = await window.api.invoke(
       TreeChannels.handleSelection,
@@ -238,6 +243,9 @@
       node.id,
       localKeys
     );
+    if (!localKeys.ctrl && node.type === 'file' && nextState) {
+      emit('setActiveContest', node.contestId);
+    }
   }
 
   async function clearSelection() {
