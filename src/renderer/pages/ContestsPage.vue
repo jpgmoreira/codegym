@@ -213,16 +213,16 @@
                       v-model="problem.title"
                       @change="updateCurrContestProblem(problem)"
                     />
-                    <span class="absolute icon solved z-10">
+                    <span class="absolute icon solved z-10" @dragstart.prevent>
                       <img :src="solved" />
                     </span>
-                    <span class="absolute icon todo z-10">
+                    <span class="absolute icon todo z-10" @dragstart.prevent>
                       <img :src="todo" />
                     </span>
-                    <span class="absolute icon favorite z-10">
+                    <span class="absolute icon favorite z-10" @dragstart.prevent>
                       <img :src="star" />
                     </span>
-                    <span class="absolute icon trash z-10">
+                    <span class="absolute icon trash z-10" @dragstart.prevent>
                       <img :src="trash" />
                       <span class="tooltip select-none absolute">Double-click to delete</span>
                     </span>
