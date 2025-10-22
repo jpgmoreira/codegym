@@ -67,13 +67,3 @@ ipcMain.handle(Channels.addCurrContestProblem, async (): Promise<ContestProblem>
   TreeManager.instance.updateContestFlags(currContest);
   return problem;
 });
-
-ipcMain.handle(
-  Channels.toggleCurrContestProblemFlag,
-  async (_, problemId: string, flag: ContestProblemFlag): Promise<void> => {
-    ContestsManager.instance.toggleCurrContestProblemFlag(problemId, flag);
-    const currContest = ContestsManager.instance.getCurrContest();
-    if (!currContest) return;
-    TreeManager.instance.updateContestFlags(currContest);
-  }
-);
