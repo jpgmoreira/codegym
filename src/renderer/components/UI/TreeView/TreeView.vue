@@ -12,12 +12,10 @@
     onBeforeUnmount,
     useTemplateRef,
     computed,
-    watch,
   } from 'vue';
   import { GenericResponseDTO } from '@common/dto/genericResponseDTO';
   import { useUIStore } from '@renderer/store/ui';
   import { toLocaleNumber } from '@common/utils/utils';
-  import { Contest } from '@common/schemas/contests';
 
   // --- Types: ---
 
@@ -45,7 +43,6 @@
       search?: boolean;
       dirIcon?: boolean;
       fileIcon?: boolean;
-      contest?: Contest | null;
     }>(),
     {
       checkbox: false,
@@ -53,16 +50,8 @@
       search: false,
       dirIcon: false,
       fileIcon: false,
-      contest: null,
     }
   );
-
-  const emit = defineEmits<{
-    (e: 'setActive', contestId: string): void;
-    (e: 'rename', contestId: string, newName: string): void;
-    (e: 'deleteContest', contestId: string): void;
-    (e: 'deleteSelectedContests'): void;
-  }>();
 
   // --- Variables: ---
 
@@ -218,8 +207,6 @@
       if (result.status === 'error') {
         uiStore.showToast(result.errorMsg, 'error');
         node.text = originalName.value;
-      } else if (node.type === 'file') {
-        emit('rename', node.contestId, newName);
       }
     }
     renamingNode.value = null;
@@ -253,9 +240,6 @@
       node.id,
       localKeys
     );
-    if (newActive && node.type === 'file') {
-      emit('setActive', node.contestId);
-    }
   }
 
   async function clearSelection() {
@@ -268,14 +252,10 @@
     const node = modalState.currentNode;
     if (!node) return;
     tree.value = await window.api.invoke(TreeChannels.deleteNode, tree.value?.anchor || 0, node.id);
-    if (node.type === 'file') {
-      emit('deleteContest', node.contestId);
-    }
   }
 
   async function deleteSelectedNodes() {
     tree.value = await window.api.invoke(TreeChannels.deleteSelectedNodes, tree.value?.anchor || 0);
-    emit('deleteSelectedContests');
   }
 
   function handleDeletion() {
@@ -395,25 +375,6 @@
       contextState.visible = false;
     }
   }
-
-  // --- Watches: ---
-  watch(
-    [
-      () => props.contest?.id,
-      () => props.contest?.nSolved,
-      () => props.contest?.nTodo,
-      () => props.contest?.nFavorite,
-      () => props.contest?.problems.length,
-    ],
-    async (newVal, oldVal) => {
-      if (newVal[0] === oldVal[0]) {
-        // Some flag changed for a same contest:
-        console.clear();
-        console.log(oldVal, newVal);
-        tree.value = await window.api.invoke(TreeChannels.getState, tree.value?.anchor || 0);
-      }
-    }
-  );
 
   // --- Hooks: ---
 
