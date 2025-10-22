@@ -61,9 +61,6 @@ ipcMain.handle(Channels.getContest, async (_, contestId: string): Promise<Contes
 });
 
 ipcMain.handle(Channels.addCurrContestProblem, async (): Promise<ContestProblem> => {
-  const problem = ContestsManager.instance.addCurrContestProblem();
-  const currContest = ContestsManager.instance.getCurrContest();
-  if (!currContest) return problem;
-  TreeManager.instance.updateContestFlags(currContest);
+  const problem = TreeManager.instance.addCurrContestProblem();
   return problem;
 });

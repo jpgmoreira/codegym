@@ -2,7 +2,6 @@ import { DATA_DIR } from '../constants';
 import {
   Contest,
   ContestProblem,
-  ContestProblemFlag,
   getEmptyContest,
   getEmptyContestProblem,
 } from '@common/schemas/contests';

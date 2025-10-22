@@ -12,10 +12,12 @@
     onBeforeUnmount,
     useTemplateRef,
     computed,
+    watch,
   } from 'vue';
   import { GenericResponseDTO } from '@common/dto/genericResponseDTO';
   import { useUIStore } from '@renderer/store/ui';
   import { toLocaleNumber } from '@common/utils/utils';
+  import { Contest } from '@common/schemas/contests';
 
   // --- Types: ---
 
@@ -43,6 +45,10 @@
       search?: boolean;
       dirIcon?: boolean;
       fileIcon?: boolean;
+      // The current contest is passed just because we have
+      // to refresh the tree when some of its properties change,
+      // for example when we add a new problem.
+      contest?: Contest | null;
     }>(),
     {
       checkbox: false,
@@ -50,6 +56,7 @@
       search: false,
       dirIcon: false,
       fileIcon: false,
+      contest: null,
     }
   );
 
@@ -391,6 +398,15 @@
     }
   }
 
+  // --- Watches: ---
+  watch(
+    () => props.contest,
+    async () => {
+      tree.value = await window.api.invoke(TreeChannels.getState, tree.value?.anchor ?? 0);
+    },
+    { deep: true }
+  );
+
   // --- Hooks: ---
 
   onMounted(async () => {
@@ -571,6 +587,7 @@
               <span v-if="node.type === 'dir' && props.filesHint" class="files-hint">
                 ({{ fileHintText(node.nFileDesc) }})
               </span>
+              <span>{{ node.nProblems }}</span>
             </div>
           </div>
         </div>

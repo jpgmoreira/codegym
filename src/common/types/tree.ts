@@ -19,6 +19,11 @@ export type BaseNode = {
   parentId: string | null;
   nextId: string | null;
   prevId: string | null;
+  // Application specific:
+  nProblems: number;
+  nSolved: number;
+  nTodo: number;
+  nFavorite: number;
 };
 
 export type DirNode = BaseNode &
@@ -35,10 +40,6 @@ export type FileNode = BaseNode & {
   // -- Custom fields:
   contestId: string;
   active: boolean;
-  nTodo: number;
-  nFavorite: number;
-  nSolved: number;
-  nProblems: number;
 };
 
 export type Node = DirNode | FileNode;

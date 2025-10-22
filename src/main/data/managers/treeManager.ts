@@ -235,6 +235,10 @@ export class TreeManager {
       nDesc: 0,
       nSelDesc: 0,
       nFileDesc: 0,
+      nProblems: 0,
+      nSolved: 0,
+      nTodo: 0,
+      nFavorite: 0,
     } as const;
   }
 
@@ -650,13 +654,16 @@ export class TreeManager {
 
   //  -- Application-specific: ---
 
-  public updateContestFlags(contest: Contest) {
-    const node = this.contestIdToNode[contest.id];
-    if (!node || node.type !== 'file') return;
-    node.nFavorite = contest.nFavorite;
-    node.nSolved = contest.nSolved;
-    node.nTodo = contest.nTodo;
-    node.nProblems = contest.problems.length;
-    this._proxy!.queueWrite();
+  public addCurrContestProblem() {
+    const problem = ContestsManager.instance.addCurrContestProblem();
+    const contest = ContestsManager.instance.getCurrContest();
+    if (!contest) return problem;
+    let curr = this.contestIdToNode[contest.id] as Node | null;
+    while (curr) {
+      curr.nProblems++;
+      curr = this.getParent(curr, false);
+    }
+    this._proxy?.queueWrite();
+    return problem;
   }
 }
