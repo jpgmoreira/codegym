@@ -137,7 +137,7 @@ ipcMain.handle(
   TreeChannels.clearSelection,
   (_: IpcMainInvokeEvent, anchor: number): TreeOperationResponseDTO => {
     return measure('clearSelection', () => {
-      TreeManager.instance.clearSelection();
+      TreeManager.instance.clearSelection(false);
       return TreeManager.instance.buildResult(anchor);
     });
   }

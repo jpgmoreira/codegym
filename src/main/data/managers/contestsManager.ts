@@ -2,6 +2,7 @@ import { DATA_DIR } from '../constants';
 import {
   Contest,
   ContestProblem,
+  ContestProblemFlag,
   getEmptyContest,
   getEmptyContestProblem,
 } from '@common/schemas/contests';
@@ -113,6 +114,10 @@ export class ContestsManager {
   }
 
   public updateCurrContestProblem(problem: ContestProblem) {
+    /**
+     * This method is used only for updating problem text fields.
+     * For toggling flags, use "toggleCurrContestProblemFlag".
+     */
     if (!this.proxy) return;
     const problemToUpdate = this.proxy.proxy.problems.find((p) => p.id === problem.id);
     if (!problemToUpdate) return;
@@ -122,5 +127,16 @@ export class ContestsManager {
   public getCurrContest() {
     if (!this.proxy) return null;
     return this.proxy.target;
+  }
+
+  public toggleCurrContestProblemFlag(problemId: string, flag: ContestProblemFlag) {
+    const problem = this.proxy?.proxy.problems.find((p) => p.id === problemId);
+    if (!problem) return;
+    problem[flag] = !problem[flag];
+  }
+
+  public deleteCurrContestProblem(problemId: string) {
+    if (!this.proxy) return;
+    this.proxy.proxy.problems = this.proxy.proxy.problems.filter((p) => p.id !== problemId);
   }
 }

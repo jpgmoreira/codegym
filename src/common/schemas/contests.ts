@@ -17,9 +17,6 @@ export type Contest = {
   name: string;
   createdAt: number;
   notes: string;
-  nSolved: number;
-  nTodo: number;
-  nFavorite: number;
   problems: ContestProblem[];
 };
 
@@ -30,9 +27,6 @@ export function getEmptyContest(id: string, name: string, createdAt: number): Co
     name,
     createdAt,
     notes: '',
-    nSolved: 0,
-    nTodo: 0,
-    nFavorite: 0,
     problems: [],
   };
 }

@@ -587,7 +587,10 @@
               <span v-if="node.type === 'dir' && props.filesHint" class="files-hint">
                 ({{ fileHintText(node.nFileDesc) }})
               </span>
-              <span>{{ node.nProblems }}</span>
+              <span>{{ node.nProblems + ' ' }}</span>
+              <span>{{ node.nFavorite + ' ' }}</span>
+              <span>{{ node.nSolved + ' ' }}</span>
+              <span>{{ node.nTodo + ' ' }}</span>
             </div>
           </div>
         </div>

@@ -64,3 +64,20 @@ ipcMain.handle(Channels.addCurrContestProblem, async (): Promise<ContestProblem>
   const problem = TreeManager.instance.addCurrContestProblem();
   return problem;
 });
+
+ipcMain.handle(
+  Channels.toggleCurrContestProblemFlag,
+  (_, problemId: string, flag: ContestProblemFlag) => {
+    ContestsManager.instance.toggleCurrContestProblemFlag(problemId, flag);
+    const currContest = ContestsManager.instance.getCurrContest();
+    if (!currContest) return;
+    TreeManager.instance.updateContestFlags(currContest);
+  }
+);
+
+ipcMain.handle(Channels.deleteCurrContestProblem, (_, problemId: string) => {
+  const currContest = ContestsManager.instance.getCurrContest();
+  if (!currContest) return;
+  TreeManager.instance.deleteContestProblem(currContest, problemId);
+  ContestsManager.instance.deleteCurrContestProblem(problemId);
+});

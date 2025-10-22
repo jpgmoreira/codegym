@@ -1,6 +1,6 @@
 <script lang="ts" setup>
   import { ref, onMounted, onBeforeUnmount, watch, computed, toRaw } from 'vue';
-  import { Contest, ContestProblem } from '@common/schemas/contests';
+  import { Contest, ContestProblem, ContestProblemFlag } from '@common/schemas/contests';
   import { useProfileStore } from '@renderer/store/profile';
   import { parseTimestamp } from '@common/utils/dateUtils';
   import TreeView from '@renderer/components/UI/TreeView/TreeView.vue';
@@ -96,6 +96,19 @@
     if (!allowedKeys.includes(e.key) && !/^\d$/.test(e.key)) {
       e.preventDefault();
     }
+  }
+
+  async function toggleProblemFlag(problem: ContestProblem, flag: ContestProblemFlag) {
+    // await here because the tree can be updated in the back with this call,
+    // and problem[flag] = !problem[flag] will trigger a new tree refetch.
+    await window.api.invoke(Channels.toggleCurrContestProblemFlag, problem.id, flag);
+    problem[flag] = !problem[flag];
+  }
+
+  async function deleteProblem(problem: ContestProblem) {
+    if (!contest.value) return;
+    await window.api.invoke(Channels.deleteCurrContestProblem, problem.id);
+    contest.value.problems = contest.value.problems.filter((p) => p.id !== problem.id);
   }
 
   function windowMouseUp() {
@@ -213,16 +226,32 @@
                       v-model="problem.title"
                       @change="updateCurrContestProblem(problem)"
                     />
-                    <span class="absolute icon solved z-10" @dragstart.prevent>
+                    <span
+                      class="absolute icon solved z-10"
+                      @dragstart.prevent
+                      @click="toggleProblemFlag(problem, 'solved')"
+                    >
                       <img :src="solved" />
                     </span>
-                    <span class="absolute icon todo z-10" @dragstart.prevent>
+                    <span
+                      class="absolute icon todo z-10"
+                      @dragstart.prevent
+                      @click="toggleProblemFlag(problem, 'todo')"
+                    >
                       <img :src="todo" />
                     </span>
-                    <span class="absolute icon favorite z-10" @dragstart.prevent>
+                    <span
+                      class="absolute icon favorite z-10"
+                      @dragstart.prevent
+                      @click="toggleProblemFlag(problem, 'favorite')"
+                    >
                       <img :src="star" />
                     </span>
-                    <span class="absolute icon trash z-10" @dragstart.prevent>
+                    <span
+                      class="absolute icon trash z-10"
+                      @dragstart.prevent
+                      @dblclick="deleteProblem(problem)"
+                    >
                       <img :src="trash" />
                       <span class="tooltip select-none absolute">Double-click to delete</span>
                     </span>

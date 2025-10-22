@@ -15,6 +15,7 @@ import { GenericResponseDTO } from '@common/dto/genericResponseDTO';
 import { ContestsManager } from './contestsManager';
 import path from 'path';
 import { ProfileManager } from './profileManager';
+import { Contest, ContestProblem } from '@common/schemas/contests';
 
 type RootController = NodeController & {
   nextDir: number;
@@ -676,5 +677,34 @@ export class TreeManager {
     node.nProblems++;
     this.refresh();
     return problem;
+  }
+
+  public updateContestFlags(contest: Contest) {
+    const node = this.contestIdToNode[contest.id];
+    if (!node || node.type !== 'file') return;
+    node.nFavorite = contest.problems.reduce(
+      (acc: number, curr: ContestProblem) => acc + (curr.favorite ? 1 : 0),
+      0
+    );
+    node.nTodo = contest.problems.reduce(
+      (acc: number, curr: ContestProblem) => acc + (curr.todo ? 1 : 0),
+      0
+    );
+    node.nSolved = contest.problems.reduce(
+      (acc: number, curr: ContestProblem) => acc + (curr.solved ? 1 : 0),
+      0
+    );
+    this.refresh();
+  }
+
+  public deleteContestProblem(contest: Contest, problemId: string) {
+    const problem = contest.problems.find((p) => p.id === problemId);
+    if (!problem) return;
+    const node = this.contestIdToNode[contest.id];
+    node.nProblems--;
+    node.nFavorite -= problem.favorite ? 1 : 0;
+    node.nTodo -= problem.todo ? 1 : 0;
+    node.nSolved -= problem.solved ? 1 : 0;
+    this.refresh();
   }
 }

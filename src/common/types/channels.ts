@@ -21,4 +21,5 @@ export enum Channels {
   updateCurrContestNotes = 'update-curr-contest-notes',
   updateCurrContestProblem = 'update-curr-contest-problem',
   toggleCurrContestProblemFlag = 'toggle-curr-contest-problem-flag',
+  deleteCurrContestProblem = 'delete-curr-contest-problem',
 }

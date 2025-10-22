@@ -22,6 +22,7 @@ export const allowedInvokeChannels = Object.freeze([
   Channels.getContest,
   Channels.addCurrContestProblem,
   Channels.toggleCurrContestProblemFlag,
+  Channels.deleteCurrContestProblem,
   // Channels to perform treeview operations:
   TreeChannels.createNode,
   TreeChannels.createNodeAbove,
