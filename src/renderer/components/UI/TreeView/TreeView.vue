@@ -1,8 +1,4 @@
 <script lang="ts" setup>
-  /**
-   * Could race conditions be a problem here? - After using the component a lot, it seems to me that no.
-   */
-
   import Modal from '../Modal.vue';
   import ContextMenu from './ContextMenu.vue';
   import { TreeOperationResponseDTO } from '@common/dto/treeOperationResponseDTO';
