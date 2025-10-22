@@ -65,6 +65,10 @@
     contest.value = await store.getCurrContest();
   }
 
+  function renameContest(newName: string) {
+    contest.value.name = newName;
+  }
+
   function acceptedInputKeydown(e: KeyboardEvent) {
     const allowedKeys = [
       'Backspace',
@@ -124,7 +128,8 @@
           search
           file-icon
           :contest="contest"
-          @set-active-contest="setActiveContest"
+          @set-active="setActiveContest"
+          @rename="renameContest"
         />
       </div>
       <div

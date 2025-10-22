@@ -54,7 +54,8 @@
   );
 
   const emit = defineEmits<{
-    (e: 'setActiveContest', contestId: string): void;
+    (e: 'setActive', contestId: string): void;
+    (e: 'rename', newName: string);
   }>();
 
   // --- Variables: ---
@@ -211,6 +212,8 @@
       if (result.status === 'error') {
         uiStore.showToast(result.errorMsg, 'error');
         node.text = originalName.value;
+      } else {
+        emit('rename', newName);
       }
     }
     renamingNode.value = null;
@@ -244,7 +247,7 @@
       localKeys
     );
     if (!localKeys.ctrl && node.type === 'file' && nextState) {
-      emit('setActiveContest', node.contestId);
+      emit('setActive', node.contestId);
     }
   }
 
