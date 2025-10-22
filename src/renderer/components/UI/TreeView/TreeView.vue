@@ -55,7 +55,9 @@
 
   const emit = defineEmits<{
     (e: 'setActive', contestId: string): void;
-    (e: 'rename', newName: string);
+    (e: 'rename', newName: string): void;
+    (e: 'deleteSingle', contestId: Node): void;
+    (e: 'deleteMultiple'): void;
   }>();
 
   // --- Variables: ---
@@ -261,10 +263,14 @@
     const node = modalState.currentNode;
     if (!node) return;
     tree.value = await window.api.invoke(TreeChannels.deleteNode, tree.value?.anchor || 0, node.id);
+    if (node.type === 'file') {
+      emit('deleteSingle', node.contestId);
+    }
   }
 
   async function deleteSelectedNodes() {
     tree.value = await window.api.invoke(TreeChannels.deleteSelectedNodes, tree.value?.anchor || 0);
+    emit('deleteMultiple');
   }
 
   function handleDeletion() {

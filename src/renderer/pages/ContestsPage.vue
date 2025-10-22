@@ -66,7 +66,15 @@
   }
 
   function renameContest(newName: string) {
+    if (!contest.value) return;
     contest.value.name = newName;
+  }
+
+  function deleteSingleContest(contestId: string) {
+    if (!contest.value) return;
+    if (contest.value.id === contestId) {
+      store.setCurrContest(null);
+    }
   }
 
   function acceptedInputKeydown(e: KeyboardEvent) {
@@ -130,6 +138,7 @@
           :contest="contest"
           @set-active="setActiveContest"
           @rename="renameContest"
+          @delete-single="deleteSingleContest"
         />
       </div>
       <div
