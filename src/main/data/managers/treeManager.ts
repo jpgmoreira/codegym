@@ -89,21 +89,28 @@ export class TreeManager {
     let curr = node;
     let nSub = 0,
       nSubSel = 0,
-      nSubFiles = 0;
-    if (node && node.type === 'file') {
-      this.contestIdToNode[node.contestId] = node;
-    }
+      nSubFiles = 0,
+      nSubProblems = 0,
+      nSubSolved = 0,
+      nSubTodo = 0,
+      nSubFavorite = 0;
     while (curr) {
+      if (curr && curr.type === 'file') {
+        this.contestIdToNode[curr.contestId] = curr;
+      }
       array.push(curr);
       if (curr.type === 'dir') {
         const dirHead = this.getHead(curr.dirs, false);
         const fileHead = this.getHead(curr.files, false);
         const dirResult = this.flatten(dirHead, depth + 1, array);
         const fileResult = this.flatten(fileHead, depth + 1, array);
-        curr.nDesc = dirResult[0] + fileResult[0];
-        curr.nSelDesc = dirResult[1] + fileResult[1];
-        curr.nFileDesc = dirResult[2] + fileResult[2];
-        nSub += curr.nDesc;
+        curr.nDesc = dirResult.nSub + fileResult.nSub;
+        curr.nSelDesc = dirResult.nSubSel + fileResult.nSubSel;
+        curr.nFileDesc = dirResult.nSubFiles + fileResult.nSubFiles;
+        curr.nProblems = dirResult.nSubProblems + fileResult.nSubProblems;
+        curr.nSolved = dirResult.nSubSolved + fileResult.nSubSolved;
+        curr.nTodo = dirResult.nSubTodo + fileResult.nSubTodo;
+        curr.nFavorite = dirResult.nSubFavorite + fileResult.nSubFavorite;
         nSubSel += curr.nSelDesc;
         nSubFiles += curr.nFileDesc;
         if (curr.nDesc) {
@@ -116,11 +123,15 @@ export class TreeManager {
       nSub++;
       nSubSel += sel;
       nSubFiles += curr.type === 'file' ? 1 : 0;
+      nSubProblems += curr.nProblems;
+      nSubSolved += curr.nSolved;
+      nSubTodo += curr.nTodo;
+      nSubFavorite += curr.nFavorite;
       this.nSelectedNodes += sel;
       this.nSelectedFiles += curr.type === 'file' ? sel : 0;
       curr = this.getNext(curr, false);
     }
-    return [nSub, nSubSel, nSubFiles];
+    return { nSub, nSubSel, nSubFiles, nSubProblems, nSubSolved, nSubTodo, nSubFavorite };
   }
 
   public buildResult(anchor: number): TreeOperationResponseDTO {
@@ -164,6 +175,10 @@ export class TreeManager {
    *  - nDesc;
    *  - nSelDesc;
    *  - nFileDesc;
+   *  - nProblems;
+   *  - nSolved;
+   *  - nTodo;
+   *  - nFavorite;
    */
   private refresh() {
     const dirHead = this.getHead(this.target.rootController.dirs, false);
@@ -658,12 +673,9 @@ export class TreeManager {
     const problem = ContestsManager.instance.addCurrContestProblem();
     const contest = ContestsManager.instance.getCurrContest();
     if (!contest) return problem;
-    let curr = this.contestIdToNode[contest.id] as Node | null;
-    while (curr) {
-      curr.nProblems++;
-      curr = this.getParent(curr, false);
-    }
-    this._proxy?.queueWrite();
+    const node = this.contestIdToNode[contest.id];
+    node.nProblems++;
+    this.refresh();
     return problem;
   }
 }
