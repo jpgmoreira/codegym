@@ -10,7 +10,6 @@ import { useOjMetaStore } from './ojMeta';
 import { useGraphStore } from './graph';
 import { GetOjProblemResponseDTO } from '@common/dto/getOjProblemResponseDTO';
 import { getTodayDate } from '@common/utils/dateUtils';
-import { getEmptyGraphRecord } from '@common/schemas/graph';
 import { toRaw } from 'vue';
 import { OjProblem } from '@common/schemas/problems';
 import { GenericResponseDTO } from '@common/dto/genericResponseDTO';

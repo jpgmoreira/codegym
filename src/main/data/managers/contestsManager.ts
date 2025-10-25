@@ -13,7 +13,6 @@ import path from 'path';
 import fs from 'fs';
 import { GraphManager } from './graphManager';
 import { getTodayDate } from '@common/utils/dateUtils';
-import ProblemsPage from '@renderer/pages/ProblemsPage/ProblemsPage.vue';
 
 /**
  * Singleton for managing contests.
