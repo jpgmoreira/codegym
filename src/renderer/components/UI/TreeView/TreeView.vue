@@ -18,9 +18,6 @@
   import { useUIStore } from '@renderer/store/ui';
   import { toLocaleNumber } from '@common/utils/utils';
   import { Contest } from '@common/schemas/contests';
-  import solved from '@renderer/assets/images/solved.png';
-  import todo from '@renderer/assets/images/to-do-list.png';
-  import star from '@renderer/assets/images/star.png';
 
   // --- Types: ---
 
@@ -37,6 +34,13 @@
     visible: boolean;
     currentNode: Node | null;
     multiple: boolean;
+  };
+
+  type TooltipState = {
+    visible: boolean;
+    text: string;
+    left: number;
+    top: number;
   };
 
   // --- Props and emits: ---
@@ -92,6 +96,13 @@
     y: 0,
   });
 
+  const tooltipState = reactive<TooltipState>({
+    visible: false,
+    text: '',
+    left: 0,
+    top: 0,
+  });
+
   const modalState = reactive<ModalState>({
     currentNode: null,
     multiple: false,
@@ -112,6 +123,11 @@
 
   const ghostStyle = computed(() => ({
     height: `${rowHeight * (tree.value?.nSurfaceNodes || 0) + paddingBottom}px`,
+  }));
+
+  const tooltipStyle = computed(() => ({
+    left: `${tooltipState.left}px`,
+    top: `${tooltipState.top}px`,
   }));
 
   const selectedFilesText = computed(() => {
@@ -358,6 +374,7 @@
   function handleScroll() {
     if (!scrollContainer.value) return;
     contextState.visible = false;
+    tooltipState.visible = false;
     const scrollTop = scrollContainer.value.scrollTop;
     if (scrollTop === lastScrollTop) return; // Do not react on x scroll;
     lastScrollTop = scrollTop;
@@ -405,19 +422,34 @@
 
   function todoTagText(node: Node) {
     const s = node.nTodo === 1 ? '' : 's';
-    if (node.type === 'file') return `This contest has ${node.nTodo} problem${s} marked as to-do.`
-    else return `This folder has ${node.nTodo} problem${s} marked as to-do.`
+    if (node.type === 'file') return `This contest has ${node.nTodo} problem${s} marked as to-do.`;
+    else return `This folder has ${node.nTodo} problem${s} marked as to-do.`;
   }
 
   function favoriteTagText(node: Node) {
-    const s = node.nTodo === 1 ? '' : 's';
-    if (node.type === 'file') return `This contest has ${node.nFavorite} problem${s} marked as favorite.`
-    else return `This folder has ${node.nFavorite} problem${s} marked as favorite.`
+    const s = node.nFavorite === 1 ? '' : 's';
+    if (node.type === 'file')
+      return `This contest has ${node.nFavorite} problem${s} marked as favorite.`;
+    else return `This folder has ${node.nFavorite} problem${s} marked as favorite.`;
   }
 
   function solvedTagText(node: Node) {
     if (node.type === 'file') return "You have solved all this contest's problems!";
-    else return "You have solved all this folder's problems!"
+    else return "You have solved all this folder's problems!";
+  }
+
+  // --- Tooltip: ---
+
+  function showTooltip(text: string, e: MouseEvent) {
+    tooltipState.left = e.clientX;
+    tooltipState.top = e.clientY;
+    tooltipState.visible = true;
+    tooltipState.text = text;
+  }
+
+  function hideTooltip() {
+    tooltipState.visible = false;
+    tooltipState.text = '';
   }
 
   // --- Watches: ---
@@ -450,7 +482,7 @@
 <template>
   <div
     v-if="hasLoaded"
-    class="treeview relative z-0 h-full"
+    class="treeview relative z-[0] h-full"
     @click.right="(e) => showContextMenu('root', null, e)"
     @click="() => (contextState.visible = false)"
     @mouseenter="containerMouseEnter"
@@ -501,7 +533,7 @@
     </Modal>
 
     <ContextMenu
-      class="z-30"
+      class="z-[3]"
       :tree="tree"
       :n-selected-folders="nSelectedFolders"
       :n-selected-files="tree ? tree.nSelectedFiles : 0"
@@ -523,12 +555,19 @@
       @move-selected-nodes-into="() => moveSelection(TreeChannels.moveSelectedNodesInto)"
       @move-selected-nodes-to-root="moveSelectionToRoot"
     />
-    <Transition name="badge-fade">
-      <div v-show="showFilesSelectedBadge" class="z-20 files-selected-badge text-sm font-bold">
+    <Transition name="fade">
+      <div v-show="showFilesSelectedBadge" class="z-[2] files-selected-badge text-sm font-bold">
         <div>{{ selectedFilesText }} and</div>
         <div>{{ selectedFoldersText }} selected</div>
       </div>
     </Transition>
+
+    <Transition name="fade">
+      <div v-if="tooltipState.visible" class="tooltip z-[9999]" :style="tooltipStyle">
+        {{ tooltipState.text }}
+      </div>
+    </Transition>
+
     <div
       v-if="!isSearching && !tree?.visibleNodes.length"
       class="absolute-center whitespace-nowrap text-lg opacity-70"
@@ -537,7 +576,7 @@
     </div>
     <div
       v-else-if="tree"
-      class="absolute top-0 left-0 w-full z-10 overflow-auto h-full"
+      class="absolute top-0 left-0 w-full z-[1] overflow-auto h-full"
       ref="scroll-container"
       @scroll="handleScroll"
     >
@@ -610,19 +649,25 @@
               <span v-if="node.type === 'dir' && props.filesHint" class="files-hint">
                 ({{ fileHintText(node.nFileDesc) }})
               </span>
-              <div class="tags-container flex gap-1">
-                <span class="tag" v-if="node.nTodo">
-                  <img :src="todo"></img>
-                  <span class="tooltip select-none absolute">{{ todoTagText(node) }}</span>
-                </span>
-                <span class="tag" v-if="node.nFavorite">
-                  <img :src="star"></img>
-                  <span class="tooltip select-none absolute">{{ favoriteTagText(node) }}</span>
-                </span>
-                <span class="tag" v-if="node.nProblems > 0 && node.nProblems === node.nSolved">
-                  <img :src="solved"></img>
-                  <span class="tooltip select-none absolute">{{ solvedTagText(node) }}</span>
-                </span>
+              <div class="tags-container flex ps-1">
+                <span
+                  v-if="node.nTodo"
+                  class="todo-tag"
+                  @mouseenter="(e) => showTooltip(todoTagText(node), e)"
+                  @mouseleave="hideTooltip"
+                ></span>
+                <span
+                  v-if="node.nFavorite"
+                  class="favorite-tag"
+                  @mouseenter="(e) => showTooltip(favoriteTagText(node), e)"
+                  @mouseleave="hideTooltip"
+                ></span>
+                <span
+                  v-if="node.nProblems > 0 && node.nProblems === node.nSolved"
+                  class="solved-tag"
+                  @mouseenter="(e) => showTooltip(solvedTagText(node), e)"
+                  @mouseleave="hideTooltip"
+                ></span>
               </div>
             </div>
           </div>
@@ -710,42 +755,29 @@
   }
 
   .tags-container {
-    padding-left: 5px;
-  }
-
-  .tags-container img {
-    width: 20px;
-    height: 20px;
-    opacity: 0.8
   }
 
   .tooltip {
-    visibility: hidden;
-    opacity: 0;
-    transition: opacity 0.23s ease;
-    width: 140px;
+    width: 200px;
     white-space: normal;
     word-break: break-word;
-  }
-
-  .tags-container .tag:hover .tooltip {
-    opacity: 1;
-    visibility: visible;
+    user-select: none;
+    position: fixed;
   }
 
   /* --- Transitions --- */
 
-  /* Badge fade: */
-  .badge-fade-enter-active,
-  .badge-fade-leave-active {
+  /* Fade: */
+  .fade-enter-active,
+  .fade-leave-active {
     transition: opacity 0.25s ease;
   }
-  .badge-fade-enter-from,
-  .badge-fade-leave-to {
+  .fade-enter-from,
+  .fade-leave-to {
     opacity: 0;
   }
-  .badge-fade-enter-to,
-  .badge-fade-leave-from {
+  .fade-enter-to,
+  .fade-leave-from {
     opacity: 1;
   }
 </style>
