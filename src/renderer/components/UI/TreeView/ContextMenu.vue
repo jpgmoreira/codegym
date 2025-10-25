@@ -68,6 +68,13 @@
     change: true,
   }));
 
+  const anySectionVisible = computed(
+    () =>
+      (props.type === 'root' && Object.values(rootSections.value).some(Boolean)) ||
+      (props.type === 'dir' && Object.values(dirSections.value).some(Boolean)) ||
+      (props.type === 'file' && Object.values(fileSections.value).some(Boolean))
+  );
+
   function computeContextStyle() {
     style.value = {};
     const diffY = window.innerHeight - props.y;
@@ -82,7 +89,7 @@
 </script>
 
 <template>
-  <div class="fixed context-menu" v-if="props.visible" :style="style">
+  <div class="fixed context-menu" v-if="props.visible && anySectionVisible" :style="style">
     <!-- Root context -->
     <div v-if="props.type === 'root'">
       <div v-if="rootSections.create">
