@@ -11,6 +11,9 @@ import { FileProxy } from '../fileProxy';
 import { buildId } from '@common/utils/utils';
 import path from 'path';
 import fs from 'fs';
+import { GraphManager } from './graphManager';
+import { getTodayDate } from '@common/utils/dateUtils';
+import ProblemsPage from '@renderer/pages/ProblemsPage/ProblemsPage.vue';
 
 /**
  * Singleton for managing contests.
@@ -133,6 +136,23 @@ export class ContestsManager {
     const problem = this.proxy?.proxy.problems.find((p) => p.id === problemId);
     if (!problem) return;
     problem[flag] = !problem[flag];
+    if (flag === 'solved') {
+      const prevDate = problem.solvedDate;
+      const today = getTodayDate();
+      if (problem.solved) {
+        problem.solvedDate = today;
+        GraphManager.instance.updateGraph('contests', today, 1);
+      } else {
+        problem.solvedDate = null;
+        if (prevDate === today) {
+          // I only unmark a problem as "solved" if it was last solved today.
+          // This is because I want to avoid this: The person solved a contest's problem,
+          //   then in the future unmark all problems from the contest, to solve it again.
+          //   -> There is no sense on removing old data from the graph in this case!
+          GraphManager.instance.updateGraph('contests', today, -1);
+        }
+      }
+    }
   }
 
   public deleteCurrContestProblem(problemId: string) {
