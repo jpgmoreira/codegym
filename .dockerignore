@@ -3,6 +3,8 @@ codegym-data
 dist
 _trash
 node_modules.tar.gz
+.git
+.gitignore
 
 # --
 
