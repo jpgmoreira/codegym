@@ -26,3 +26,15 @@
   background-repeat: no-repeat;
   background-position: center;
 }
+
+.theme-dark .problems-page .popularity-info-icon .tooltip {
+  width: 280px;
+  z-index: 10;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease;
+}
+.theme-dark .problems-page .popularity-info-icon:hover .tooltip {
+  opacity: 1;
+  visibility: visible;
+}

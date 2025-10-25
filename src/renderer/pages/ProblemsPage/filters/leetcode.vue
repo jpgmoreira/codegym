@@ -12,7 +12,15 @@
   <div>
     <div>
       <div class="flex items-center">
-        <label class="pr-1.5">Popularity:</label>
+        <div class="flex items-center pr-1.5">
+          <label>Popularity</label>
+          <span class="popularity-info-icon mx-0.5 cursor-pointer relative">
+            <span class="tooltip absolute left-full top-0">
+              All problems sorted from most solved to least solved, divided in groups of 20.
+            </span>
+          </span>
+          <span>:</span>
+        </div>
         <div>
           <input
             type="number"

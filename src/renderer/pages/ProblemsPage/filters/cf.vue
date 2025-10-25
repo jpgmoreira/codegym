@@ -80,17 +80,3 @@
     />
   </div>
 </template>
-
-<style scoped>
-  .tooltip {
-    width: 280px;
-    z-index: 10;
-    opacity: 0;
-    visibility: hidden;
-    transition: opacity 0.3s ease;
-  }
-  .popularity-info-icon:hover .tooltip {
-    opacity: 1;
-    visibility: visible;
-  }
-</style>
