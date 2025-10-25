@@ -68,7 +68,7 @@
 <template>
   <div class="w-[100vw] h-[100vh] flex flex-col">
     <SettingsPageHeader />
-    <LineChart v-if="hasContent" v-bind="content" class="bg-white" />
+    <LineChart v-if="hasContent" v-bind="content" />
     <div v-else class="flex grow items-center justify-center text-xl">No problems solved yet!</div>
   </div>
 </template>

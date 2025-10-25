@@ -572,7 +572,7 @@
     padding: 6px 8px;
     border: 1px solid #aaa;
     border-radius: 10px;
-    background-color: rgba(255, 255, 255, 0.95);
+    background-color: rgba(239, 239, 239, 0.95);
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
     font-size: 0.9rem;
     position: absolute;
@@ -634,7 +634,7 @@
     min-width: 180px;
     max-width: 250px;
     border-radius: 10px;
-    background-color: rgba(255, 255, 255, 0.95);
+    background-color: rgba(239, 239, 239, 0.95);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
     font-size: 0.9rem;
     font-weight: 500;
@@ -680,6 +680,7 @@
     position: relative;
     overflow: hidden;
     height: 100%;
+    background-color: #efefef;
   }
 
   canvas {
