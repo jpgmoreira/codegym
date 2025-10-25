@@ -149,7 +149,7 @@
       <div>CodeGym &ndash; Version {{ packageJson.version }}</div>
       <div>
         Homepage:
-        <a :href="packageJson.homepage">{{ packageJson.homepage }}</a>
+        <a href="#">{{ packageJson.homepage }}</a>
       </div>
     </div>
   </div>
