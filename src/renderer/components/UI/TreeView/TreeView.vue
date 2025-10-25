@@ -447,7 +447,12 @@
     tooltipState.text = text;
   }
 
-  function hideTooltip() {
+  function hideTooltip(e: MouseEvent) {
+    const el = document.elementFromPoint(e.clientX, e.clientY) as HTMLElement | null;
+    if (!el) return;
+    if (el.closest('.todo-tag, .favorite-tag, .solved-tag, .tooltip')) {
+      return;
+    }
     tooltipState.visible = false;
     tooltipState.text = '';
   }
@@ -563,7 +568,12 @@
     </Transition>
 
     <Transition name="fade">
-      <div v-if="tooltipState.visible" class="tooltip z-[9999]" :style="tooltipStyle">
+      <div
+        v-if="tooltipState.visible"
+        class="tooltip z-[9999]"
+        :style="tooltipStyle"
+        @mouseleave="hideTooltip"
+      >
         {{ tooltipState.text }}
       </div>
     </Transition>
@@ -653,19 +663,19 @@
                 <span
                   v-if="node.nTodo"
                   class="todo-tag"
-                  @mouseover="(e) => showTooltip(todoTagText(node), e)"
+                  @mouseenter="(e) => showTooltip(todoTagText(node), e)"
                   @mouseleave="hideTooltip"
                 ></span>
                 <span
                   v-if="node.nFavorite"
                   class="favorite-tag"
-                  @mouseover="(e) => showTooltip(favoriteTagText(node), e)"
+                  @mouseenter="(e) => showTooltip(favoriteTagText(node), e)"
                   @mouseleave="hideTooltip"
                 ></span>
                 <span
                   v-if="node.nProblems > 0 && node.nProblems === node.nSolved"
                   class="solved-tag"
-                  @mouseover="(e) => showTooltip(solvedTagText(node), e)"
+                  @mouseenter="(e) => showTooltip(solvedTagText(node), e)"
                   @mouseleave="hideTooltip"
                 ></span>
               </div>
