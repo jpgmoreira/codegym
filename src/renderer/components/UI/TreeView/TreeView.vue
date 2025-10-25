@@ -600,6 +600,7 @@
           class="w-full rounded-none"
           type="text"
           placeholder="Search for contests..."
+          @keydown.enter="search"
         />
         <button type="button" class="btn-primary rounded-none" @click="search">Search</button>
       </div>

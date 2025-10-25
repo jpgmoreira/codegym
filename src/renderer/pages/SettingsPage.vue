@@ -127,7 +127,13 @@
     <h1 class="text-2xl">Profile</h1>
     <div class="flex items-center px-5">
       <label for="profile-name" class="mr-1">Profile name:</label>
-      <input type="text" name="profile-name" id="profile-name" v-model.trim="name" />
+      <input
+        type="text"
+        name="profile-name"
+        id="profile-name"
+        v-model.trim="name"
+        @keydown.enter="handleRename"
+      />
       <button type="button" class="btn-primary ml-1" @click="handleRename">Rename</button>
     </div>
     <div class="flex justify-between px-5">

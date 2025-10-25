@@ -33,7 +33,12 @@
   <div class="flex flex-col items-center justify-center w-full flex-1">
     <div>
       <label for="profile-name" class="text-lg mr-2">Create a new profile:</label>
-      <input type="text" v-model.trim="name" placeholder="Profile name" />
+      <input
+        type="text"
+        v-model.trim="name"
+        placeholder="Profile name"
+        @keydown.enter="createProfile"
+      />
     </div>
     <button
       type="button"
