@@ -39,11 +39,11 @@
   const nSelectedNodes = computed(() => props.tree?.nSelectedNodes || 0);
   const nSelectedFiles = computed(() => props.tree?.nSelectedFiles || 0);
 
-  const showSelectAll = computed(
-    () => props.tree && props.tree.nTotalNodes > props.tree.nSelectedNodes
+  const showSelectAll = computed(() =>
+    Boolean(!props.isSearching && props.tree && props.tree.nTotalNodes > props.tree.nSelectedNodes)
   );
-  const showRootSelection = computed(
-    () => nSelectedNodes.value || props.nOpenDirs || showSelectAll.value
+  const showRootSelection = computed(() =>
+    Boolean(nSelectedNodes.value || props.nOpenDirs || showSelectAll.value)
   );
 
   // Root sections

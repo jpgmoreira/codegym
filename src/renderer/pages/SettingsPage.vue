@@ -65,6 +65,16 @@
   function closeModal() {
     modalVisible.value = false;
   }
+  function copyHomePage() {
+    navigator.clipboard
+      .writeText(packageJson.homepage)
+      .then(() => {
+        uiStore.showToast('URL copied to the clipboard!', 'success');
+      })
+      .catch(() => {
+        uiStore.showToast('Error on copying URL!', 'error');
+      });
+  }
 </script>
 
 <template>
@@ -149,7 +159,7 @@
       <div>CodeGym &ndash; Version {{ packageJson.version }}</div>
       <div>
         Homepage:
-        <a href="#">{{ packageJson.homepage }}</a>
+        <a href="#" @click="copyHomePage">{{ packageJson.homepage }}</a>
       </div>
     </div>
   </div>
