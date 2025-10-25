@@ -487,7 +487,7 @@
 <template>
   <div
     v-if="hasLoaded"
-    class="treeview relative z-[9999] h-full"
+    class="treeview relative h-full"
     @click.right="(e) => showContextMenu('root', null, e)"
     @click="() => (contextState.visible = false)"
     @mouseenter="containerMouseEnter"
@@ -570,7 +570,7 @@
     <Transition name="fade">
       <div
         v-if="tooltipState.visible"
-        class="tooltip z-[9999]"
+        class="tooltip z-[4]"
         :style="tooltipStyle"
         @mouseleave="hideTooltip"
       >
