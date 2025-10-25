@@ -8,7 +8,6 @@
     visible: boolean;
     type: NodeType | 'root';
     nSelectedFolders: number;
-    nSelectedFiles: number;
     nOpenDirs: number;
     isSearching: boolean;
     activeNode: Node | null;
@@ -24,6 +23,7 @@
     (e: 'deleteNode'): void;
     (e: 'deleteSelectedNodes'): void;
     (e: 'clearSelection'): void;
+    (e: 'selectAll'): void;
     (e: 'collapseAll'): void;
     (e: 'moveSelectedFilesAbove'): void;
     (e: 'moveSelectedFilesBelow'): void;
@@ -36,12 +36,20 @@
   const props = defineProps<ContextProps>();
   const style = ref<Record<string, string>>({});
 
-  const nSelectedNodes = computed(() => props.nSelectedFiles + props.nSelectedFolders);
+  const nSelectedNodes = computed(() => props.tree?.nSelectedNodes || 0);
+  const nSelectedFiles = computed(() => props.tree?.nSelectedFiles || 0);
+
+  const showSelectAll = computed(
+    () => props.tree && props.tree.nTotalNodes > props.tree.nSelectedNodes
+  );
+  const showRootSelection = computed(
+    () => nSelectedNodes.value || props.nOpenDirs || showSelectAll.value
+  );
 
   // Root sections
   const rootSections = computed(() => ({
     create: !props.isSearching,
-    clear: Boolean(nSelectedNodes.value || props.nOpenDirs),
+    select: showRootSelection.value,
     move: nSelectedNodes.value > 0,
     delete: nSelectedNodes.value > 0,
   }));
@@ -49,14 +57,14 @@
   // Dir sections
   const dirSections = computed(() => ({
     create: !props.isSearching,
-    move: Boolean(!props.activeNode?.selected && (props.nSelectedFolders || props.nSelectedFiles)),
+    move: Boolean(!props.activeNode?.selected && nSelectedNodes.value),
     change: true,
   }));
 
   // File sections
   const fileSections = computed(() => ({
     create: !props.isSearching,
-    move: Boolean(!props.activeNode?.selected && props.nSelectedFiles),
+    move: Boolean(!props.activeNode?.selected && nSelectedFiles.value),
     change: true,
   }));
 
@@ -81,9 +89,10 @@
         <div class="item" @click="emit('createNode', 'file')">New contest</div>
         <div class="item" @click="emit('createNode', 'dir')">New folder</div>
       </div>
-      <div class="separator" v-if="rootSections.create && rootSections.clear"></div>
+      <div class="separator" v-if="rootSections.create && rootSections.select"></div>
 
-      <div v-if="rootSections.clear">
+      <div v-if="rootSections.select">
+        <div class="item" v-if="showSelectAll" @click="emit('selectAll')">Select all</div>
         <div class="item" v-if="nSelectedNodes" @click="emit('clearSelection')">
           Clear selection
         </div>
@@ -91,7 +100,7 @@
       </div>
       <div
         class="separator"
-        v-if="(rootSections.create || rootSections.clear) && rootSections.move"
+        v-if="(rootSections.create || rootSections.select) && rootSections.move"
       ></div>
 
       <div v-if="rootSections.move">
@@ -102,7 +111,7 @@
       <div
         class="separator"
         v-if="
-          (rootSections.create || rootSections.clear || rootSections.move) && rootSections.delete
+          (rootSections.create || rootSections.select || rootSections.move) && rootSections.delete
         "
       ></div>
 

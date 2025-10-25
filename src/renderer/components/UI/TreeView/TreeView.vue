@@ -541,7 +541,6 @@
       class="z-[3]"
       :tree="tree"
       :n-selected-folders="nSelectedFolders"
-      :n-selected-files="tree ? tree.nSelectedFiles : 0"
       :n-open-dirs="tree?.nOpenDirs || 0"
       :is-searching="isSearching"
       v-bind="contextState"
