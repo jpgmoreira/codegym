@@ -1,7 +1,7 @@
 import { OjProblem, UvaProblem } from '@common/schemas/problems';
 import * as cheerio from 'cheerio';
 import { UvaResponseDTO } from '../dto/uvaResponseDTO';
-import { SOLVED_BUCKET_SIZE } from '@common/constants';
+import { POPULARITY_GROUP_SIZE } from '@common/constants';
 import { OjMeta } from '@common/schemas/ojMeta';
 import { sanitizeQuery } from '@main/data/utils';
 import { ProfileManager } from '@main/data/managers/profileManager';
@@ -30,7 +30,7 @@ async function downloadUvaProblems() {
       info: {
         dacu: p[3],
         starred: starredProblems.has(p[1]),
-        solvedBucket: -1,
+        popularity: -1,
       },
     };
     problems.push(newProblem);
@@ -39,11 +39,11 @@ async function downloadUvaProblems() {
     return a.info.dacu < b.info.dacu ? 1 : -1;
   });
   problems.forEach((p, i) => {
-    p.info.solvedBucket = Math.floor(i / SOLVED_BUCKET_SIZE) + 1;
+    p.info.popularity = Math.floor(i / POPULARITY_GROUP_SIZE) + 1;
   });
   const stats: OjMeta['uva']['stats'] = {
-    solvedBucket: {
-      max: Math.floor((problems.length - 1) / SOLVED_BUCKET_SIZE) + 1,
+    popularity: {
+      max: Math.floor((problems.length - 1) / POPULARITY_GROUP_SIZE) + 1,
     },
   };
   return {
@@ -67,15 +67,15 @@ export async function updateUvaCache(db: Datastore<OjProblem[Oj]>): Promise<OjMe
 export async function filterUvaProblems(db: Datastore<OjProblem[Oj]>): Promise<UvaProblem[]> {
   const currProfile = ProfileManager.instance.getCurrProfile()!;
   const filters = currProfile.ojContext['uva'].filters;
-  const minsb = filters.solvedBucket.min;
-  const maxsb = filters.solvedBucket.max;
+  const minsb = filters.popularity.min;
+  const maxsb = filters.popularity.max;
   const starred = filters.starred.value;
   const query: Record<string, any> = {
     oj: 'uva',
-    'info.solvedBucket': {},
+    'info.popularity': {},
   };
-  if (minsb !== '') query['info.solvedBucket'].$gte = minsb;
-  if (maxsb !== '') query['info.solvedBucket'].$lte = maxsb;
+  if (minsb !== '') query['info.popularity'].$gte = minsb;
+  if (maxsb !== '') query['info.popularity'].$lte = maxsb;
   if (starred) query['info.starred'] = true;
   sanitizeQuery(query);
   return db.findAsync(query, { _id: 0 });

@@ -1,2 +1,2 @@
 export const APP_NAME = 'codegym';
-export const SOLVED_BUCKET_SIZE = 20;
+export const POPULARITY_GROUP_SIZE = 20;

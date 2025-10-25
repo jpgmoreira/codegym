@@ -1,4 +1,4 @@
-import { SOLVED_BUCKET_SIZE } from '@common/constants';
+import { POPULARITY_GROUP_SIZE } from '@common/constants';
 import { OjProblem, TimusProblem } from '@common/schemas/problems';
 import { OjMeta } from '@common/schemas/ojMeta';
 import { sanitizeQuery } from '@main/data/utils';
@@ -20,7 +20,7 @@ async function downloadTimusProblems() {
       min: Infinity,
       max: -Infinity,
     },
-    solvedBucket: {
+    popularity: {
       max: -Infinity,
     },
   };
@@ -36,19 +36,19 @@ async function downloadTimusProblems() {
           source: $(tds[3]).text().trim() || null,
           solved: parseInt($(tds[4]).text().trim()),
           difficulty: parseInt($(tds[5]).text().trim()),
-          solvedBucket: -1,
+          popularity: -1,
         },
       };
       stats.difficulty.min = Math.min(stats.difficulty.min!, newProblem.info.difficulty);
       stats.difficulty.max = Math.max(stats.difficulty.max!, newProblem.info.difficulty);
       problems.push(newProblem);
     });
-  stats.solvedBucket.max = Math.floor((problems.length - 1) / SOLVED_BUCKET_SIZE) + 1;
+  stats.popularity.max = Math.floor((problems.length - 1) / POPULARITY_GROUP_SIZE) + 1;
   problems.sort((a, b) => {
     return a.info.solved < b.info.solved ? 1 : -1;
   });
   problems.forEach((p, i) => {
-    p.info.solvedBucket = Math.floor(i / SOLVED_BUCKET_SIZE) + 1;
+    p.info.popularity = Math.floor(i / POPULARITY_GROUP_SIZE) + 1;
   });
   return {
     problems,
@@ -73,17 +73,17 @@ export async function filterTimusProblems(db: Datastore<OjProblem[Oj]>): Promise
   const filters = currProfile.ojContext['timus'].filters;
   const mind = filters.difficulty.min;
   const maxd = filters.difficulty.max;
-  const minsb = filters.solvedBucket.min;
-  const maxsb = filters.solvedBucket.max;
+  const minsb = filters.popularity.min;
+  const maxsb = filters.popularity.max;
   const query: Record<string, any> = {
     oj: 'timus',
     'info.difficulty': {},
-    'info.solvedBucket': {},
+    'info.popularity': {},
   };
   if (mind !== '') query['info.difficulty'].$gte = mind;
   if (maxd !== '') query['info.difficulty'].$lte = maxd;
-  if (minsb !== '') query['info.solvedBucket'].$gte = minsb;
-  if (maxsb !== '') query['info.solvedBucket'].$lte = maxsb;
+  if (minsb !== '') query['info.popularity'].$gte = minsb;
+  if (maxsb !== '') query['info.popularity'].$lte = maxsb;
   sanitizeQuery(query);
   return db.findAsync(query, { _id: 0 });
 }

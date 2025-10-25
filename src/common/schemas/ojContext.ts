@@ -20,7 +20,7 @@ export type OjContext = {
     snapshot: CfProblem | null;
     filters: {
       rating: RangeFilter;
-      solvedBucket: RangeFilter;
+      popularity: RangeFilter;
       tags: AndArrayFilter;
     };
   };
@@ -30,7 +30,7 @@ export type OjContext = {
     snapshot: KattisProblem | null;
     filters: {
       difficulty: RangeFilter;
-      solvedBucket: RangeFilter;
+      popularity: RangeFilter;
       starred: BooleanFilter;
     };
   };
@@ -40,7 +40,7 @@ export type OjContext = {
     snapshot: NepsProblem | null;
     filters: {
       score: RangeFilter;
-      solvedBucket: RangeFilter;
+      popularity: RangeFilter;
     };
   };
   leetcode: {
@@ -49,7 +49,7 @@ export type OjContext = {
     snapshot: LeetcodeProblem | null;
     filters: {
       difficulty: OrArrayFilter;
-      solvedBucket: RangeFilter;
+      popularity: RangeFilter;
       premium: YesNoBothFilter;
     };
   };
@@ -59,7 +59,7 @@ export type OjContext = {
     snapshot: TimusProblem | null;
     filters: {
       difficulty: RangeFilter;
-      solvedBucket: RangeFilter;
+      popularity: RangeFilter;
     };
   };
   uva: {
@@ -67,7 +67,7 @@ export type OjContext = {
     hasEverFiltered: boolean;
     snapshot: UvaProblem | null;
     filters: {
-      solvedBucket: RangeFilter;
+      popularity: RangeFilter;
       starred: BooleanFilter;
     };
   };
@@ -81,7 +81,7 @@ export function getEmptyOjContext(): OjContext {
       snapshot: null,
       filters: {
         rating: { type: 'range', min: '', max: '' },
-        solvedBucket: { type: 'range', min: '', max: '' },
+        popularity: { type: 'range', min: '', max: '' },
         tags: { type: 'and-array', values: [] },
       },
     },
@@ -91,7 +91,7 @@ export function getEmptyOjContext(): OjContext {
       snapshot: null,
       filters: {
         difficulty: { type: 'range', min: '', max: '' },
-        solvedBucket: { type: 'range', min: '', max: '' },
+        popularity: { type: 'range', min: '', max: '' },
         starred: { type: 'boolean', value: false },
       },
     },
@@ -101,7 +101,7 @@ export function getEmptyOjContext(): OjContext {
       snapshot: null,
       filters: {
         score: { type: 'range', min: '', max: '' },
-        solvedBucket: { type: 'range', min: '', max: '' },
+        popularity: { type: 'range', min: '', max: '' },
       },
     },
     leetcode: {
@@ -110,7 +110,7 @@ export function getEmptyOjContext(): OjContext {
       snapshot: null,
       filters: {
         difficulty: { type: 'or-array', values: [] },
-        solvedBucket: { type: 'range', min: '', max: '' },
+        popularity: { type: 'range', min: '', max: '' },
         premium: { type: 'yes-no-both', value: 'both' },
       },
     },
@@ -120,7 +120,7 @@ export function getEmptyOjContext(): OjContext {
       snapshot: null,
       filters: {
         difficulty: { type: 'range', min: '', max: '' },
-        solvedBucket: { type: 'range', min: '', max: '' },
+        popularity: { type: 'range', min: '', max: '' },
       },
     },
     uva: {
@@ -128,7 +128,7 @@ export function getEmptyOjContext(): OjContext {
       hasEverFiltered: false,
       snapshot: null,
       filters: {
-        solvedBucket: { type: 'range', min: '', max: '' },
+        popularity: { type: 'range', min: '', max: '' },
         starred: { type: 'boolean', value: false },
       },
     },

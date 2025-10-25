@@ -1,7 +1,7 @@
 import { CfProblem, OjProblem } from '@common/schemas/problems';
 import { CfResponseDTO } from '../dto/cfResponseDTO';
 import { OjMeta } from '@common/schemas/ojMeta';
-import { SOLVED_BUCKET_SIZE } from '@common/constants';
+import { POPULARITY_GROUP_SIZE } from '@common/constants';
 import { OjMetaManager } from '@main/data/managers/ojMetaManager';
 import { sanitizeQuery } from '@main/data/utils';
 import { Oj } from '@common/types/oj';
@@ -19,8 +19,8 @@ async function downloadCfProblems() {
       min: Infinity,
       max: -Infinity,
     },
-    solvedBucket: {
-      max: Math.floor((problemset.length - 1) / SOLVED_BUCKET_SIZE) + 1,
+    popularity: {
+      max: Math.floor((problemset.length - 1) / POPULARITY_GROUP_SIZE) + 1,
     },
   };
   const tagsSet = new Set<string>();
@@ -38,7 +38,7 @@ async function downloadCfProblems() {
         rating: problemset[i].rating || null,
         tags: problemset[i].tags,
         solved: problemStatistics[i].solvedCount,
-        solvedBucket: -1,
+        popularity: -1,
       },
     };
     if (newProblem.info.rating != null) {
@@ -52,7 +52,7 @@ async function downloadCfProblems() {
     return a.info.solved! < b.info.solved! ? 1 : -1;
   });
   problems.forEach((p, i) => {
-    p.info.solvedBucket = Math.floor(i / SOLVED_BUCKET_SIZE) + 1;
+    p.info.popularity = Math.floor(i / POPULARITY_GROUP_SIZE) + 1;
   });
   return {
     problems,
@@ -80,17 +80,17 @@ export async function filterCfProblems(db: Datastore<OjProblem[Oj]>): Promise<Cf
   const tags = filters.tags.values;
   const minr = filters.rating.min;
   const maxr = filters.rating.max;
-  const minsb = filters.solvedBucket.min;
-  const maxsb = filters.solvedBucket.max;
+  const minsb = filters.popularity.min;
+  const maxsb = filters.popularity.max;
   const query: Record<string, any> = {
     oj: 'cf',
     'info.rating': {},
-    'info.solvedBucket': {},
+    'info.popularity': {},
   };
   if (minr !== '') query['info.rating'].$gte = minr;
   if (maxr !== '') query['info.rating'].$lte = maxr;
-  if (minsb !== '') query['info.solvedBucket'].$gte = minsb;
-  if (maxsb !== '') query['info.solvedBucket'].$lte = maxsb;
+  if (minsb !== '') query['info.popularity'].$gte = minsb;
+  if (maxsb !== '') query['info.popularity'].$lte = maxsb;
   if (tags.length) {
     query.$where = function () {
       return tags.every((t: string) => (this as CfProblem).info.tags.includes(t));

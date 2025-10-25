@@ -1,7 +1,7 @@
 import { LeetcodeProblem, OjProblem } from '@common/schemas/problems';
 import { LeetcodeResponseDTO } from '../dto/leetcodeResponseDTO';
 import { OjMeta } from '@common/schemas/ojMeta';
-import { SOLVED_BUCKET_SIZE } from '@common/constants';
+import { POPULARITY_GROUP_SIZE } from '@common/constants';
 import { sanitizeQuery } from '@main/data/utils';
 import { ProfileManager } from '@main/data/managers/profileManager';
 import { OjMetaManager } from '@main/data/managers/ojMetaManager';
@@ -14,8 +14,8 @@ async function downloadLeetcodeProblems() {
   const problemset = json.stat_status_pairs;
   const problems: LeetcodeProblem[] = [];
   const stats: OjMeta['leetcode']['stats'] = {
-    solvedBucket: {
-      max: Math.floor((problemset.length - 1) / SOLVED_BUCKET_SIZE) + 1,
+    popularity: {
+      max: Math.floor((problemset.length - 1) / POPULARITY_GROUP_SIZE) + 1,
     },
   };
   problemset.forEach((p) => {
@@ -28,7 +28,7 @@ async function downloadLeetcodeProblems() {
         submissions: p.stat.total_submitted,
         difficulty: p.difficulty.level,
         premium: p.paid_only,
-        solvedBucket: -1,
+        popularity: -1,
       },
     };
     problems.push(newProblem);
@@ -37,7 +37,7 @@ async function downloadLeetcodeProblems() {
     return a.info.accepted < b.info.accepted ? 1 : -1;
   });
   problems.forEach((p, i) => {
-    p.info.solvedBucket = Math.floor(i / SOLVED_BUCKET_SIZE) + 1;
+    p.info.popularity = Math.floor(i / POPULARITY_GROUP_SIZE) + 1;
   });
   return {
     problems,
@@ -64,8 +64,8 @@ export async function filterLeetcodeProblems(
 ): Promise<LeetcodeProblem[]> {
   const currProfile = ProfileManager.instance.getCurrProfile()!;
   const filters = currProfile.ojContext['leetcode'].filters;
-  const minsb = filters.solvedBucket.min;
-  const maxsb = filters.solvedBucket.max;
+  const minsb = filters.popularity.min;
+  const maxsb = filters.popularity.max;
   const premium = filters.premium.value;
   const difficulties = filters.difficulty.values
     .map((d) => {
@@ -76,10 +76,10 @@ export async function filterLeetcodeProblems(
     .filter((x) => x !== undefined);
   const query: Record<string, any> = {
     oj: 'leetcode',
-    'info.solvedBucket': {},
+    'info.popularity': {},
   };
-  if (minsb !== '') query['info.solvedBucket'].$gte = minsb;
-  if (maxsb !== '') query['info.solvedBucket'].$lte = maxsb;
+  if (minsb !== '') query['info.popularity'].$gte = minsb;
+  if (maxsb !== '') query['info.popularity'].$lte = maxsb;
   if (premium === 'yes') query['info.premium'] = true;
   if (premium === 'no') query['info.premium'] = false;
   if (difficulties.length) query['info.difficulty'] = { $in: difficulties };

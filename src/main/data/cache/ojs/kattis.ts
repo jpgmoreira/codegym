@@ -1,4 +1,4 @@
-import { SOLVED_BUCKET_SIZE } from '@common/constants';
+import { POPULARITY_GROUP_SIZE } from '@common/constants';
 import { KattisProblem, OjProblem } from '@common/schemas/problems';
 import { OjMeta } from '@common/schemas/ojMeta';
 import { OjMetaManager } from '@main/data/managers/ojMetaManager';
@@ -37,7 +37,7 @@ async function downloadKattisProblems() {
       min: Infinity,
       max: -Infinity,
     },
-    solvedBucket: {
+    popularity: {
       max: -Infinity,
     },
   };
@@ -61,7 +61,7 @@ async function downloadKattisProblems() {
           textDifficulty,
           difficulty,
           starred: false,
-          solvedBucket: -1,
+          popularity: -1,
         },
       };
       newProblem.info.starred = starredProblems.has(newProblem.path);
@@ -76,10 +76,10 @@ async function downloadKattisProblems() {
     return a.info.solved < b.info.solved ? 1 : -1;
   });
   problems.forEach((p, i) => {
-    p.info.solvedBucket = Math.floor(i / SOLVED_BUCKET_SIZE) + 1;
+    p.info.popularity = Math.floor(i / POPULARITY_GROUP_SIZE) + 1;
   });
-  stats.solvedBucket = {
-    max: Math.floor((problems.length - 1) / SOLVED_BUCKET_SIZE) + 1,
+  stats.popularity = {
+    max: Math.floor((problems.length - 1) / POPULARITY_GROUP_SIZE) + 1,
   };
   return {
     problems,
@@ -104,18 +104,18 @@ export async function filterKattisProblems(db: Datastore<OjProblem[Oj]>): Promis
   const filters = currProfile.ojContext['kattis'].filters;
   const mind = filters.difficulty.min;
   const maxd = filters.difficulty.max;
-  const minsb = filters.solvedBucket.min;
-  const maxsb = filters.solvedBucket.max;
+  const minsb = filters.popularity.min;
+  const maxsb = filters.popularity.max;
   const starred = filters.starred.value;
   const query: Record<string, any> = {
     oj: 'kattis',
     'info.difficulty': {},
-    'info.solvedBucket': {},
+    'info.popularity': {},
   };
   if (mind !== '') query['info.difficulty'].$gte = mind;
   if (maxd !== '') query['info.difficulty'].$lte = maxd;
-  if (minsb !== '') query['info.solvedBucket'].$gte = minsb;
-  if (maxsb !== '') query['info.solvedBucket'].$lte = maxsb;
+  if (minsb !== '') query['info.popularity'].$gte = minsb;
+  if (maxsb !== '') query['info.popularity'].$lte = maxsb;
   if (starred) query['info.starred'] = true;
   sanitizeQuery(query);
   return db.findAsync(query, { _id: 0 });

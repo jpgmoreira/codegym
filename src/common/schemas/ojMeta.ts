@@ -6,7 +6,7 @@ export type OjMeta = {
     lastCacheUpdate: number | null;
     stats: {
       rating: RangeStat;
-      solvedBucket: MaxStat;
+      popularity: MaxStat;
     };
     tags: string[];
   };
@@ -14,33 +14,33 @@ export type OjMeta = {
     lastCacheUpdate: number | null;
     stats: {
       score: RangeStat;
-      solvedBucket: MaxStat;
+      popularity: MaxStat;
     };
   };
   leetcode: {
     lastCacheUpdate: number | null;
     stats: {
-      solvedBucket: MaxStat;
+      popularity: MaxStat;
     };
   };
   timus: {
     lastCacheUpdate: number | null;
     stats: {
       difficulty: RangeStat;
-      solvedBucket: MaxStat;
+      popularity: MaxStat;
     };
   };
   uva: {
     lastCacheUpdate: number | null;
     stats: {
-      solvedBucket: MaxStat;
+      popularity: MaxStat;
     };
   };
   kattis: {
     lastCacheUpdate: number | null;
     stats: {
       difficulty: RangeStat;
-      solvedBucket: MaxStat;
+      popularity: MaxStat;
     };
   };
 };
@@ -51,7 +51,7 @@ export function getEmptyOjMeta(): OjMeta {
       lastCacheUpdate: null,
       stats: {
         rating: { min: null, max: null },
-        solvedBucket: { max: null },
+        popularity: { max: null },
       },
       tags: [],
     },
@@ -59,33 +59,33 @@ export function getEmptyOjMeta(): OjMeta {
       lastCacheUpdate: null,
       stats: {
         score: { min: null, max: null },
-        solvedBucket: { max: null },
+        popularity: { max: null },
       },
     },
     leetcode: {
       lastCacheUpdate: null,
       stats: {
-        solvedBucket: { max: null },
+        popularity: { max: null },
       },
     },
     timus: {
       lastCacheUpdate: null,
       stats: {
         difficulty: { min: null, max: null },
-        solvedBucket: { max: null },
+        popularity: { max: null },
       },
     },
     uva: {
       lastCacheUpdate: null,
       stats: {
-        solvedBucket: { max: null },
+        popularity: { max: null },
       },
     },
     kattis: {
       lastCacheUpdate: null,
       stats: {
         difficulty: { min: null, max: null },
-        solvedBucket: { max: null },
+        popularity: { max: null },
       },
     },
   };

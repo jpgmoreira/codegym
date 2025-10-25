@@ -1,7 +1,7 @@
 import { NepsProblem, OjProblem } from '@common/schemas/problems';
 import { NepsResponseDTO } from '../dto/nepsResponseDTO';
 import { OjMeta } from '@common/schemas/ojMeta';
-import { SOLVED_BUCKET_SIZE } from '@common/constants';
+import { POPULARITY_GROUP_SIZE } from '@common/constants';
 import { OjMetaManager } from '@main/data/managers/ojMetaManager';
 import { ProfileManager } from '@main/data/managers/profileManager';
 import { sanitizeQuery } from '@main/data/utils';
@@ -18,8 +18,8 @@ async function downloadNepsProblems() {
       min: Infinity,
       max: -Infinity,
     },
-    solvedBucket: {
-      max: Math.floor((problemset.length - 1) / SOLVED_BUCKET_SIZE) + 1,
+    popularity: {
+      max: Math.floor((problemset.length - 1) / POPULARITY_GROUP_SIZE) + 1,
     },
   };
   problemset.forEach((p) => {
@@ -30,7 +30,7 @@ async function downloadNepsProblems() {
       info: {
         score: p.score,
         solved: p.solved,
-        solvedBucket: -1,
+        popularity: -1,
       },
     };
     problems.push(newProblem);
@@ -43,7 +43,7 @@ async function downloadNepsProblems() {
     return a.info.solved < b.info.solved ? 1 : -1;
   });
   problems.forEach((p, i) => {
-    p.info.solvedBucket = Math.floor(i / SOLVED_BUCKET_SIZE) + 1;
+    p.info.popularity = Math.floor(i / POPULARITY_GROUP_SIZE) + 1;
   });
   return {
     problems,
@@ -68,17 +68,17 @@ export async function filterNepsProblems(db: Datastore<OjProblem[Oj]>): Promise<
   const filters = currProfile.ojContext['neps'].filters;
   const mins = filters.score.min;
   const maxs = filters.score.max;
-  const minsb = filters.solvedBucket.min;
-  const maxsb = filters.solvedBucket.max;
+  const minsb = filters.popularity.min;
+  const maxsb = filters.popularity.max;
   const query: Record<string, any> = {
     oj: 'neps',
     'info.score': {},
-    'info.solvedBucket': {},
+    'info.popularity': {},
   };
   if (mins !== '') query['info.score'].$gte = mins;
   if (maxs !== '') query['info.score'].$lte = maxs;
-  if (minsb !== '') query['info.solvedBucket'].$gte = minsb;
-  if (maxsb !== '') query['info.solvedBucket'].$lte = maxsb;
+  if (minsb !== '') query['info.popularity'].$gte = minsb;
+  if (maxsb !== '') query['info.popularity'].$lte = maxsb;
   sanitizeQuery(query);
   return db.findAsync(query, { _id: 0 });
 }

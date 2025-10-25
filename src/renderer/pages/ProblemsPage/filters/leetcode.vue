@@ -12,18 +12,18 @@
   <div>
     <div>
       <div class="flex items-center">
-        <label class="pr-1.5">Solved bucket:</label>
+        <label class="pr-1.5">Popularity:</label>
         <div>
           <input
             type="number"
             placeholder="min"
-            v-model="filters.solvedBucket.min"
+            v-model="filters.popularity.min"
             @change="onChange"
           />
           <input
             type="number"
             placeholder="max"
-            v-model="filters.solvedBucket.max"
+            v-model="filters.popularity.max"
             @change="onChange"
           />
         </div>

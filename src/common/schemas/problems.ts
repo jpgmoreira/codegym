@@ -13,7 +13,7 @@ export type CfProblem = {
   info: {
     solved: number;
     rating: number | null;
-    solvedBucket: number;
+    popularity: number;
     tags: string[];
   };
 };
@@ -30,7 +30,7 @@ export type KattisProblem = {
     submissions: number;
     textDifficulty: string;
     difficulty: number | null;
-    solvedBucket: number;
+    popularity: number;
     starred: boolean;
   };
 };
@@ -45,7 +45,7 @@ export type NepsProblem = {
   info: {
     score: number;
     solved: number;
-    solvedBucket: number;
+    popularity: number;
   };
 };
 
@@ -60,7 +60,7 @@ export type LeetcodeProblem = {
     accepted: number;
     difficulty: number;
     premium: boolean;
-    solvedBucket: number;
+    popularity: number;
     submissions: number;
   };
 };
@@ -76,7 +76,7 @@ export type TimusProblem = {
     solved: number;
     source: string | null;
     difficulty: number;
-    solvedBucket: number;
+    popularity: number;
   };
 };
 
@@ -89,7 +89,7 @@ export type UvaProblem = {
   timestamp?: number;
   info: {
     dacu: number;
-    solvedBucket: number;
+    popularity: number;
     starred: boolean;
   };
 };

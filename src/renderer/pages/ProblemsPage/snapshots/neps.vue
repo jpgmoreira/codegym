@@ -26,10 +26,10 @@
         <span class="font-bold">{{ toLocaleNumber(snapshot.info.solved) }} users.</span>
       </li>
       <li>
-        Solved bucket:
+        Popularity:
         <span class="font-bold">
-          {{ toLocaleNumber(snapshot.info.solvedBucket) }} of
-          {{ toLocaleNumber(meta.stats.solvedBucket.max!) }}.
+          {{ toLocaleNumber(snapshot.info.popularity) }} of
+          {{ toLocaleNumber(meta.stats.popularity.max!) }}.
         </span>
       </li>
     </ul>
