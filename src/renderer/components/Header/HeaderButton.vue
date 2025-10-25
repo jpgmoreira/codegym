@@ -12,5 +12,6 @@
   a {
     cursor: pointer;
     padding: 8px;
+    transition: background-color 0.2s ease;
   }
 </style>

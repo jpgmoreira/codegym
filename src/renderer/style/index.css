@@ -2,6 +2,7 @@
 /* Global resets, Tailwind utilities, and shared variables */
 @import './lib/tailwind.css';
 @import './common.css';
+@import './bg-transition.css';
 
 /* === 2. Components === */
 /* Base component styles (non-themed) */
