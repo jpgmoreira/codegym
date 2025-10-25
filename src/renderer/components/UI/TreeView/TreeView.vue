@@ -754,9 +754,6 @@
     cursor: not-allowed;
   }
 
-  .tags-container {
-  }
-
   .tooltip {
     width: 200px;
     white-space: normal;
