@@ -2,7 +2,8 @@
   import { ref, onMounted, onBeforeUnmount, watch, computed, toRaw } from 'vue';
   import { Contest, ContestProblem, ContestProblemFlag } from '@common/schemas/contests';
   import { useProfileStore } from '@renderer/store/profile';
-  import { parseTimestamp } from '@common/utils/dateUtils';
+  import { useGraphStore } from '@renderer/store/graph';
+  import { getTodayDate, parseTimestamp } from '@common/utils/dateUtils';
   import TreeView from '@renderer/components/UI/TreeView/TreeView.vue';
   import SettingsPageHeader from '@renderer/components/Header/custom/SettingsPageHeader.vue';
   import { Channels } from '@common/types/channels';
@@ -11,7 +12,8 @@
   import trash from '@renderer/assets/images/trash.png';
   import star from '@renderer/assets/images/star.png';
 
-  const store = useProfileStore();
+  const profileStore = useProfileStore();
+  const graphStore = useGraphStore();
 
   const treeAreaWidth = ref(300);
   const contestsAreaWidth = ref(window.innerWidth - 300);
@@ -20,7 +22,7 @@
   const contest = ref<Contest | null>(null);
   const loaded = ref(false);
 
-  const currContestId = computed(() => store.currProfile?.currContestId);
+  const currContestId = computed(() => profileStore.currProfile?.currContestId);
 
   const sortedContestProblems = computed(() => {
     if (contest.value && contest.value.problems.length) {
@@ -61,8 +63,8 @@
 
   async function setActiveContest(contestId: string) {
     // Sets the active contest and then retrieve it from back.
-    store.setCurrContest(contestId);
-    contest.value = await store.getCurrContest();
+    profileStore.setCurrContest(contestId);
+    contest.value = await profileStore.getCurrContest();
   }
 
   function renameContest(newName: string) {
@@ -73,13 +75,13 @@
   function deleteSingleContest(contestId: string) {
     if (!contest.value) return;
     if (contest.value.id === contestId) {
-      store.setCurrContest(null);
+      profileStore.setCurrContest(null);
     }
   }
 
   async function deleteMultipleContests() {
     // Get curr contest again, if it was deleted, back will return null.
-    contest.value = await store.getCurrContest();
+    contest.value = await profileStore.getCurrContest();
   }
 
   function acceptedInputKeydown(e: KeyboardEvent) {
@@ -103,6 +105,20 @@
     // and problem[flag] = !problem[flag] will trigger a new tree refetch.
     await window.api.invoke(Channels.toggleCurrContestProblemFlag, problem.id, flag);
     problem[flag] = !problem[flag];
+    if (flag === 'solved') {
+      const prevDate = problem.solvedDate;
+      const today = getTodayDate();
+      if (problem.solved) {
+        problem.solvedDate = today;
+        graphStore.updateGraphData('contests', today, 1);
+      } else {
+        problem.solvedDate = null;
+        if (prevDate === today) {
+          // See "contestsManager.ts", method "toggleCurrContestProblemFlag" for context.
+          graphStore.updateGraphData('contests', today, -1);
+        }
+      }
+    }
   }
 
   async function deleteProblem(problem: ContestProblem) {
@@ -125,7 +141,7 @@
   watch(
     currContestId,
     async () => {
-      contest.value = await store.getCurrContest();
+      contest.value = await profileStore.getCurrContest();
       loaded.value = true;
     },
     { immediate: true }

@@ -109,17 +109,11 @@ export const useProfileStore = defineStore('profile', {
       if (!snapshot) return;
       const prevSolvedDate = snapshot.solvedDate;
       if (prevSolvedDate != null) {
-        const record = graphStore.findGraphRecord(prevSolvedDate);
-        if (record) record[currOj]--;
+        graphStore.updateGraphData(currOj, prevSolvedDate, -1);
       }
       const today = getTodayDate();
       if (value) {
-        let record = graphStore.findGraphRecord(today);
-        if (!record) {
-          record = getEmptyGraphRecord(today);
-          graphStore.graphData.push(record);
-        }
-        record[currOj]++;
+        graphStore.updateGraphData(currOj, today, 1);
       }
       snapshot.solvedDate = value ? today : null;
       window.api.send(Channels.setCurrSnapshotSolvedDate, snapshot.solvedDate);
