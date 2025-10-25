@@ -69,7 +69,7 @@
      ======================== */
 
 /* Indent line */
-.theme-dark .indent-span::after {
+.theme-dark .treeview .indent-span::after {
   background-color: #606368;
 }
 
@@ -113,18 +113,23 @@
 /* ========================
      Tags
      ======================== */
-.theme-dark .tags-container > span {
+.theme-dark .treeview .tags-container > span {
   width: 20px;
   height: 20px;
   background-size: cover;
   background-repeat: no-repeat;
 }
-.theme-dark .tags-container .todo-tag {
+.theme-dark .treeview .tags-container .todo-tag {
   background-image: url('@renderer/assets/images/to-do-list.png');
 }
-.theme-dark .tags-container .favorite-tag {
+.theme-dark .treeview .tags-container .favorite-tag {
   background-image: url('@renderer/assets/images/star.png');
 }
-.theme-dark .tags-container .solved-tag {
+.theme-dark .treeview .tags-container .solved-tag {
   background-image: url('@renderer/assets/images/solved.png');
+}
+.theme-dark .treeview .tooltip {
+  background-color: #1e1e1e;
+  border: 1px solid #2e2e2e;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.45);
 }

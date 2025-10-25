@@ -482,7 +482,7 @@
 <template>
   <div
     v-if="hasLoaded"
-    class="treeview relative z-[0] h-full"
+    class="treeview relative z-[9999] h-full"
     @click.right="(e) => showContextMenu('root', null, e)"
     @click="() => (contextState.visible = false)"
     @mouseenter="containerMouseEnter"
@@ -649,23 +649,23 @@
               <span v-if="node.type === 'dir' && props.filesHint" class="files-hint">
                 ({{ fileHintText(node.nFileDesc) }})
               </span>
-              <div class="tags-container flex ps-1">
+              <div class="tags-container flex ps-1 gap-1">
                 <span
                   v-if="node.nTodo"
                   class="todo-tag"
-                  @mouseenter="(e) => showTooltip(todoTagText(node), e)"
+                  @mouseover="(e) => showTooltip(todoTagText(node), e)"
                   @mouseleave="hideTooltip"
                 ></span>
                 <span
                   v-if="node.nFavorite"
                   class="favorite-tag"
-                  @mouseenter="(e) => showTooltip(favoriteTagText(node), e)"
+                  @mouseover="(e) => showTooltip(favoriteTagText(node), e)"
                   @mouseleave="hideTooltip"
                 ></span>
                 <span
                   v-if="node.nProblems > 0 && node.nProblems === node.nSolved"
                   class="solved-tag"
-                  @mouseenter="(e) => showTooltip(solvedTagText(node), e)"
+                  @mouseover="(e) => showTooltip(solvedTagText(node), e)"
                   @mouseleave="hideTooltip"
                 ></span>
               </div>

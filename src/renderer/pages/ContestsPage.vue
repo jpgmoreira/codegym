@@ -221,34 +221,34 @@
                 >
                   <td class="font-bold relative">
                     <input
-                      class="absolute top-0 bottom-0 left-0 right-0 z-0"
+                      class="top-0 bottom-0 left-0 right-0"
                       type="text"
                       v-model="problem.title"
                       @change="updateCurrContestProblem(problem)"
                     />
                     <span
-                      class="absolute icon solved z-10"
+                      class="absolute icon solved"
                       @dragstart.prevent
                       @click="toggleProblemFlag(problem, 'solved')"
                     >
                       <img :src="solved" />
                     </span>
                     <span
-                      class="absolute icon todo z-10"
+                      class="absolute icon todo"
                       @dragstart.prevent
                       @click="toggleProblemFlag(problem, 'todo')"
                     >
                       <img :src="todo" />
                     </span>
                     <span
-                      class="absolute icon favorite z-10"
+                      class="absolute icon favorite"
                       @dragstart.prevent
                       @click="toggleProblemFlag(problem, 'favorite')"
                     >
                       <img :src="star" />
                     </span>
                     <span
-                      class="absolute icon trash z-10"
+                      class="absolute icon trash"
                       @dragstart.prevent
                       @dblclick="deleteProblem(problem)"
                     >
