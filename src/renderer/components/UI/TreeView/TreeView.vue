@@ -698,7 +698,7 @@
               <span v-if="node.type === 'dir' && props.filesHint" class="files-hint">
                 ({{ fileHintText(node.nFileDesc) }})
               </span>
-              <div class="tags-container flex ps-1 gap-1">
+              <div class="tags-container opacity-60 flex ps-1 gap-1">
                 <span
                   v-if="node.nTodo"
                   class="todo-tag"
