@@ -34,6 +34,7 @@
     visible: boolean;
     currentNode: Node | null;
     multiple: boolean;
+    isDeleting: boolean;
   };
 
   type TooltipState = {
@@ -107,6 +108,7 @@
     currentNode: null,
     multiple: false,
     visible: false,
+    isDeleting: false,
   });
 
   const renamingNode = ref<Node | null>(null);
@@ -303,9 +305,11 @@
     emit('deleteMultiple');
   }
 
-  function handleDeletion() {
+  async function handleDeletion() {
+    modalState.isDeleting = true;
     if (modalState.multiple) deleteSelectedNodes();
     else deleteNode();
+    modalState.isDeleting = false;
     closeModal();
   }
 
@@ -498,6 +502,8 @@
     @mouseleave="containerMouseLeave"
     ref="tree-view"
   >
+    <!-- The modal belongs to here, because the delete node operation belongs to here,
+   and it intercepts the delete node operation. -->
     <Modal :visible="modalState.visible" @close="closeModal">
       <template #header>
         <div v-if="!modalState.multiple && modalState.currentNode?.type === 'dir'">
@@ -519,6 +525,13 @@
               {{ modalState.currentNode.type === 'dir' ? 'folder' : 'contest' }}?
             </span>
             <span class="text-danger text-xl my-2">This action cannot be undone!</span>
+            <div
+              v-if="modalState.isDeleting"
+              class="text-danger text-xl flex items-center justify-center"
+            >
+              Deleting...
+              <span class="loader ml-2"></span>
+            </div>
           </template>
           <template v-else>
             <span>
@@ -530,13 +543,34 @@
               {{ nSelectedFolders === 1 ? 'folder' : 'folders' }}?
             </span>
             <span class="text-danger text-xl my-2">This action cannot be undone!</span>
+            <div
+              v-if="modalState.isDeleting"
+              class="text-danger text-xl flex items-center justify-center"
+            >
+              Deleting...
+              <span class="loader ml-2"></span>
+            </div>
           </template>
         </div>
       </template>
       <template #footer>
         <div class="flex justify-between">
-          <button type="button" class="btn-secondary" @click="closeModal">Cancel</button>
-          <button type="button" class="btn-danger" @click="handleDeletion">Delete</button>
+          <button
+            type="button"
+            class="btn-secondary"
+            @click="closeModal"
+            :disabled="modalState.isDeleting"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            class="btn-danger"
+            @click="handleDeletion"
+            :disabled="modalState.isDeleting"
+          >
+            Delete
+          </button>
         </div>
       </template>
     </Modal>
