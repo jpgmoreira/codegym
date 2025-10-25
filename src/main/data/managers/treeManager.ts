@@ -112,6 +112,7 @@ export class TreeManager {
         curr.nSolved = dirResult.nSubSolved + fileResult.nSubSolved;
         curr.nTodo = dirResult.nSubTodo + fileResult.nSubTodo;
         curr.nFavorite = dirResult.nSubFavorite + fileResult.nSubFavorite;
+        nSub += curr.nDesc;
         nSubSel += curr.nSelDesc;
         nSubFiles += curr.nFileDesc;
         if (curr.nDesc) {
