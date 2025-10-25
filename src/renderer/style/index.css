@@ -22,6 +22,7 @@
 @import './themes/dark/generic.css';
 @import './themes/dark/text.css';
 @import './themes/dark/buttons.css';
+@import './themes/dark/scrollbar.css';
 @import './themes/dark/alerts.css';
 @import './themes/dark/header.css';
 @import './themes/dark/modal.css';
