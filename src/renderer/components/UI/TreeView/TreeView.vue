@@ -18,6 +18,9 @@
   import { useUIStore } from '@renderer/store/ui';
   import { toLocaleNumber } from '@common/utils/utils';
   import { Contest } from '@common/schemas/contests';
+  import solved from '@renderer/assets/images/solved.png';
+  import todo from '@renderer/assets/images/to-do-list.png';
+  import star from '@renderer/assets/images/star.png';
 
   // --- Types: ---
 
@@ -398,7 +401,27 @@
     }
   }
 
+  // --- Tags: ---
+
+  function todoTagText(node: Node) {
+    const s = node.nTodo === 1 ? '' : 's';
+    if (node.type === 'file') return `This contest has ${node.nTodo} problem${s} marked as to-do.`
+    else return `This folder has ${node.nTodo} problem${s} marked as to-do.`
+  }
+
+  function favoriteTagText(node: Node) {
+    const s = node.nTodo === 1 ? '' : 's';
+    if (node.type === 'file') return `This contest has ${node.nFavorite} problem${s} marked as favorite.`
+    else return `This folder has ${node.nFavorite} problem${s} marked as favorite.`
+  }
+
+  function solvedTagText(node: Node) {
+    if (node.type === 'file') return "You have solved all this contest's problems!";
+    else return "You have solved all this folder's problems!"
+  }
+
   // --- Watches: ---
+
   watch(
     () => props.contest,
     async () => {
@@ -587,10 +610,20 @@
               <span v-if="node.type === 'dir' && props.filesHint" class="files-hint">
                 ({{ fileHintText(node.nFileDesc) }})
               </span>
-              <span>{{ node.nProblems + ' ' }}</span>
-              <span>{{ node.nFavorite + ' ' }}</span>
-              <span>{{ node.nSolved + ' ' }}</span>
-              <span>{{ node.nTodo + ' ' }}</span>
+              <div class="tags-container flex gap-1">
+                <span class="tag" v-if="node.nTodo">
+                  <img :src="todo"></img>
+                  <span class="tooltip select-none absolute">{{ todoTagText(node) }}</span>
+                </span>
+                <span class="tag" v-if="node.nFavorite">
+                  <img :src="star"></img>
+                  <span class="tooltip select-none absolute">{{ favoriteTagText(node) }}</span>
+                </span>
+                <span class="tag" v-if="node.nProblems > 0 && node.nProblems === node.nSolved">
+                  <img :src="solved"></img>
+                  <span class="tooltip select-none absolute">{{ solvedTagText(node) }}</span>
+                </span>
+              </div>
             </div>
           </div>
         </div>
@@ -674,6 +707,30 @@
 
   .cursor-not-allowed {
     cursor: not-allowed;
+  }
+
+  .tags-container {
+    padding-left: 5px;
+  }
+
+  .tags-container img {
+    width: 20px;
+    height: 20px;
+    opacity: 0.8
+  }
+
+  .tooltip {
+    visibility: hidden;
+    opacity: 0;
+    transition: opacity 0.23s ease;
+    width: 140px;
+    white-space: normal;
+    word-break: break-word;
+  }
+
+  .tags-container .tag:hover .tooltip {
+    opacity: 1;
+    visibility: visible;
   }
 
   /* --- Transitions --- */

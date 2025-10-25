@@ -253,7 +253,7 @@
                       @dblclick="deleteProblem(problem)"
                     >
                       <img :src="trash" />
-                      <span class="tooltip select-none absolute">Double-click to delete</span>
+                      <span class="tooltip select-none absolute">Double-click to delete.</span>
                     </span>
                   </td>
                   <td>
@@ -369,8 +369,9 @@
   }
   .tooltip {
     visibility: hidden;
-    width: 80px;
+    font-weight: normal;
     top: calc(100% + 3px);
+    width: 120px;
   }
   .icon:hover .tooltip {
     visibility: visible;
