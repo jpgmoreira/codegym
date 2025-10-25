@@ -283,6 +283,10 @@
     tree.value = await window.api.invoke(TreeChannels.clearSelection, tree.value?.anchor || 0);
   }
 
+  async function selectAll() {
+    tree.value = await window.api.invoke(TreeChannels.selectAll, tree.value?.anchor || 0);
+  }
+
   // --- Deletion: ---
 
   async function deleteNode() {
@@ -333,7 +337,7 @@
     });
   }
 
-  // --- Selection: ---
+  // --- Movement: ---
 
   async function moveSelection(channel: TreeChannels) {
     if (!tree.value) return;
@@ -552,6 +556,7 @@
       @delete-selected-nodes="openDeleteSelectedNodesModal"
       @collapse-all="collapseAll"
       @clear-selection="clearSelection"
+      @select-all="selectAll"
       @move-selected-files-above="() => moveSelection(TreeChannels.moveSelectedFilesAbove)"
       @move-selected-files-below="() => moveSelection(TreeChannels.moveSelectedFilesBelow)"
       @move-selected-folders-above="() => moveSelection(TreeChannels.moveSelectedFoldersAbove)"

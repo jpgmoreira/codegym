@@ -144,6 +144,16 @@ ipcMain.handle(
 );
 
 ipcMain.handle(
+  TreeChannels.selectAll,
+  (_: IpcMainInvokeEvent, anchor: number): TreeOperationResponseDTO => {
+    return measure('selectAll', () => {
+      TreeManager.instance.selectAll();
+      return TreeManager.instance.buildResult(anchor);
+    });
+  }
+);
+
+ipcMain.handle(
   TreeChannels.moveSelectedFilesAbove,
   (_: IpcMainInvokeEvent, anchor: number, baseNodeId: string): TreeOperationResponseDTO => {
     return measure('moveSelectedFilesAbove', () => {

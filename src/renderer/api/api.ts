@@ -36,6 +36,7 @@ export const allowedInvokeChannels = Object.freeze([
   TreeChannels.search,
   TreeChannels.collapseAll,
   TreeChannels.clearSelection,
+  TreeChannels.selectAll,
   TreeChannels.moveSelectedFilesAbove,
   TreeChannels.moveSelectedFilesBelow,
   TreeChannels.moveSelectedFoldersAbove,

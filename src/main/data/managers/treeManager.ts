@@ -17,14 +17,15 @@ import path from 'path';
 import { ProfileManager } from './profileManager';
 import { Contest, ContestProblem } from '@common/schemas/contests';
 
+// Contains a linked list of the base nodes of the tree.
 type RootController = NodeController & {
-  nextDir: number;
-  nextFile: number;
+  nextDir: number; // Number of the next directory to be created.
+  nextFile: number; // Number of the next file to be created.
 };
 
 type TreeData = {
   rootController: RootController;
-  idToNode: Record<string, Node>;
+  idToNode: Record<string, Node>; // Maps node ids to the node objects.
 };
 
 /**
@@ -58,9 +59,9 @@ export class TreeManager {
   private nSelectedNodes = 0;
   private nSelectedFiles = 0;
   private nOpenDirs = 0;
-  private expandedFlat: Node[] = [];
+  private expandedFlat: Node[] = []; // Entire tree flattened into an array.
 
-  private contestIdToNode: Record<string, Node> = {};
+  private contestIdToNode: Record<string, Node> = {}; // Maps contest IDs to nodes.
 
   // --- Setup methods: ---
 
@@ -150,7 +151,7 @@ export class TreeManager {
       }
     }
     if (nSurfaceNodes && !visibleNodes.length) {
-      // Here we have a problem: anchor is larger than nSurfaceNodes.
+      // If current anchor is larger than nSurfaceNodes.
       return this.buildResult(Math.max(0, nSurfaceNodes - TREE_PAGE_SIZE));
     }
     return {
@@ -436,6 +437,17 @@ export class TreeManager {
     }
     this.nSelectedFiles = 0;
     this.nSelectedNodes = 0;
+    this._proxy!.queueWrite();
+  }
+
+  public selectAll() {
+    this.nSelectedFiles = 0;
+    for (const node of this.expandedFlat) {
+      node.selected = true;
+      if (node.type === 'dir') node.nSelDesc = node.nDesc;
+      if (node.type === 'file') this.nSelectedFiles++;
+    }
+    this.nSelectedNodes = this.expandedFlat.length;
     this._proxy!.queueWrite();
   }
 
