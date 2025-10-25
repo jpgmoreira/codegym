@@ -102,7 +102,7 @@ export class ContestsManager {
     fs.unlinkSync(contestPath);
   }
 
-  public addCurrContestProblem() {
+  public addCurrContestProblem(): ContestProblem {
     const newProblem = getEmptyContestProblem();
     this.proxy?.proxy.problems.push(newProblem);
     return newProblem;
