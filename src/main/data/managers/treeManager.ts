@@ -80,7 +80,7 @@ export class TreeManager {
   public loadTree(profileId: string) {
     const filePath = path.join(DATA_DIR, 'profileData', profileId, 'tree.json');
     this._proxy = new FileProxy(filePath, this.getEmptyTreeData());
-    this.refresh();
+    this.refresh(false);
     this.clearHidden();
   }
 
@@ -182,7 +182,7 @@ export class TreeManager {
    *  - nTodo;
    *  - nFavorite;
    */
-  private refresh() {
+  private refresh(flush: boolean) {
     const dirHead = this.getHead(this.target.rootController.dirs, false);
     const fileHead = this.getHead(this.target.rootController.files, false);
     this.expandedFlat.length = 0;
@@ -192,7 +192,9 @@ export class TreeManager {
     this.contestIdToNode = {};
     this.flatten(dirHead, 0, this.expandedFlat);
     this.flatten(fileHead, 0, this.expandedFlat);
-    this._proxy!.queueWrite();
+    if (flush) {
+      this._proxy!.queueWrite();
+    }
   }
 
   // --- Helpers: ---
@@ -342,7 +344,7 @@ export class TreeManager {
     } else {
       this.appendNode(newNode, this.target.rootController);
     }
-    this.refresh();
+    this.refresh(true);
   }
 
   public createNodeAbove(type: NodeType, prefix: string, baseNodeId: string) {
@@ -352,7 +354,7 @@ export class TreeManager {
     const newNode = this.createNodeHelper(type, prefix, parent?.id || null);
     if (parent) newNode.selected = parent.selected;
     this.appendNodeAbove(newNode, baseNode);
-    this.refresh();
+    this.refresh(true);
   }
 
   public createNodeBelow(type: NodeType, prefix: string, baseNodeId: string) {
@@ -362,7 +364,7 @@ export class TreeManager {
     const newNode = this.createNodeHelper(type, prefix, parent?.id || null);
     if (parent) newNode.selected = parent.selected;
     this.appendNodeBelow(newNode, baseNode);
-    this.refresh();
+    this.refresh(true);
   }
 
   // --- Handle directory open/closed state: ---
@@ -484,7 +486,7 @@ export class TreeManager {
       node.active = true;
       ProfileManager.instance.setCurrContest(node.contestId);
     }
-    this.refresh();
+    this.refresh(true);
   }
 
   // --- Deletion: ---
@@ -542,7 +544,7 @@ export class TreeManager {
       this.deleteSubtree(node);
     }
     delete this.target.idToNode[nodeId];
-    this.refresh();
+    this.refresh(true);
   }
 
   public deleteSelectedNodes() {
@@ -553,7 +555,7 @@ export class TreeManager {
         delete this.target.idToNode[node.id];
       }
     }
-    this.refresh();
+    this.refresh(true);
   }
 
   // --- Search: ---
@@ -612,7 +614,7 @@ export class TreeManager {
         node.parentId = parent?.id || null;
       }
     }
-    this.refresh();
+    this.refresh(true);
   }
 
   public moveSelectedFilesBelow(baseNodeId: string) {
@@ -627,7 +629,7 @@ export class TreeManager {
         node.parentId = parent?.id || null;
       }
     }
-    this.refresh();
+    this.refresh(true);
   }
 
   public moveSelectedFoldersAbove(baseNodeId: string) {
@@ -643,7 +645,7 @@ export class TreeManager {
         node.parentId = baseNodeParent?.id || null;
       }
     }
-    this.refresh();
+    this.refresh(true);
   }
 
   public moveSelectedFoldersBelow(baseNodeId: string) {
@@ -660,7 +662,7 @@ export class TreeManager {
         node.parentId = baseNodeParent?.id || null;
       }
     }
-    this.refresh();
+    this.refresh(true);
   }
 
   public moveSelectedNodesInto(destinationId: string | null) {
@@ -677,7 +679,7 @@ export class TreeManager {
         node.parentId = destinationNode ? destinationNode.id : null;
       }
     }
-    this.refresh();
+    this.refresh(true);
   }
 
   //  -- Application-specific: ---
@@ -688,7 +690,7 @@ export class TreeManager {
     if (!contest) return problem;
     const node = this.contestIdToNode[contest.id];
     node.nProblems++;
-    this.refresh();
+    this.refresh(true);
     return problem;
   }
 
@@ -707,7 +709,7 @@ export class TreeManager {
       (acc: number, curr: ContestProblem) => acc + (curr.solved ? 1 : 0),
       0
     );
-    this.refresh();
+    this.refresh(true);
   }
 
   public deleteContestProblem(contest: Contest, problemId: string) {
@@ -718,6 +720,6 @@ export class TreeManager {
     node.nFavorite -= problem.favorite ? 1 : 0;
     node.nTodo -= problem.todo ? 1 : 0;
     node.nSolved -= problem.solved ? 1 : 0;
-    this.refresh();
+    this.refresh(true);
   }
 }
