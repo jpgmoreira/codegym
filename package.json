@@ -1,7 +1,7 @@
 {
   "name": "codegym",
   "productName": "CodeGym",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "An application for practicing competitive programming",
   "main": "./out/main/main.js",
   "author": {
