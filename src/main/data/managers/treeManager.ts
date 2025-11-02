@@ -71,8 +71,10 @@ export class TreeManager {
   public loadTree(profileId: string) {
     const filePath = path.join(DATA_DIR, 'profileData', profileId, 'tree', 'tree.json');
     const bkpPath = path.join(DATA_DIR, 'profileData', profileId, 'tree', 'tree.json.bkp');
+    // In case the FileProxy creation fails because the "tree.json" file is corrupt,
+    // an exception is thrown and the backup file stays safe (corrupt content is not copied).
     this._proxy = new FileProxy(filePath, this.getEmptyTreeData());
-    fs.writeFileSync(bkpPath, JSON.stringify(this.target));
+    fs.copyFileSync(filePath, bkpPath);
     this.refresh(false);
     this.clearHidden();
   }
