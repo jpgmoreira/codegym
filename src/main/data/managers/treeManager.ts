@@ -8,6 +8,7 @@ import { GenericResponseDTO } from '@common/dto/genericResponseDTO';
 import { ContestsManager } from './contestsManager';
 import path from 'path';
 import { ProfileManager } from './profileManager';
+import fs from 'fs';
 
 // Contains a linked list of the base nodes of the tree.
 type RootController = NodeController & {
@@ -68,8 +69,10 @@ export class TreeManager {
   }
 
   public loadTree(profileId: string) {
-    const filePath = path.join(DATA_DIR, 'profileData', profileId, 'tree.json');
+    const filePath = path.join(DATA_DIR, 'profileData', profileId, 'tree', 'tree.json');
+    const bkpPath = path.join(DATA_DIR, 'profileData', profileId, 'tree', 'tree.json.bkp');
     this._proxy = new FileProxy(filePath, this.getEmptyTreeData());
+    fs.writeFileSync(bkpPath, JSON.stringify(this.target));
     this.refresh(false);
     this.clearHidden();
   }
