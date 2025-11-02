@@ -1,7 +1,8 @@
 import { ipcMain, IpcMainInvokeEvent } from 'electron';
 import { TreeChannels } from '@common/types/treeChannels';
 import { TreeManager } from '@main/data/managers/treeManager';
-import { ModifierKeys, NodeType } from '@common/types/tree';
+import { NodeType } from '@common/types/tree';
+import { ModifierKeys } from '@common/types/keys';
 import { TreeOperationResponseDTO } from '@common/dto/treeOperationResponseDTO';
 import { GenericResponseDTO } from '@common/dto/genericResponseDTO';
 import { measure } from '@main/utils/performance';
