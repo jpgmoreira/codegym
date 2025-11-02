@@ -1,0 +1,16 @@
+Future improvements:
+  - Optimize even further components that deal with large amounts of data (mainly TreeView and LineChart);
+
+  - Separate important components (TreeView, LineChart, Multiselect, etc.) into reusable components, publish them as libraries, adapt the code to use them as dependencies;
+
+  - Add automated testing;
+
+  - Add storybook;
+
+  - Record a video showing how to use the application;
+
+  - Find better ways to improve reproductibility and make the project future-proof;
+
+  - Load initial treeview and history data upon application load, store on pinia, to avoid UI delay.
+
+  - Write technical documentation, with decisions made, and architecture.
