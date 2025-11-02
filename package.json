@@ -4,7 +4,10 @@
   "version": "0.0.1",
   "description": "An application for practicing competitive programming",
   "main": "./out/main/main.js",
-  "author": "The CodeGym Team",
+  "author": {
+    "name": "The CodeGym Team",
+    "email": "jpgmoreira19@gmail.com"
+  },
   "homepage": "https://github.com/jpgmoreira/codegym",
   "repository": {
     "type": "git",
