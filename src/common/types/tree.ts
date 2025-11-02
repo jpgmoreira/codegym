@@ -1,10 +1,12 @@
 export type NodeType = 'dir' | 'file';
 
+// First and last node IDs in a doubly linked list of siblings.
 export type HeadAndTail = {
-  headId: string | null; // First node ID in a linked list.
-  tailId: string | null; // Last node ID na a linked list.
+  headId: string | null;
+  tailId: string | null;
 };
 
+// Stores the linked lists of dir and file direct children.
 export type NodeController = {
   dirs: HeadAndTail;
   files: HeadAndTail;
