@@ -68,13 +68,25 @@ export class TreeManager {
     };
   }
 
+  private safeCopy(src: string, dest: string) {
+    const tmp = dest + '.tmp';
+    fs.copyFileSync(src, tmp);
+    fs.renameSync(tmp, dest);
+  }
+
   public loadTree(profileId: string) {
     const filePath = path.join(DATA_DIR, 'profileData', profileId, 'tree', 'tree.json');
     const bkpPath = path.join(DATA_DIR, 'profileData', profileId, 'tree', 'tree.json.bkp');
-    // In case the FileProxy creation fails because the "tree.json" file is corrupt,
-    // an exception is thrown and the backup file stays safe (corrupt content is not copied).
-    this._proxy = new FileProxy(filePath, this.getEmptyTreeData());
-    fs.copyFileSync(filePath, bkpPath);
+    try {
+      // In case the FileProxy creation fails because the "tree.json" file is corrupt,
+      // an exception is thrown and the backup file stays safe (corrupt content is not copied).
+      this._proxy = new FileProxy(filePath, this.getEmptyTreeData());
+      this.safeCopy(filePath, bkpPath);
+    } catch {
+      // File "tree.json" is corrupt: restore from backup.
+      this.safeCopy(bkpPath, filePath);
+      this._proxy = new FileProxy(filePath, this.getEmptyTreeData());
+    }
     this.refresh(false);
     this.clearHidden();
   }
