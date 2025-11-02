@@ -21,21 +21,21 @@
 }
 
 /* Fade + slight move animation */
-.theme-dark .treeview .badge-fade-enter-active,
-.theme-dark .treeview .badge-fade-leave-active {
+.theme-dark .treeview .fade-enter-active,
+.theme-dark .treeview .fade-leave-active {
   transition:
     opacity 0.25s ease,
     transform 0.25s ease;
 }
 
-.theme-dark .treeview .badge-fade-enter-from,
-.theme-dark .treeview .badge-fade-leave-to {
+.theme-dark .treeview .fade-enter-from,
+.theme-dark .treeview .fade-leave-to {
   opacity: 0;
   transform: translateY(5px);
 }
 
-.theme-dark .treeview .badge-fade-enter-to,
-.theme-dark .treeview .badge-fade-leave-from {
+.theme-dark .treeview .fade-enter-to,
+.theme-dark .treeview .fade-leave-from {
   opacity: 1;
   transform: translateY(0);
 }

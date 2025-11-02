@@ -102,7 +102,7 @@
 
   async function toggleProblemFlag(problem: ContestProblem, flag: ContestProblemFlag) {
     // await here because the tree can be updated in the back with this call,
-    // and problem[flag] = !problem[flag] will trigger a new tree refetch.
+    // and "problem[flag] = !problem[flag]" will trigger a new tree refetch.
     await window.api.invoke(Channels.toggleCurrContestProblemFlag, problem.id, flag);
     problem[flag] = !problem[flag];
     if (flag === 'solved') {
@@ -169,7 +169,6 @@
           files-hint
           search
           file-icon
-          :contest="contest"
           @set-active="setActiveContest"
           @rename="renameContest"
           @delete-single="deleteSingleContest"
@@ -334,7 +333,7 @@
     width: 15%;
   }
   textarea {
-    field-sizing: content; /** CSS experimental. Should work fine on current electron versions. */
+    field-sizing: content; /** CSS experimental. Should work fine on recent electron versions. */
     resize: none;
     display: block;
     width: 100%;

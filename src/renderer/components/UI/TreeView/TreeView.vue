@@ -2,7 +2,8 @@
   import Modal from '../Modal.vue';
   import ContextMenu from './ContextMenu.vue';
   import { TreeOperationResponseDTO } from '@common/dto/treeOperationResponseDTO';
-  import { NodeType, Node, ModifierKeys, DirNode } from '@common/types/tree';
+  import { NodeType, Node, DirNode } from '@common/types/tree';
+  import { ModifierKeys } from '@common/types/keys';
   import { TreeChannels } from '@common/types/treeChannels';
   import {
     ref,
@@ -12,12 +13,10 @@
     onBeforeUnmount,
     useTemplateRef,
     computed,
-    watch,
   } from 'vue';
   import { GenericResponseDTO } from '@common/dto/genericResponseDTO';
   import { useUIStore } from '@renderer/store/ui';
   import { toLocaleNumber } from '@common/utils/utils';
-  import { Contest } from '@common/schemas/contests';
 
   // --- Types: ---
 
@@ -37,13 +36,6 @@
     isDeleting: boolean;
   };
 
-  type TooltipState = {
-    visible: boolean;
-    text: string;
-    left: number;
-    top: number;
-  };
-
   // --- Props and emits: ---
 
   const props = withDefaults(
@@ -53,10 +45,6 @@
       search?: boolean;
       dirIcon?: boolean;
       fileIcon?: boolean;
-      // The current contest is passed just because we have
-      // to refresh the tree when some of its properties change,
-      // for example when we add a new problem.
-      contest?: Contest | null;
     }>(),
     {
       checkbox: false,
@@ -64,7 +52,6 @@
       search: false,
       dirIcon: false,
       fileIcon: false,
-      contest: null,
     }
   );
 
@@ -97,13 +84,6 @@
     y: 0,
   });
 
-  const tooltipState = reactive<TooltipState>({
-    visible: false,
-    text: '',
-    left: 0,
-    top: 0,
-  });
-
   const modalState = reactive<ModalState>({
     currentNode: null,
     multiple: false,
@@ -125,11 +105,6 @@
 
   const ghostStyle = computed(() => ({
     height: `${rowHeight * (tree.value?.nSurfaceNodes || 0) + paddingBottom}px`,
-  }));
-
-  const tooltipStyle = computed(() => ({
-    left: `${tooltipState.left}px`,
-    top: `${tooltipState.top}px`,
   }));
 
   const selectedFilesText = computed(() => {
@@ -372,12 +347,7 @@
   }
 
   function fileHintText(node: DirNode) {
-    const texts = [
-      node.nFileDesc === 1 ? '1 contest' : `${toLocaleNumber(node.nFileDesc)} contests`,
-    ];
-    // if (node.nTodo) texts.push(`${toLocaleNumber(node.nTodo)} todo`);
-    // if (node.nFavorite) texts.push(`${toLocaleNumber(node.nFavorite)} favorite`);
-    return texts.join(', ');
+    return node.nFileDesc === 1 ? '1 contest' : `${toLocaleNumber(node.nFileDesc)} contests`;
   }
 
   // --- Events: ---
@@ -386,7 +356,6 @@
   function handleScroll() {
     if (!scrollContainer.value) return;
     contextState.visible = false;
-    tooltipState.visible = false;
     const scrollTop = scrollContainer.value.scrollTop;
     if (scrollTop === lastScrollTop) return; // Do not react on x scroll;
     lastScrollTop = scrollTop;
@@ -430,55 +399,6 @@
     }
   }
 
-  // --- Tags: ---
-
-  // function todoTagText(node: Node) {
-  //   const s = node.nTodo === 1 ? '' : 's';
-  //   if (node.type === 'file') return `This contest has ${node.nTodo} problem${s} marked as to-do.`;
-  //   else return `This folder has ${node.nTodo} problem${s} marked as to-do.`;
-  // }
-
-  // function favoriteTagText(node: Node) {
-  //   const s = node.nFavorite === 1 ? '' : 's';
-  //   if (node.type === 'file')
-  //     return `This contest has ${node.nFavorite} problem${s} marked as favorite.`;
-  //   else return `This folder has ${node.nFavorite} problem${s} marked as favorite.`;
-  // }
-
-  // function solvedTagText(node: Node) {
-  //   if (node.type === 'file') return "You have solved all this contest's problems!";
-  //   else return "You have solved all this folder's problems!";
-  // }
-
-  // --- Tooltip: ---
-
-  // function showTooltip(text: string, e: MouseEvent) {
-  //   tooltipState.left = e.clientX;
-  //   tooltipState.top = e.clientY;
-  //   tooltipState.visible = true;
-  //   tooltipState.text = text;
-  // }
-
-  function hideTooltip(e: MouseEvent) {
-    const el = document.elementFromPoint(e.clientX, e.clientY) as HTMLElement | null;
-    if (!el) return;
-    if (el.closest('.todo-tag, .favorite-tag, .solved-tag, .tooltip')) {
-      return;
-    }
-    tooltipState.visible = false;
-    tooltipState.text = '';
-  }
-
-  // --- Watches: ---
-
-  watch(
-    () => props.contest,
-    async () => {
-      tree.value = await window.api.invoke(TreeChannels.getState, tree.value?.anchor ?? 0);
-    },
-    { deep: true }
-  );
-
   // --- Hooks: ---
 
   onMounted(async () => {
@@ -507,7 +427,7 @@
     @mouseleave="containerMouseLeave"
   >
     <!-- The modal belongs to here, because the delete node operation belongs to here,
-   and it intercepts the delete node operation. -->
+   and the modal must intercept the delete node operation to request for confirmation. -->
     <Modal :visible="modalState.visible" @close="closeModal">
       <template #header>
         <div v-if="!modalState.multiple && modalState.currentNode?.type === 'dir'">
@@ -609,17 +529,6 @@
       </div>
     </Transition>
 
-    <Transition name="fade">
-      <div
-        v-if="tooltipState.visible"
-        class="tooltip z-[4]"
-        :style="tooltipStyle"
-        @mouseleave="hideTooltip"
-      >
-        {{ tooltipState.text }}
-      </div>
-    </Transition>
-
     <div
       v-if="!isSearching && !tree?.visibleNodes.length"
       class="absolute-center flex justify-center whitespace-nowrap text-lg opacity-70 w-full overflow-hidden"
@@ -702,27 +611,6 @@
               <span v-if="node.type === 'dir' && props.filesHint" class="files-hint">
                 ({{ fileHintText(node) }})
               </span>
-              <!-- Too much visual pollution: -->
-              <!-- <div class="tags-container opacity-60 flex ps-1 gap-1">
-                <span
-                  v-if="node.nTodo"
-                  class="todo-tag"
-                  @mouseenter="(e) => showTooltip(todoTagText(node), e)"
-                  @mouseleave="hideTooltip"
-                ></span>
-                <span
-                  v-if="node.nFavorite"
-                  class="favorite-tag"
-                  @mouseenter="(e) => showTooltip(favoriteTagText(node), e)"
-                  @mouseleave="hideTooltip"
-                ></span>
-                <span
-                  v-if="node.nProblems > 0 && node.nProblems === node.nSolved"
-                  class="solved-tag"
-                  @mouseenter="(e) => showTooltip(solvedTagText(node), e)"
-                  @mouseleave="hideTooltip"
-                ></span>
-              </div> -->
             </div>
           </div>
         </div>
@@ -758,7 +646,7 @@
     padding-right: 5px;
     cursor: pointer;
     background-color: transparent;
-    field-sizing: content; /** CSS experimental. On modern electron should work fine. */
+    field-sizing: content; /** CSS experimental. On recent electron versions it should work fine. */
   }
 
   .node-caret {
@@ -806,14 +694,6 @@
 
   .cursor-not-allowed {
     cursor: not-allowed;
-  }
-
-  .tooltip {
-    width: 200px;
-    white-space: normal;
-    word-break: break-word;
-    user-select: none;
-    position: fixed;
   }
 
   /* --- Transitions --- */
