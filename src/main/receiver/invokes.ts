@@ -14,7 +14,6 @@ import { GenericResponseDTO } from '@common/dto/genericResponseDTO';
 import { FetchHistoryPageResponseDTO } from '@common/dto/fetchHistoryPageResponseDTO';
 import { Contest, ContestProblem, ContestProblemFlag } from '@common/schemas/contests';
 import { ContestsManager } from '@main/data/managers/contestsManager';
-import { TreeManager } from '@main/data/managers/treeManager';
 
 ipcMain.handle(
   Channels.createProfile,
@@ -70,7 +69,7 @@ ipcMain.handle(Channels.getContest, async (_, contestId: string): Promise<Contes
 });
 
 ipcMain.handle(Channels.addCurrContestProblem, async (): Promise<ContestProblem> => {
-  const problem = TreeManager.instance.addCurrContestProblem();
+  const problem = ContestsManager.instance.addCurrContestProblem();
   return problem;
 });
 
@@ -78,15 +77,11 @@ ipcMain.handle(
   Channels.toggleCurrContestProblemFlag,
   (_, problemId: string, flag: ContestProblemFlag) => {
     ContestsManager.instance.toggleCurrContestProblemFlag(problemId, flag);
-    const currContest = ContestsManager.instance.getCurrContest();
-    if (!currContest) return;
-    TreeManager.instance.updateContestFlags(currContest);
   }
 );
 
 ipcMain.handle(Channels.deleteCurrContestProblem, (_, problemId: string) => {
   const currContest = ContestsManager.instance.getCurrContest();
   if (!currContest) return;
-  TreeManager.instance.deleteContestProblem(currContest, problemId);
   ContestsManager.instance.deleteCurrContestProblem(problemId);
 });

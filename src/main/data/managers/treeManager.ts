@@ -8,7 +8,6 @@ import { GenericResponseDTO } from '@common/dto/genericResponseDTO';
 import { ContestsManager } from './contestsManager';
 import path from 'path';
 import { ProfileManager } from './profileManager';
-import { Contest, ContestProblem } from '@common/schemas/contests';
 
 // Contains a linked list of the base nodes of the tree.
 type RootController = NodeController & {
@@ -54,8 +53,6 @@ export class TreeManager {
   private nOpenDirs = 0;
   private expandedFlat: Node[] = []; // Entire tree flattened into an array.
 
-  private contestIdToNode: Record<string, Node> = {}; // Maps contest IDs to nodes.
-
   // --- Setup methods: ---
 
   private getEmptyTreeData(): TreeData {
@@ -85,9 +82,6 @@ export class TreeManager {
       nSubSel = 0,
       nSubFiles = 0;
     while (curr) {
-      if (curr && curr.type === 'file') {
-        this.contestIdToNode[curr.contestId] = curr;
-      }
       array.push(curr);
       if (curr.type === 'dir') {
         const dirHead = this.getHead(curr.dirs, false);
@@ -170,7 +164,6 @@ export class TreeManager {
     this.nSelectedNodes = 0;
     this.nSelectedFiles = 0;
     this.nOpenDirs = 0;
-    this.contestIdToNode = {};
     this.flatten(dirHead, 0, this.expandedFlat);
     this.flatten(fileHead, 0, this.expandedFlat);
     if (flush) {
@@ -652,47 +645,6 @@ export class TreeManager {
         node.parentId = destinationNode ? destinationNode.id : null;
       }
     }
-    this.refresh(true);
-  }
-
-  //  -- Application-specific: ---
-
-  public addCurrContestProblem() {
-    const problem = ContestsManager.instance.addCurrContestProblem();
-    const contest = ContestsManager.instance.getCurrContest();
-    if (!contest) return problem;
-    const node = this.contestIdToNode[contest.id];
-    node.nProblems++;
-    this.refresh(true);
-    return problem;
-  }
-
-  public updateContestFlags(contest: Contest) {
-    const node = this.contestIdToNode[contest.id];
-    if (!node || node.type !== 'file') return;
-    node.nFavorite = contest.problems.reduce(
-      (acc: number, curr: ContestProblem) => acc + (curr.favorite ? 1 : 0),
-      0
-    );
-    node.nTodo = contest.problems.reduce(
-      (acc: number, curr: ContestProblem) => acc + (curr.todo ? 1 : 0),
-      0
-    );
-    node.nSolved = contest.problems.reduce(
-      (acc: number, curr: ContestProblem) => acc + (curr.solved ? 1 : 0),
-      0
-    );
-    this.refresh(true);
-  }
-
-  public deleteContestProblem(contest: Contest, problemId: string) {
-    const problem = contest.problems.find((p) => p.id === problemId);
-    if (!problem) return;
-    const node = this.contestIdToNode[contest.id];
-    node.nProblems--;
-    node.nFavorite -= problem.favorite ? 1 : 0;
-    node.nTodo -= problem.todo ? 1 : 0;
-    node.nSolved -= problem.solved ? 1 : 0;
     this.refresh(true);
   }
 }
