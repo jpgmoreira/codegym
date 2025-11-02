@@ -1,15 +1,8 @@
 import { randomId } from '@common/utils/utils';
 import { DATA_DIR, TREE_PAGE_SIZE } from '../constants';
 import { FileProxy } from '../fileProxy';
-import {
-  NodeController,
-  Node,
-  FileNode,
-  DirNode,
-  NodeType,
-  ModifierKeys,
-  HeadAndTail,
-} from '@common/types/tree';
+import { NodeController, Node, FileNode, DirNode, NodeType, HeadAndTail } from '@common/types/tree';
+import { ModifierKeys } from '@common/types/keys';
 import { TreeOperationResponseDTO } from '@common/dto/treeOperationResponseDTO';
 import { GenericResponseDTO } from '@common/dto/genericResponseDTO';
 import { ContestsManager } from './contestsManager';
@@ -90,11 +83,7 @@ export class TreeManager {
     let curr = node;
     let nSub = 0,
       nSubSel = 0,
-      nSubFiles = 0,
-      nSubProblems = 0,
-      nSubSolved = 0,
-      nSubTodo = 0,
-      nSubFavorite = 0;
+      nSubFiles = 0;
     while (curr) {
       if (curr && curr.type === 'file') {
         this.contestIdToNode[curr.contestId] = curr;
@@ -108,10 +97,6 @@ export class TreeManager {
         curr.nDesc = dirResult.nSub + fileResult.nSub;
         curr.nSelDesc = dirResult.nSubSel + fileResult.nSubSel;
         curr.nFileDesc = dirResult.nSubFiles + fileResult.nSubFiles;
-        curr.nProblems = dirResult.nSubProblems + fileResult.nSubProblems;
-        curr.nSolved = dirResult.nSubSolved + fileResult.nSubSolved;
-        curr.nTodo = dirResult.nSubTodo + fileResult.nSubTodo;
-        curr.nFavorite = dirResult.nSubFavorite + fileResult.nSubFavorite;
         nSub += curr.nDesc;
         nSubSel += curr.nSelDesc;
         nSubFiles += curr.nFileDesc;
@@ -125,15 +110,11 @@ export class TreeManager {
       nSub++;
       nSubSel += sel;
       nSubFiles += curr.type === 'file' ? 1 : 0;
-      nSubProblems += curr.nProblems;
-      nSubSolved += curr.nSolved;
-      nSubTodo += curr.nTodo;
-      nSubFavorite += curr.nFavorite;
       this.nSelectedNodes += sel;
       this.nSelectedFiles += curr.type === 'file' ? sel : 0;
       curr = this.getNext(curr, false);
     }
-    return { nSub, nSubSel, nSubFiles, nSubProblems, nSubSolved, nSubTodo, nSubFavorite };
+    return { nSub, nSubSel, nSubFiles };
   }
 
   public buildResult(anchor: number): TreeOperationResponseDTO {
@@ -254,10 +235,6 @@ export class TreeManager {
       nDesc: 0,
       nSelDesc: 0,
       nFileDesc: 0,
-      nProblems: 0,
-      nSolved: 0,
-      nTodo: 0,
-      nFavorite: 0,
     } as const;
   }
 
@@ -276,10 +253,6 @@ export class TreeManager {
       prevId: null,
       contestId,
       active: false,
-      nTodo: 0,
-      nFavorite: 0,
-      nSolved: 0,
-      nProblems: 0,
     } as const;
   }
 

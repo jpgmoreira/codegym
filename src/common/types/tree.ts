@@ -1,9 +1,5 @@
 export type NodeType = 'dir' | 'file';
 
-/**
- * Optional properties will be absent **ONLY** in the "tree.json" file, to save space.
- */
-
 // First and last node IDs in a doubly linked list of siblings.
 export type HeadAndTail = {
   headId: string | null;
@@ -19,7 +15,7 @@ export type NodeController = {
 export type BaseNode = {
   id: string;
   text: string;
-  depth?: number;
+  depth: number;
   selected: boolean;
   hidden: boolean; // Used to hide nodes when searching by file text.
   parentId: string | null;
@@ -32,9 +28,9 @@ export type DirNode = BaseNode &
   NodeController & {
     type: 'dir';
     open: boolean;
-    nDesc?: number; // Total number of descendants, dir or file, not including the node.
-    nSelDesc?: number; // Total number of selected descendants.
-    nFileDesc?: number; // Total number of file descendants.
+    nDesc: number; // Total number of descendants, dir or file, not including the node.
+    nSelDesc: number; // Total number of selected descendants.
+    nFileDesc: number; // Total number of file descendants.
   };
 
 export type FileNode = BaseNode & {
