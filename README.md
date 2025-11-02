@@ -67,3 +67,16 @@ npm run build:linux
 ## About
 
 CodeGym was created to help competitive programmers stay motivated, track their progress, and make practice more engaging.
+
+## Assets
+
+- **App Icon** — [Neural](https://www.flaticon.com/free-icon/neural_2103658)
+- **Arrow Down** — [Arrow Down](https://www.flaticon.com/free-icon/arrow-down_9053032)
+- **Book** — [Book](https://www.flaticon.com/free-icon/book_2232559)
+- **Information** — [Information](https://www.flaticon.com/free-icon/information_9195785)
+- **Solved** — [Solved](https://www.flaticon.com/free-icon/solved_2597570)
+- **Star** — [Star](https://www.flaticon.com/free-icon/star_1828614)
+- **To-do List** — [To-do List](https://www.flaticon.com/free-icon/to-do-list_2387635)
+- **Trash** — [Trash](https://www.flaticon.com/free-icon/trash_3096750)
+
+> All icons were downloaded from [Flaticon](https://www.flaticon.com/).
