@@ -29,8 +29,9 @@ With CodeGym, you can explore problems from multiple online judges, organize you
 
 You can also download pre-built installers here:
 
-- [Linux](link here)
-- [Windows](link here)
+- [Linux (rpm)](https://github.com/jpgmoreira/codegym/releases/download/0.0.1/codegym-0.0.1.x86_64.rpm)
+- [Linux (deb)](https://github.com/jpgmoreira/codegym/releases/download/0.0.1/codegym_0.0.1_amd64.deb)
+- [Windows](https://github.com/jpgmoreira/codegym/releases/download/0.0.1/codegym-0.0.1-setup.exe)
 
 ## How to Run
 
