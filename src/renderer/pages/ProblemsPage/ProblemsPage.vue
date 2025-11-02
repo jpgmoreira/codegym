@@ -51,12 +51,12 @@
     <div class="my-auto flex items-center">
       <label for="solved-checkbox" class="pr-2">Solved?</label>
       <input
-        type="checkbox"
         id="solved-checkbox"
+        v-model="isSolved"
+        type="checkbox"
         name="solved-checkbox"
         :disabled="!snapshot"
         @change="handleSolvedChange"
-        v-model="isSolved"
       />
     </div>
   </footer>

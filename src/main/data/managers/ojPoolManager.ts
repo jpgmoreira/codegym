@@ -54,7 +54,7 @@ export class OjPoolManager {
   }
 
   public async getOjProblem<T extends Oj>(oj: T) {
-    let result: GetOjProblemResponseDTO<T> = {
+    const result: GetOjProblemResponseDTO<T> = {
       snapshot: null,
       matched: 0,
     };

@@ -45,7 +45,7 @@
           </span>
         </div>
         <div v-if="showTags" class="tags-container flex flex-wrap gap-1 border rounded-md p-1">
-          <span class="tag-badge" v-for="tag in snapshot.info.tags" :key="tag">{{ tag }}</span>
+          <span v-for="tag in snapshot.info.tags" :key="tag" class="tag-badge">{{ tag }}</span>
         </div>
       </li>
     </ul>

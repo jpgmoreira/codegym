@@ -14,15 +14,15 @@
       <label class="pr-1.5">Difficulty:</label>
       <div>
         <input
+          v-model="filters.difficulty.min"
           type="number"
           placeholder="min"
-          v-model="filters.difficulty.min"
           @change="onChange"
         />
         <input
+          v-model="filters.difficulty.max"
           type="number"
           placeholder="max"
-          v-model="filters.difficulty.max"
           @change="onChange"
         />
       </div>
@@ -39,15 +39,15 @@
       </div>
       <div>
         <input
+          v-model="filters.popularity.min"
           type="number"
           placeholder="min"
-          v-model="filters.popularity.min"
           @change="onChange"
         />
         <input
+          v-model="filters.popularity.max"
           type="number"
           placeholder="max"
-          v-model="filters.popularity.max"
           @change="onChange"
         />
       </div>
@@ -55,10 +55,10 @@
     <div class="flex items-center mt-2">
       <label class="pr-1.5" for="starred">Starred:</label>
       <input
-        type="checkbox"
         id="starred"
-        name="starred"
         v-model="filters.starred.value"
+        type="checkbox"
+        name="starred"
         @change="onChange"
       />
     </div>

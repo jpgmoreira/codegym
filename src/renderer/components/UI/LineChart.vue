@@ -525,10 +525,10 @@
   <div class="canvas-container">
     <div class="legend-container">
       <div
-        class="legend-item"
-        :class="{ disabled: disabledSeries[series.id] }"
         v-for="series of data"
         :key="series.id"
+        class="legend-item"
+        :class="{ disabled: disabledSeries[series.id] }"
         @click="legendItemClick(series.id)"
       >
         <div class="legend-item-content">
@@ -537,7 +537,7 @@
         </div>
       </div>
     </div>
-    <div class="context-menu" v-show="contextState.visible" :style="contextMenuStyle">
+    <div v-show="contextState.visible" class="context-menu" :style="contextMenuStyle">
       <div class="context-menu-header">{{ contextState.label }}</div>
       <div class="context-menu-body">
         <div
@@ -551,15 +551,15 @@
         </div>
       </div>
     </div>
-    <canvas class="hover-canvas" ref="hover-canvas-ref"></canvas>
+    <canvas ref="hover-canvas-ref" class="hover-canvas"></canvas>
     <canvas
-      class="main-canvas"
       ref="main-canvas-ref"
+      class="main-canvas"
+      :class="{ dragging: isDragging }"
       @wheel="canvasWheel"
       @mousedown="canvasMouseDown"
       @mousemove="canvasMouseMove"
       @mouseleave="resetContextState"
-      :class="{ dragging: isDragging }"
     ></canvas>
   </div>
 </template>

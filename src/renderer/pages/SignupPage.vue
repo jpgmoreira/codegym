@@ -34,8 +34,8 @@
     <div>
       <label for="profile-name" class="text-lg mr-2">Create a new profile:</label>
       <input
-        type="text"
         v-model.trim="name"
+        type="text"
         placeholder="Profile name"
         @keydown.enter="createProfile"
       />
@@ -43,8 +43,8 @@
     <button
       type="button"
       class="btn-primary mt-5 flex items-center"
-      @click="createProfile"
       :disabled="fetching"
+      @click="createProfile"
     >
       Create
       <span v-if="fetching" class="loader ml-1"></span>

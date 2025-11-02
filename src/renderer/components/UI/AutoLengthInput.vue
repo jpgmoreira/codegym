@@ -67,8 +67,8 @@
     ref="input-ref"
     type="text"
     :value="modelValue"
+    v-bind="$attrs"
     @input="handleEvent"
     @blur="handleEvent"
-    v-bind="$attrs"
   />
 </template>

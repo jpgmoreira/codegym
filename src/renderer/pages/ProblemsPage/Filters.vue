@@ -27,7 +27,7 @@
 
 <template>
   <div class="filters flex flex-col p-3">
-    <component class="flex-1" :is="mapping[currOj]" />
+    <component :is="mapping[currOj]" class="flex-1" />
     <div v-if="hasEverFiltered" class="font-bold">
       {{ toLocaleNumber(matched) }} problems matched.
     </div>

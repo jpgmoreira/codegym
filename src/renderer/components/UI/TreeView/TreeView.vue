@@ -2,7 +2,7 @@
   import Modal from '../Modal.vue';
   import ContextMenu from './ContextMenu.vue';
   import { TreeOperationResponseDTO } from '@common/dto/treeOperationResponseDTO';
-  import { NodeType, Node, ModifierKeys } from '@common/types/tree';
+  import { NodeType, Node, ModifierKeys, DirNode } from '@common/types/tree';
   import { TreeChannels } from '@common/types/treeChannels';
   import {
     ref,
@@ -371,9 +371,13 @@
     return node.type === 'dir' && isSearching.value;
   }
 
-  function fileHintText(nFiles: number) {
-    if (nFiles === 1) return '1 contest';
-    return `${toLocaleNumber(nFiles)} contests`;
+  function fileHintText(node: DirNode) {
+    const texts = [
+      node.nFileDesc === 1 ? '1 contest' : `${toLocaleNumber(node.nFileDesc)} contests`,
+    ];
+    // if (node.nTodo) texts.push(`${toLocaleNumber(node.nTodo)} todo`);
+    // if (node.nFavorite) texts.push(`${toLocaleNumber(node.nFavorite)} favorite`);
+    return texts.join(', ');
   }
 
   // --- Events: ---
@@ -428,32 +432,32 @@
 
   // --- Tags: ---
 
-  function todoTagText(node: Node) {
-    const s = node.nTodo === 1 ? '' : 's';
-    if (node.type === 'file') return `This contest has ${node.nTodo} problem${s} marked as to-do.`;
-    else return `This folder has ${node.nTodo} problem${s} marked as to-do.`;
-  }
+  // function todoTagText(node: Node) {
+  //   const s = node.nTodo === 1 ? '' : 's';
+  //   if (node.type === 'file') return `This contest has ${node.nTodo} problem${s} marked as to-do.`;
+  //   else return `This folder has ${node.nTodo} problem${s} marked as to-do.`;
+  // }
 
-  function favoriteTagText(node: Node) {
-    const s = node.nFavorite === 1 ? '' : 's';
-    if (node.type === 'file')
-      return `This contest has ${node.nFavorite} problem${s} marked as favorite.`;
-    else return `This folder has ${node.nFavorite} problem${s} marked as favorite.`;
-  }
+  // function favoriteTagText(node: Node) {
+  //   const s = node.nFavorite === 1 ? '' : 's';
+  //   if (node.type === 'file')
+  //     return `This contest has ${node.nFavorite} problem${s} marked as favorite.`;
+  //   else return `This folder has ${node.nFavorite} problem${s} marked as favorite.`;
+  // }
 
-  function solvedTagText(node: Node) {
-    if (node.type === 'file') return "You have solved all this contest's problems!";
-    else return "You have solved all this folder's problems!";
-  }
+  // function solvedTagText(node: Node) {
+  //   if (node.type === 'file') return "You have solved all this contest's problems!";
+  //   else return "You have solved all this folder's problems!";
+  // }
 
   // --- Tooltip: ---
 
-  function showTooltip(text: string, e: MouseEvent) {
-    tooltipState.left = e.clientX;
-    tooltipState.top = e.clientY;
-    tooltipState.visible = true;
-    tooltipState.text = text;
-  }
+  // function showTooltip(text: string, e: MouseEvent) {
+  //   tooltipState.left = e.clientX;
+  //   tooltipState.top = e.clientY;
+  //   tooltipState.visible = true;
+  //   tooltipState.text = text;
+  // }
 
   function hideTooltip(e: MouseEvent) {
     const el = document.elementFromPoint(e.clientX, e.clientY) as HTMLElement | null;
@@ -495,12 +499,12 @@
 <template>
   <div
     v-if="hasLoaded"
+    ref="tree-view"
     class="treeview relative h-full"
     @click.right="(e) => showContextMenu('root', null, e)"
     @click="() => (contextState.visible = false)"
     @mouseenter="containerMouseEnter"
     @mouseleave="containerMouseLeave"
-    ref="tree-view"
   >
     <!-- The modal belongs to here, because the delete node operation belongs to here,
    and it intercepts the delete node operation. -->
@@ -558,16 +562,16 @@
           <button
             type="button"
             class="btn-secondary"
-            @click="closeModal"
             :disabled="modalState.isDeleting"
+            @click="closeModal"
           >
             Cancel
           </button>
           <button
             type="button"
             class="btn-danger"
-            @click="handleDeletion"
             :disabled="modalState.isDeleting"
+            @click="handleDeletion"
           >
             Delete
           </button>
@@ -618,14 +622,14 @@
 
     <div
       v-if="!isSearching && !tree?.visibleNodes.length"
-      class="absolute-center whitespace-nowrap text-lg opacity-70"
+      class="absolute-center flex justify-center whitespace-nowrap text-lg opacity-70 w-full overflow-hidden"
     >
       Right-click here
     </div>
     <div
       v-else-if="tree"
-      class="absolute top-0 left-0 w-full z-[1] overflow-auto h-full"
       ref="scroll-container"
+      class="absolute top-0 left-0 w-full z-[1] overflow-auto h-full"
       @scroll="handleScroll"
     >
       <div v-if="props.search" class="flex w-full sticky left-0 right-0">
@@ -645,15 +649,15 @@
           class="nodes-container absolute top-0 left-0"
         >
           <div
-            class="flex items-center whitespace-nowrap"
             v-for="node in tree.visibleNodes"
             :key="node.id"
+            class="flex items-center whitespace-nowrap"
           >
-            <span class="indent-span" v-for="_ in node.depth"></span>
+            <span v-for="_ in node.depth" class="indent-span"></span>
             <span
+              v-if="node.type === 'dir'"
               class="node-caret"
               :class="{ closed: !node.open }"
-              v-if="node.type === 'dir'"
               @click="toggleDirOpen(node)"
             ></span>
 
@@ -682,13 +686,13 @@
               ></span>
 
               <input
+                v-model="node.text"
                 class="node-input"
                 :class="{
                   selected: node.selected,
                   active: node.type === 'file' && node.active,
                   'cursor-not-allowed': isNodeDisabled(node),
                 }"
-                v-model="node.text"
                 :readonly="renamingNode !== node"
                 @keydown.enter="applyRenaming"
                 @keydown.esc="undoRenaming"
@@ -696,9 +700,10 @@
                 @click.right.stop="(e: MouseEvent) => showContextMenu(node.type, node, e)"
               />
               <span v-if="node.type === 'dir' && props.filesHint" class="files-hint">
-                ({{ fileHintText(node.nFileDesc) }})
+                ({{ fileHintText(node) }})
               </span>
-              <div class="tags-container opacity-60 flex ps-1 gap-1">
+              <!-- Too much visual pollution: -->
+              <!-- <div class="tags-container opacity-60 flex ps-1 gap-1">
                 <span
                   v-if="node.nTodo"
                   class="todo-tag"
@@ -717,7 +722,7 @@
                   @mouseenter="(e) => showTooltip(solvedTagText(node), e)"
                   @mouseleave="hideTooltip"
                 ></span>
-              </div>
+              </div> -->
             </div>
           </div>
         </div>

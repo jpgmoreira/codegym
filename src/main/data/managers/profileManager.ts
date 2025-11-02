@@ -9,9 +9,7 @@ import path from 'path';
 import { DATA_DIR } from '../constants';
 import { Oj } from '@common/types/oj';
 import { AuthPage } from '@common/types/authPage';
-import { CreateProfileResponseDTO } from '@common/dto/createProfileResponseDTO';
 import { buildId } from '@common/utils/utils';
-import { loadStartupData } from '../startup';
 import { OjContext } from '@common/schemas/ojContext';
 import { OjProblem } from '@common/schemas/problems';
 import { EventEmitter } from '@common/helpers/eventEmitter';
@@ -156,7 +154,7 @@ export class ProfileManager {
     };
   }
 
-  public async createProfile(name: string): Promise<CreateProfileResponseDTO> {
+  public createProfile(name: string): GenericResponseDTO {
     name = name.trim();
     const validationResult = this.validateProfileName(name);
     if (validationResult.status === 'error') {
@@ -170,11 +168,7 @@ export class ProfileManager {
       createdAt: now,
     });
     this.loadProfile(id);
-    const data = await loadStartupData();
-    return {
-      status: 'success',
-      data,
-    };
+    return { status: 'success' };
   }
 
   public updateOjFilters<T extends Oj>(oj: T, filters: OjContext[T]['filters']) {

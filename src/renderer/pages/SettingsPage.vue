@@ -120,7 +120,7 @@
               :disabled="isUpdatingCache[oj]"
               @click="updateCache(oj)"
             >
-              <span class="flex items-center" v-if="isUpdatingCache[oj]">
+              <span v-if="isUpdatingCache[oj]" class="flex items-center">
                 Updating...
                 <span class="loader ml-1"></span>
               </span>
@@ -138,10 +138,10 @@
     <div class="flex items-center px-5">
       <label for="profile-name" class="mr-1">Profile name:</label>
       <input
-        type="text"
-        name="profile-name"
         id="profile-name"
         v-model.trim="name"
+        type="text"
+        name="profile-name"
         @keydown.enter="handleRename"
       />
       <button type="button" class="btn-primary ml-1" @click="handleRename">Rename</button>
@@ -156,7 +156,7 @@
   <div class="p-2">
     <h1 class="text-2xl">Version</h1>
     <div class="px-5">
-      <div>CodeGym &ndash; Version {{ packageJson.version }}</div>
+      <div>{{ APP_NAME }} &ndash; Version {{ packageJson.version }}</div>
       <div>
         Homepage:
         <a href="#" @click="copyHomePage">{{ packageJson.homepage }}</a>

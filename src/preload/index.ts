@@ -7,7 +7,7 @@ import {
   allowedOnChannels,
   allowedSendChannels,
   type ElectronAPI,
-} from '@renderer/api/api';
+} from './api';
 
 type SendChannel = (typeof allowedSendChannels)[number];
 type InvokeChannel = (typeof allowedInvokeChannels)[number];

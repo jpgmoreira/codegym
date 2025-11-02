@@ -4,7 +4,7 @@
 </script>
 <template>
   <Transition name="toast-transition">
-    <div class="toast-container" :class="store.toast.type" v-if="store.toast.visible">
+    <div v-if="store.toast.visible" class="toast-container" :class="store.toast.type">
       {{ store.toast.message }}
     </div>
   </Transition>

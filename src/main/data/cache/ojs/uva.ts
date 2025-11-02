@@ -13,7 +13,7 @@ async function downloadUvaProblems() {
   // 1. Download all UVA starred problems from Methods to Solve:
   let response = await fetch('https://cpbook.net/methodstosolve?oj=uva&topic=all&quality=starred');
   const html = await response.text();
-  let $ = cheerio.load(html);
+  const $ = cheerio.load(html);
   const starredProblems = new Set<number>();
   $('.UVa.starred').each((_, e) => {
     starredProblems.add(parseInt($(e).children('td').first().text().trim()));

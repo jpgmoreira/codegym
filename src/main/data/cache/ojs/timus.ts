@@ -13,7 +13,7 @@ async function downloadTimusProblems() {
     'https://acm.timus.ru/problemset.aspx?space=1&page=all&skipac=False&sort=id'
   );
   const html = await result.text();
-  let $ = cheerio.load(html);
+  const $ = cheerio.load(html);
   const problems: TimusProblem[] = [];
   const stats: OjMeta['timus']['stats'] = {
     difficulty: {

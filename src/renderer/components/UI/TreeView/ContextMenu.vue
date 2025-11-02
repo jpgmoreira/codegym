@@ -89,25 +89,25 @@
 </script>
 
 <template>
-  <div class="fixed context-menu" v-if="props.visible && anySectionVisible" :style="style">
+  <div v-if="props.visible && anySectionVisible" class="fixed context-menu" :style="style">
     <!-- Root context -->
     <div v-if="props.type === 'root'">
       <div v-if="rootSections.create">
         <div class="item" @click="emit('createNode', 'file')">New contest</div>
         <div class="item" @click="emit('createNode', 'dir')">New folder</div>
       </div>
-      <div class="separator" v-if="rootSections.create && rootSections.select"></div>
+      <div v-if="rootSections.create && rootSections.select" class="separator"></div>
 
       <div v-if="rootSections.select">
-        <div class="item" v-if="showSelectAll" @click="emit('selectAll')">Select all</div>
-        <div class="item" v-if="nSelectedNodes" @click="emit('clearSelection')">
+        <div v-if="showSelectAll" class="item" @click="emit('selectAll')">Select all</div>
+        <div v-if="nSelectedNodes" class="item" @click="emit('clearSelection')">
           Clear selection
         </div>
-        <div class="item" v-if="props.nOpenDirs" @click="emit('collapseAll')">Collapse all</div>
+        <div v-if="props.nOpenDirs" class="item" @click="emit('collapseAll')">Collapse all</div>
       </div>
       <div
-        class="separator"
         v-if="(rootSections.create || rootSections.select) && rootSections.move"
+        class="separator"
       ></div>
 
       <div v-if="rootSections.move">
@@ -116,10 +116,10 @@
         </div>
       </div>
       <div
-        class="separator"
         v-if="
           (rootSections.create || rootSections.select || rootSections.move) && rootSections.delete
         "
+        class="separator"
       ></div>
 
       <div v-if="rootSections.delete">
@@ -135,7 +135,7 @@
         <div class="item" @click="emit('createNodeAbove', 'dir')">Create folder above</div>
         <div class="item" @click="emit('createNodeBelow', 'dir')">Create folder below</div>
       </div>
-      <div class="separator" v-if="dirSections.create && dirSections.move"></div>
+      <div v-if="dirSections.create && dirSections.move" class="separator"></div>
 
       <div v-if="dirSections.move">
         <div v-if="props.nSelectedFolders" class="item" @click="emit('moveSelectedFoldersAbove')">
@@ -149,8 +149,8 @@
         </div>
       </div>
       <div
-        class="separator"
         v-if="(dirSections.create || dirSections.move) && dirSections.change"
+        class="separator"
       ></div>
 
       <div v-if="dirSections.change">
@@ -165,15 +165,15 @@
         <div class="item" @click="emit('createNodeAbove', 'file')">Create file above</div>
         <div class="item" @click="emit('createNodeBelow', 'file')">Create file below</div>
       </div>
-      <div class="separator" v-if="fileSections.create && fileSections.move"></div>
+      <div v-if="fileSections.create && fileSections.move" class="separator"></div>
 
       <div v-if="fileSections.move">
         <div class="item" @click="emit('moveSelectedFilesAbove')">Move selected files above</div>
         <div class="item" @click="emit('moveSelectedFilesBelow')">Move selected files below</div>
       </div>
       <div
-        class="separator"
         v-if="(fileSections.create || fileSections.move) && fileSections.change"
+        class="separator"
       ></div>
 
       <div v-if="fileSections.change">

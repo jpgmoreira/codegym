@@ -13,8 +13,8 @@
     <div class="flex items-center">
       <label class="pr-1.5">Score:</label>
       <div>
-        <input type="number" placeholder="min" v-model="filters.score.min" @change="onChange" />
-        <input type="number" placeholder="max" v-model="filters.score.max" @change="onChange" />
+        <input v-model="filters.score.min" type="number" placeholder="min" @change="onChange" />
+        <input v-model="filters.score.max" type="number" placeholder="max" @change="onChange" />
       </div>
     </div>
     <div class="flex items-center mt-2">
@@ -29,15 +29,15 @@
       </div>
       <div>
         <input
+          v-model="filters.popularity.min"
           type="number"
           placeholder="min"
-          v-model="filters.popularity.min"
           @change="onChange"
         />
         <input
+          v-model="filters.popularity.max"
           type="number"
           placeholder="max"
-          v-model="filters.popularity.max"
           @change="onChange"
         />
       </div>

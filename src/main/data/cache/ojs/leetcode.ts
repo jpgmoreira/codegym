@@ -71,7 +71,7 @@ export async function filterLeetcodeProblems(
     .map((d) => {
       if (d === 'easy') return 1;
       if (d === 'medium') return 2;
-      if (d === 'hard') return 3;
+      return 3;
     })
     .filter((x) => x !== undefined);
   const query: Record<string, any> = {

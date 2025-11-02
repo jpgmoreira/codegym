@@ -18,8 +18,17 @@ import { TreeManager } from '@main/data/managers/treeManager';
 
 ipcMain.handle(
   Channels.createProfile,
-  (_, name: string): Promise<CreateProfileResponseDTO> =>
-    ProfileManager.instance.createProfile(name)
+  async (_, name: string): Promise<CreateProfileResponseDTO> => {
+    const result = ProfileManager.instance.createProfile(name);
+    if (result.status === 'error') {
+      return result;
+    }
+    const data = await loadStartupData();
+    return {
+      status: 'success',
+      data,
+    };
+  }
 );
 
 ipcMain.handle(Channels.login, (_, profileId: string): Promise<StartupData> => {

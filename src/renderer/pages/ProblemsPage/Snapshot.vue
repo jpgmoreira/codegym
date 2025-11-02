@@ -38,7 +38,7 @@
     <component :is="mapping[currOj]" />
   </div>
   <div v-else class="flex items-center justify-center text-xl">
-    <template v-if="hasEverFiltered">No problem satisfy the current filters</template>
-    <template v-else>Click on New Problem</template>
+    <span v-if="hasEverFiltered" class="opacity-70">No problem satisfy the current filters</span>
+    <span v-else class="opacity-70">Click on New Problem</span>
   </div>
 </template>

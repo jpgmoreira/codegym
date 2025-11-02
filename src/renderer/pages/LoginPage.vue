@@ -43,8 +43,8 @@
               <button
                 type="button"
                 class="btn-primary flex items-center"
-                @click="() => onClick(profile.id)"
                 :disabled="Boolean(fetching)"
+                @click="() => onClick(profile.id)"
               >
                 Login
                 <span v-if="fetching === profile.id" class="ml-1 loader"></span>

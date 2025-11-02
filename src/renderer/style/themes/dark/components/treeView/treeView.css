@@ -80,9 +80,9 @@
   height: 22px;
 }
 .theme-dark .treeview .file-icon {
-  background-image: url('@renderer/assets/images/manual.png');
-  width: 27px;
-  height: 27px;
+  background-image: url('@renderer/assets/images/file.png');
+  width: 20px;
+  height: 20px;
 }
 
 /* Hint text */

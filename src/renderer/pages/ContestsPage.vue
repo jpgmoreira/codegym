@@ -188,7 +188,7 @@
         >
           <span class="text-xl opacity-70 whitespace-nowrap">Create or select a contest</span>
         </div>
-        <div class="w-full overflow-auto flex flex-col" v-else-if="loaded && contest">
+        <div v-else-if="loaded && contest" class="w-full overflow-auto flex flex-col">
           <section class="header-section px-3 py-1">
             <div>
               Contest:
@@ -206,9 +206,9 @@
           </section>
           <div v-if="contest.problems.length" class="pb-20">
             <textarea
+              v-model="contest.notes"
               placeholder="Contest notes"
               class="p-1 contest-notes"
-              v-model="contest.notes"
               @change="updateContestNotes"
             ></textarea>
             <table class="w-full">
@@ -237,9 +237,9 @@
                 >
                   <td class="font-bold relative">
                     <input
+                      v-model="problem.title"
                       class="top-0 bottom-0 left-0 right-0"
                       type="text"
-                      v-model="problem.title"
                       @change="updateCurrContestProblem(problem)"
                     />
                     <span
@@ -282,8 +282,8 @@
                   </td>
                   <td>
                     <textarea
-                      class="p-1 problem-notes"
                       v-model="problem.notes"
+                      class="p-1 problem-notes"
                       @change="updateCurrContestProblem(problem)"
                     ></textarea>
                   </td>
@@ -348,8 +348,8 @@
     max-height: 200px;
   }
   .icon img {
-    width: 23px;
-    height: 23px;
+    width: 20px;
+    height: 20px;
   }
   .icon {
     bottom: 2px;
@@ -372,16 +372,16 @@
     opacity: 1 !important;
   }
   .icon.solved {
-    right: 5px;
+    right: 2px;
   }
   .icon.todo {
-    right: calc(5px + 23px + 3px);
+    right: calc(2px + 20px + 2px);
   }
   .icon.favorite {
-    right: calc(5px + 23px + 3px + 23px + 3px);
+    right: calc(2px + 20px + 2px + 20px);
   }
   .icon.trash {
-    left: 5px;
+    left: 2px;
   }
   .tooltip {
     visibility: hidden;

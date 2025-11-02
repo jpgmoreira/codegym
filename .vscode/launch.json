@@ -2,23 +2,38 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Attach to Electron Main (only my code)",
+      "name": "Debug Main Process",
       "type": "node",
-      "request": "attach",
-      "port": 9229,
-      "restart": true,
-      "timeout": 30000,
-      "autoAttachChildProcesses": true,
-      "sourceMaps": true,
-      "outFiles": ["${workspaceFolder}/.vite/build/**/*.js"],
-      "sourceMapPathOverrides": {
-        "vite:///src/*": "${workspaceFolder}/src/*"
+      "request": "launch",
+      "cwd": "${workspaceRoot}",
+      "runtimeExecutable": "${workspaceRoot}/node_modules/.bin/electron-vite",
+      "windows": {
+        "runtimeExecutable": "${workspaceRoot}/node_modules/.bin/electron-vite.cmd"
       },
-      "skipFiles": [
-        "<node_internals>/**",
-        "node_modules/**",
-        "${workspaceFolder}/.vite/build/**/*.js"
-      ]
+      "runtimeArgs": ["--sourcemap"],
+      "env": {
+        "REMOTE_DEBUGGING_PORT": "9222"
+      }
+    },
+    {
+      "name": "Debug Renderer Process",
+      "port": 9222,
+      "request": "attach",
+      "type": "chrome",
+      "webRoot": "${workspaceFolder}/src/renderer",
+      "timeout": 60000,
+      "presentation": {
+        "hidden": true
+      }
+    }
+  ],
+  "compounds": [
+    {
+      "name": "Debug All",
+      "configurations": ["Debug Main Process", "Debug Renderer Process"],
+      "presentation": {
+        "order": 1
+      }
     }
   ]
 }

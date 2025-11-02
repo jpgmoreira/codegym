@@ -237,9 +237,9 @@
 <template>
   <div class="multiselect">
     <div
-      class="context-menu"
-      ref="context-menu"
       v-if="showContextMenu"
+      ref="context-menu"
+      class="context-menu"
       :style="contextMenuStyle"
       tabindex="0"
       role="listbox"
@@ -247,26 +247,26 @@
     >
       <div class="ghost" :style="{ height: `${contextOptions.length * optionHeight}px` }"></div>
       <div
-        class="options-container"
         ref="options-container"
+        class="options-container"
         :style="{ transform: `translateY(${scrollOffset}px)` }"
       >
         <div
-          class="option"
           v-for="(option, i) in contextOptions.slice(anchor, anchor + pageSize)"
           :key="option.value"
+          class="option"
           :class="{ highlight: i + anchor === state.highlightedContextIndex }"
+          role="option"
           @mouseover="state.highlightedContextIndex = i + anchor"
           @click="selectOption(option.value)"
-          role="option"
         >
           <span v-if="props.optionNumbers" class="option-index">
             {{ toLocaleNumber(i + anchor + 1) }}
           </span>
           <span
             v-for="(part, index) in searchParts(option.text)"
-            class="text-part"
             :key="`${option.value}-${part.text}-${index}`"
+            class="text-part"
             :class="{ match: part.match }"
           >
             {{ part.text }}
@@ -274,11 +274,11 @@
         </div>
       </div>
     </div>
-    <div class="badges-container" ref="badges-container" @mousedown.prevent="focusEditor">
+    <div ref="badges-container" class="badges-container" @mousedown.prevent="focusEditor">
       <span
-        class="badge"
         v-for="(option, index) in selectedOptions"
         :key="option.value"
+        class="badge"
         tabindex="0"
         @keydown="badgeKeydown($event, option.value)"
         @mousedown.stop
@@ -286,12 +286,12 @@
         <span v-if="props.badgeNumbers" class="badge-index">({{ toLocaleNumber(index + 1) }})</span>
         <span>{{ option.text }}</span>
         <button
-          class="close-button"
           v-if="props.close"
+          class="close-button"
           type="button"
-          @click="deselectOption(option.value)"
           aria-label="remove option"
           tabindex="-1"
+          @click="deselectOption(option.value)"
         >
           <svg width="10" height="10" viewBox="0 0 10 10">
             <path d="M1 1 L9 9 M9 1 L1 9" stroke="currentColor" stroke-width="1" />
@@ -300,11 +300,11 @@
       </span>
     </div>
     <input
+      ref="editor"
+      v-model.trim="state.content"
       type="text"
       class="editor"
-      ref="editor"
       :placeholder="props.placeholder"
-      v-model.trim="state.content"
       @input="editorInput"
       @focus="state.editorHasFocus = true"
       @blur="editorBlur"
