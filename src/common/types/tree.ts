@@ -1,5 +1,9 @@
 export type NodeType = 'dir' | 'file';
 
+/**
+ * Optional properties will be absent **ONLY** in the "tree.json" file, to save space.
+ */
+
 // First and last node IDs in a doubly linked list of siblings.
 export type HeadAndTail = {
   headId: string | null;
@@ -15,38 +19,29 @@ export type NodeController = {
 export type BaseNode = {
   id: string;
   text: string;
-  depth: number;
+  depth?: number;
   selected: boolean;
-  hidden: boolean;
+  hidden: boolean; // Used to hide nodes when searching by file text.
   parentId: string | null;
   nextId: string | null; // Next sibling ID, in the same doubly linked list.
   prevId: string | null; // Previous sibling ID, in the same doubly linked list.
-  // Application specific:
-  nProblems: number;
-  nSolved: number;
-  nTodo: number;
-  nFavorite: number;
 };
 
-// Dir nodes store their children as a linked list (NodeController).
+// Dir nodes store their children as a doubly linked list (NodeController).
 export type DirNode = BaseNode &
   NodeController & {
     type: 'dir';
     open: boolean;
-    nDesc: number; // Total number of descendants, dir or file, not including the node.
-    nSelDesc: number; // Total number of selected descendants.
-    nFileDesc: number; // Total number of file descendants.
+    nDesc?: number; // Total number of descendants, dir or file, not including the node.
+    nSelDesc?: number; // Total number of selected descendants.
+    nFileDesc?: number; // Total number of file descendants.
   };
 
 export type FileNode = BaseNode & {
   type: 'file';
-  // -- Custom fields:
+  // -- Application-specific:
   contestId: string;
   active: boolean;
 };
 
 export type Node = DirNode | FileNode;
-
-export type ModifierKeys = {
-  ctrl: boolean;
-};
