@@ -14,3 +14,5 @@ Future improvements:
   - Load initial treeview and history data upon application load, store on pinia, to avoid UI delay.
 
   - Write technical documentation, with decisions made, and architecture.
+
+  - Reduce installer size.
