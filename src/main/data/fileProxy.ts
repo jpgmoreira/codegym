@@ -69,10 +69,17 @@ export class FileProxy<T extends JSONObject> {
     return true;
   }
 
+  /**
+   * Queues a write operation with debounce and serialization.
+   * - Debounce prevents too many writes in quick succession.
+   * - Promise chaining ensures writes never overlap (each waits for the previous to finish).
+   */
   public queueWrite() {
     clearTimeout(this.timer);
     this.timer = setTimeout(() => {
       if (this.writingPromise) {
+        // Use an arrow function to preserve the class context (`this`).
+        // Passing `this.writeFileAsync` directly would lose its binding when called by `finally`.
         this.writingPromise = this.writingPromise.finally(() => this.writeFileAsync());
       } else {
         this.writingPromise = this.writeFileAsync();
@@ -81,14 +88,24 @@ export class FileProxy<T extends JSONObject> {
   }
 
   private async writeFileAsync() {
-    await fs.promises
-      .writeFile(this.filePath, JSON.stringify(this._target, null, INDENT), 'utf-8')
-      .then(() => {
-        this.savedCount++;
-        console.log(`-- ${this.filePath} saved! ${this.savedCount}`);
-      })
-      .catch((err) => {
-        console.error(`-- failed to save ${this.filePath}:`, err);
-      });
+    const tmpPath = `${this.filePath}.tmp`;
+    try {
+      const data = JSON.stringify(this._target, null, INDENT);
+      // 1. Write to temp file:
+      await fs.promises.writeFile(tmpPath, data, 'utf-8');
+      // 2. Force write to disk (flush):
+      const fd = await fs.promises.open(tmpPath, 'r+');
+      await fd.sync();
+      await fd.close();
+      // 3. Atomically replace the old file:
+      await fs.promises.rename(tmpPath, this.filePath);
+      this.savedCount++;
+      console.log(`-- ${this.filePath} saved! ${this.savedCount}`);
+    } catch (err) {
+      console.error(`-- failed to save ${this.filePath}:`, err);
+    } finally {
+      // Clean up if a temp file was left behind:
+      fs.promises.unlink(tmpPath).catch(() => {});
+    }
   }
 }
