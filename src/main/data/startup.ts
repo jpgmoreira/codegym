@@ -16,7 +16,7 @@ export async function loadStartupData(): Promise<StartupData> {
   let graphData: GraphRecord[] = [];
   if (currProfile) {
     ContestsManager.instance.loadProfile(currProfile.id);
-    GraphManager.instance.loadGraph(currProfile.id);
+    await GraphManager.instance.loadGraph(currProfile.id);
     graphData = await GraphManager.instance.getGraphData();
     HistoryManager.instance.loadHistory(currProfile.id);
     TreeManager.instance.loadTree(currProfile.id);

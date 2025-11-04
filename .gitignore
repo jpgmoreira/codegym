@@ -8,3 +8,5 @@ out
 .vite
 .DS_Store
 *.log*
+src/scripts/*
+!src/scripts/*.py
