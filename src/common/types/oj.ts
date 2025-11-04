@@ -13,7 +13,7 @@ export type Oj = (typeof OjList)[number];
 
 export type OjWithContests = Oj | 'contests';
 
-export const OjColors = {
+export const OjColors = Object.freeze({
   cf: '#E6194B',
   kattis: '#3CB44B',
   neps: '#FF7F00',
@@ -22,4 +22,4 @@ export const OjColors = {
   leetcode: '#911EB4',
   contests: '#800000',
   total: '#333333',
-} as const;
+} as const);

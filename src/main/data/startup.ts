@@ -18,7 +18,7 @@ export async function loadStartupData(): Promise<StartupData> {
     ContestsManager.instance.loadProfile(currProfile.id);
     await GraphManager.instance.loadGraph(currProfile.id);
     graphData = await GraphManager.instance.getGraphData();
-    HistoryManager.instance.loadHistory(currProfile.id);
+    await HistoryManager.instance.loadHistory(currProfile.id);
     TreeManager.instance.loadTree(currProfile.id);
   }
   const result = {

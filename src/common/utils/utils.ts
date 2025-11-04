@@ -65,3 +65,13 @@ export function isAuthPage(page: string): page is AuthPage {
 export async function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
+
+export function deepFreeze<T extends object>(obj: T): Readonly<T> {
+  Object.freeze(obj);
+  Object.values(obj).forEach((val) => {
+    if (val && typeof val === 'object') {
+      deepFreeze(val);
+    }
+  });
+  return obj;
+}

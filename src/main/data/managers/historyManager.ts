@@ -1,12 +1,18 @@
 import { OjProblem } from '@common/schemas/problems';
 import { DATA_DIR } from '../constants';
-import { HISTORY_MAX_SIZE, HISTORY_PAGE_SIZE } from '../constants';
 import { Oj } from '@common/types/oj';
 import { EventEmitter } from '@common/helpers/eventEmitter';
 import { Events } from '@main/utils/events';
-import Datastore from '@seald-io/nedb';
+import { open, type Database } from 'sqlite';
+import sqlite3 from 'sqlite3';
 import path from 'path';
 import { FetchHistoryPageResponseDTO } from '@common/dto/fetchHistoryPageResponseDTO';
+import {
+  createHistoryTables,
+  fetchHistoryPage,
+  insertIntoHistory,
+  replaceHistorySnapshot,
+} from '../sql/history';
 
 EventEmitter.instance.on(Events.clearProfileData, () => {
   HistoryManager.instance.clear();
@@ -19,7 +25,7 @@ EventEmitter.instance.on(Events.clearProfileData, () => {
 export class HistoryManager {
   static #instance: HistoryManager;
 
-  private db: Datastore<OjProblem[Oj]> | null = null;
+  private db: Database | null = null;
 
   private constructor() {}
 
@@ -30,52 +36,42 @@ export class HistoryManager {
     return this.#instance;
   }
 
-  public loadHistory(profileId: string) {
-    const filename = path.join(DATA_DIR, 'profileData', profileId, 'history.nedb');
-    this.db = new Datastore({ filename, autoload: true });
-    this.db.ensureIndex({ fieldName: 'timestamp' });
-    this.db.ensureIndex({ fieldName: ['oj', 'timestamp'] });
+  public async loadHistory(profileId: string) {
+    const filename = path.join(DATA_DIR, 'profileData', profileId, 'history.sqlite');
+    this.db = await open({
+      filename,
+      driver: sqlite3.Database,
+    });
+    await createHistoryTables(this.db);
   }
 
   public async fetchHistoryPage<T extends Oj>(
     oj: T,
     top: number
   ): Promise<FetchHistoryPageResponseDTO<T>> {
-    const result: FetchHistoryPageResponseDTO<T> = {
-      data: [],
-      total: 0,
-    };
-    if (!this.db) return result;
-    const data = await this.db
-      .findAsync<OjProblem[T]>({ oj }, { _id: 0 })
-      .sort({ timestamp: -1 })
-      .skip(top)
-      .limit(HISTORY_PAGE_SIZE);
-    const total = await this.db.countAsync({ oj });
-    return { data, total };
+    if (!this.db) {
+      return {
+        data: [],
+        total: 0,
+      };
+    }
+    return fetchHistoryPage(this.db, oj, top);
   }
 
   public async insertIntoHistory(problem: OjProblem[Oj]) {
     if (!this.db) return;
-    // Insert the problem:
-    await this.db.insertAsync(problem);
-    // Guarantee maximum history size:
-    const count = await this.db.countAsync({});
-    const toDelete = count - HISTORY_MAX_SIZE;
-    if (toDelete > 0) {
-      const docs = await this.db.findAsync({}, { _id: 1 }).sort({ timestamp: 1 }).limit(toDelete);
-      // @ts-ignore
-      const _ids = docs.map((doc) => doc._id);
-      await this.db.removeAsync({ _id: { $in: _ids } }, { multi: true });
-    }
+    await insertIntoHistory(this.db, problem);
   }
 
   public async replaceHistorySnapshot(snapshot: OjProblem[Oj]) {
     if (!this.db) return;
-    await this.db.updateAsync({ id: snapshot.id }, snapshot);
+    await replaceHistorySnapshot(this.db, snapshot);
   }
 
-  public clear() {
+  public async clear() {
+    if (this.db) {
+      await this.db.close();
+    }
     this.db = null;
   }
 }

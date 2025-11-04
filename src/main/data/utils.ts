@@ -1,3 +1,5 @@
+import { OjFields, OjProblem } from '@common/schemas/problems';
+import { Oj } from '@common/types/oj';
 import fs from 'fs';
 
 export function ensureDirExists(dir: string) {
@@ -13,4 +15,26 @@ export function sanitizeQuery(query: Record<string, any>) {
       delete query[key];
     }
   }
+}
+
+/**
+ * Returns all columns and values (base + info) for an OJ problem, with JSON and boolean handling.
+ */
+export function getOjProblemColumnsAndValues<T extends Oj>(problem: OjProblem[T]) {
+  const oj = problem.oj as T;
+  const mapping = OjFields[oj];
+  const columns = [...mapping.baseFields, ...mapping.infoFields] as Array<
+    keyof typeof problem | keyof typeof problem.info
+  >;
+  const values = [
+    ...mapping.baseFields.map((f) => problem[f]),
+    ...mapping.infoFields.map((f) => {
+      const key = f as keyof typeof problem.info;
+      const val = problem.info[key];
+      if (mapping.jsonFields?.includes(key)) return JSON.stringify(val);
+      if (mapping.booleanFields?.includes(key)) return val ? 1 : 0;
+      return val;
+    }),
+  ];
+  return { columns, values };
 }

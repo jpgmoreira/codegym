@@ -46,10 +46,7 @@ export class GraphManager {
 
   public async updateGraph(source: OjWithContests, date: number, value: -1 | 1) {
     if (!this.db) return;
-    let record: GraphRecord | undefined = await this.db.get(
-      'SELECT * FROM graph WHERE date = ?',
-      date
-    );
+    let record = await this.db.get<GraphRecord>('SELECT * FROM graph WHERE date = ?', date);
     if (!record) {
       record = getEmptyGraphRecord(date);
     }
