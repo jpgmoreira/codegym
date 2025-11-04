@@ -6,7 +6,7 @@ import { EventEmitter } from '@common/helpers/eventEmitter';
 import { Events } from '@main/utils/events';
 import sqlite3 from 'sqlite3';
 import { open, type Database } from 'sqlite';
-import { CreateGraphTable, UpsertGraphRecord } from '../sql/graph';
+import { createGraphTable, upsertGraphRecord } from '../sql/graph';
 
 EventEmitter.instance.on(Events.clearProfileData, () => {
   GraphManager.instance.clear();
@@ -36,7 +36,7 @@ export class GraphManager {
       filename,
       driver: sqlite3.Database,
     });
-    await CreateGraphTable(this.db);
+    await createGraphTable(this.db);
   }
 
   public async getGraphData(): Promise<GraphRecord[]> {
@@ -54,7 +54,7 @@ export class GraphManager {
       record = getEmptyGraphRecord(date);
     }
     record[source] += value;
-    await UpsertGraphRecord(this.db, record);
+    await upsertGraphRecord(this.db, record);
   }
 
   public async clear() {

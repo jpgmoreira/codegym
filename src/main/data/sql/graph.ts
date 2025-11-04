@@ -1,7 +1,7 @@
 import { GraphRecord } from '@common/schemas/graph';
 import type { Database } from 'sqlite';
 
-export async function CreateGraphTable(db: Database) {
+export async function createGraphTable(db: Database) {
   await db.exec(`
     CREATE TABLE IF NOT EXISTS graph (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -18,7 +18,7 @@ export async function CreateGraphTable(db: Database) {
   await db.exec('CREATE INDEX IF NOT EXISTS idx_graph_date ON graph (date);');
 }
 
-export async function UpsertGraphRecord(db: Database, record: GraphRecord) {
+export async function upsertGraphRecord(db: Database, record: GraphRecord) {
   await db.run(
     `
     INSERT INTO graph (

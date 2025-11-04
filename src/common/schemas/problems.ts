@@ -3,13 +3,16 @@
  * "solvedDate" is a number in the format YYYYMMDD. It is calculated based on the user's local time.
  */
 
-export type CfProblem = {
-  oj: 'cf';
+type BaseProblem = {
   id?: string;
   name: string;
   path: string;
   solvedDate?: number | null;
   timestamp?: number;
+};
+
+export type CfProblem = BaseProblem & {
+  oj: 'cf';
   info: {
     solved: number;
     rating: number | null;
@@ -18,13 +21,8 @@ export type CfProblem = {
   };
 };
 
-export type KattisProblem = {
+export type KattisProblem = BaseProblem & {
   oj: 'kattis';
-  id?: string;
-  name: string;
-  path: string;
-  solvedDate?: number | null;
-  timestamp?: number;
   info: {
     solved: number;
     submissions: number;
@@ -35,13 +33,8 @@ export type KattisProblem = {
   };
 };
 
-export type NepsProblem = {
+export type NepsProblem = BaseProblem & {
   oj: 'neps';
-  id?: string;
-  name: string;
-  path: string;
-  solvedDate?: number | null;
-  timestamp?: number;
   info: {
     score: number;
     solved: number;
@@ -49,13 +42,8 @@ export type NepsProblem = {
   };
 };
 
-export type LeetcodeProblem = {
+export type LeetcodeProblem = BaseProblem & {
   oj: 'leetcode';
-  id?: string;
-  name: string;
-  path: string;
-  solvedDate?: number | null;
-  timestamp?: number;
   info: {
     accepted: number;
     difficulty: number;
@@ -65,13 +53,8 @@ export type LeetcodeProblem = {
   };
 };
 
-export type TimusProblem = {
+export type TimusProblem = BaseProblem & {
   oj: 'timus';
-  id?: string;
-  name: string;
-  path: string;
-  solvedDate?: number | null;
-  timestamp?: number;
   info: {
     solved: number;
     source: string | null;
@@ -80,13 +63,8 @@ export type TimusProblem = {
   };
 };
 
-export type UvaProblem = {
+export type UvaProblem = BaseProblem & {
   oj: 'uva';
-  id?: string;
-  name: string;
-  path: string;
-  solvedDate?: number | null;
-  timestamp?: number;
   info: {
     dacu: number;
     popularity: number;
