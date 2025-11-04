@@ -15,7 +15,7 @@
   const problems = ref<OjProblem[Oj][]>([]);
   const loaded = ref(false);
 
-  const scrollTimer = ref<NodeJS.Timeout | undefined>(undefined);
+  const scrollTimer = ref<ReturnType<typeof setTimeout> | undefined>(undefined);
   const nTotalRows = ref(0);
   const anchor = ref(0);
   const tableOffset = ref(0); // This is important. If we use a computed property, a lot of bugs happen.

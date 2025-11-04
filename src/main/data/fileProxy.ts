@@ -24,7 +24,7 @@ export const DISK_FLUSH_DEBOUNCE = 500; // Debounce in milliseconds to write fil
 export class FileProxy<T extends JSONObject> {
   private savedCount = 0;
   private filePath: string;
-  private timer?: NodeJS.Timeout;
+  private timer?: ReturnType<typeof setTimeout>;
   private writingPromise: Promise<void> | null = null;
   private _target: T;
   private _proxy: T;

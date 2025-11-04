@@ -94,7 +94,7 @@
   const renamingNode = ref<Node | null>(null);
   const originalName = ref('');
   const searchText = ref('');
-  const scrollTimer = ref<NodeJS.Timeout | undefined>(undefined);
+  const scrollTimer = ref<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   const isSearching = ref(false);
   const showFilesSelectedBadge = ref(false);
