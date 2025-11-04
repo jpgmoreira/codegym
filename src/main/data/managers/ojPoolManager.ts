@@ -70,8 +70,6 @@ export class OjPoolManager {
     const snapshot = structuredClone(pool.shuffledProblems[pool.index] || null);
     if (snapshot) {
       const now = Date.now();
-      // @ts-ignore
-      delete snapshot._id; // delete nedb id.
       snapshot.id = `snap-${oj}-${snapshot.path}-${toBase62(now)}`;
       snapshot.timestamp = now;
       snapshot.solvedDate = null;
