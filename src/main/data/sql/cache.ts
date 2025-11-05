@@ -34,7 +34,7 @@ export async function createCacheTables(db: Database) {
     db.exec(`
       CREATE TABLE IF NOT EXISTS neps (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT NOT NULL,
+        name TEXT, -- Neps name can be null
         path TEXT NOT NULL,
         score INTEGER NOT NULL,
         solved INTEGER NOT NULL,

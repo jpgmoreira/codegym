@@ -4,9 +4,10 @@ import { OjMeta } from '@common/schemas/ojMeta';
 import { OjMetaManager } from '@main/data/managers/ojMetaManager';
 import { ProfileManager } from '@main/data/managers/profileManager';
 import { sanitizeQuery } from '@main/data/utils';
-import Datastore from '@seald-io/nedb';
+import { type Database } from 'sqlite';
 import * as cheerio from 'cheerio';
 import { Oj } from '@common/types/oj';
+import { replaceCacheProblems } from '@main/data/sql/cache';
 
 function parseTextDifficulty(text: string): number | null {
   /**
@@ -87,15 +88,14 @@ async function downloadKattisProblems() {
   };
 }
 
-export async function updateKattisCache(db: Datastore<OjProblem[Oj]>): Promise<OjMeta['kattis']> {
+export async function updateKattisCache(db: Database): Promise<OjMeta['kattis']> {
   const { problems, stats } = await downloadKattisProblems();
   const meta: OjMeta['kattis'] = {
     lastCacheUpdate: Date.now(),
     stats,
   };
   OjMetaManager.instance.updateOjMeta('kattis', meta);
-  await db.removeAsync({ oj: 'kattis' }, { multi: true });
-  await db.insertAsync(problems);
+  await replaceCacheProblems(db, 'kattis', problems);
   return meta;
 }
 

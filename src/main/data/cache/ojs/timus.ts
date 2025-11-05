@@ -4,9 +4,10 @@ import { OjMeta } from '@common/schemas/ojMeta';
 import { sanitizeQuery } from '@main/data/utils';
 import { ProfileManager } from '@main/data/managers/profileManager';
 import { OjMetaManager } from '@main/data/managers/ojMetaManager';
-import Datastore from '@seald-io/nedb';
+import { type Database } from 'sqlite';
 import * as cheerio from 'cheerio';
 import { Oj } from '@common/types/oj';
+import { replaceCacheProblems } from '@main/data/sql/cache';
 
 async function downloadTimusProblems() {
   const result = await fetch(
@@ -56,15 +57,14 @@ async function downloadTimusProblems() {
   };
 }
 
-export async function updateTimusCache(db: Datastore<OjProblem[Oj]>): Promise<OjMeta['timus']> {
+export async function updateTimusCache(db: Database): Promise<OjMeta['timus']> {
   const { problems, stats } = await downloadTimusProblems();
   const meta: OjMeta['timus'] = {
     lastCacheUpdate: Date.now(),
     stats,
   };
   OjMetaManager.instance.updateOjMeta('timus', meta);
-  await db.removeAsync({ oj: 'timus' }, { multi: true });
-  await db.insertAsync(problems);
+  await replaceCacheProblems(db, 'timus', problems);
   return meta;
 }
 

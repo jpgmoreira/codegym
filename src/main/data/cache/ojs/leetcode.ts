@@ -5,8 +5,9 @@ import { POPULARITY_GROUP_SIZE } from '@common/constants';
 import { sanitizeQuery } from '@main/data/utils';
 import { ProfileManager } from '@main/data/managers/profileManager';
 import { OjMetaManager } from '@main/data/managers/ojMetaManager';
-import Datastore from '@seald-io/nedb';
+import { type Database } from 'sqlite';
 import { Oj } from '@common/types/oj';
+import { replaceCacheProblems } from '@main/data/sql/cache';
 
 async function downloadLeetcodeProblems() {
   const response = await fetch('https://leetcode.com/api/problems/all/');
@@ -45,17 +46,14 @@ async function downloadLeetcodeProblems() {
   };
 }
 
-export async function updateLeetcodeCache(
-  db: Datastore<OjProblem[Oj]>
-): Promise<OjMeta['leetcode']> {
+export async function updateLeetcodeCache(db: Database): Promise<OjMeta['leetcode']> {
   const { problems, stats } = await downloadLeetcodeProblems();
   const meta: OjMeta['leetcode'] = {
     lastCacheUpdate: Date.now(),
     stats,
   };
   OjMetaManager.instance.updateOjMeta('leetcode', meta);
-  await db.removeAsync({ oj: 'leetcode' }, { multi: true });
-  await db.insertAsync(problems);
+  await replaceCacheProblems(db, 'leetcode', problems);
   return meta;
 }
 

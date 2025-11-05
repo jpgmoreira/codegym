@@ -6,7 +6,8 @@ import { OjMetaManager } from '@main/data/managers/ojMetaManager';
 import { ProfileManager } from '@main/data/managers/profileManager';
 import { sanitizeQuery } from '@main/data/utils';
 import { Oj } from '@common/types/oj';
-import Datastore from '@seald-io/nedb';
+import { type Database } from 'sqlite';
+import { replaceCacheProblems } from '@main/data/sql/cache';
 
 async function downloadNepsProblems() {
   const response = await fetch('https://api.neps.academy/tables/exercises?query');
@@ -51,15 +52,14 @@ async function downloadNepsProblems() {
   };
 }
 
-export async function updateNepsCache(db: Datastore<OjProblem[Oj]>): Promise<OjMeta['neps']> {
+export async function updateNepsCache(db: Database): Promise<OjMeta['neps']> {
   const { problems, stats } = await downloadNepsProblems();
   const meta: OjMeta['neps'] = {
     lastCacheUpdate: Date.now(),
     stats,
   };
   OjMetaManager.instance.updateOjMeta('neps', meta);
-  await db.removeAsync({ oj: 'neps' }, { multi: true });
-  await db.insertAsync(problems);
+  await replaceCacheProblems(db, 'neps', problems);
   return meta;
 }
 
