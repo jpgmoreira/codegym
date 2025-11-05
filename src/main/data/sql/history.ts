@@ -131,21 +131,23 @@ export async function insertIntoHistory<T extends Oj>(
 ): Promise<void> {
   const { columns, values } = getOjProblemColumnsAndValues(problem);
   const placeholders = columns.map((c) => `$${String(c)}`).join(', ');
-  await db.run(
-    `INSERT INTO ${problem.oj} (${columns.join(', ')})
-     VALUES (${placeholders})`,
-    columns.reduce<Record<string, any>>((acc, col, i) => {
-      acc[`$${String(col)}`] = values[i];
-      return acc;
-    }, {})
-  );
-  // Limit history size:
-  const totalRow = await db.get<{ total: number }>(`SELECT COUNT(*) as total FROM ${problem.oj}`);
-  const total = totalRow?.total ?? 0;
-  const toDelete = total - HISTORY_MAX_SIZE_PER_OJ;
-  if (toDelete > 0) {
+  await db.run('BEGIN TRANSACTION');
+  try {
     await db.run(
-      `
+      `INSERT INTO ${problem.oj} (${columns.join(', ')})
+     VALUES (${placeholders})`,
+      columns.reduce<Record<string, any>>((acc, col, i) => {
+        acc[`$${String(col)}`] = values[i];
+        return acc;
+      }, {})
+    );
+    // Limit history size:
+    const totalRow = await db.get<{ total: number }>(`SELECT COUNT(*) as total FROM ${problem.oj}`);
+    const total = totalRow?.total ?? 0;
+    const toDelete = total - HISTORY_MAX_SIZE_PER_OJ;
+    if (toDelete > 0) {
+      await db.run(
+        `
       DELETE FROM ${problem.oj}
       WHERE id IN (
         SELECT id FROM ${problem.oj}
@@ -153,21 +155,33 @@ export async function insertIntoHistory<T extends Oj>(
         LIMIT ?
       )
     `,
-      toDelete
-    );
+        toDelete
+      );
+    }
+    await db.run('COMMIT');
+  } catch (err) {
+    await db.run('ROLLBACK');
+    throw err;
   }
 }
 
 export async function replaceHistorySnapshot<T extends Oj>(db: Database, snapshot: OjProblem[T]) {
-  await db.run(`DELETE FROM ${snapshot.oj} WHERE id = $id`, { $id: snapshot.id });
-  const { columns, values } = getOjProblemColumnsAndValues(snapshot);
-  const placeholders = columns.map((col) => `$${String(col)}`).join(', ');
-  const params: Record<string, any> = {};
-  columns.forEach((col, i) => {
-    params[`$${String(col)}`] = values[i];
-  });
-  await db.run(
-    `INSERT INTO ${snapshot.oj} (${columns.join(', ')}) VALUES (${placeholders})`,
-    params
-  );
+  await db.run('BEGIN TRANSACTION');
+  try {
+    await db.run(`DELETE FROM ${snapshot.oj} WHERE id = $id`, { $id: snapshot.id });
+    const { columns, values } = getOjProblemColumnsAndValues(snapshot);
+    const placeholders = columns.map((col) => `$${String(col)}`).join(', ');
+    const params: Record<string, any> = {};
+    columns.forEach((col, i) => {
+      params[`$${String(col)}`] = values[i];
+    });
+    await db.run(
+      `INSERT INTO ${snapshot.oj} (${columns.join(', ')}) VALUES (${placeholders})`,
+      params
+    );
+    await db.run('COMMIT');
+  } catch (err) {
+    await db.run('ROLLBACK');
+    throw err;
+  }
 }
