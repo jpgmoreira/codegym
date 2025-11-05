@@ -3,7 +3,7 @@ Future improvements:
 
   - Separate important components (TreeView, LineChart, Multiselect, etc.) into reusable components, publish them as libraries, adapt the code to use them as dependencies;
 
-  - Maybe rethink the TreeManager so that it does not write the whole tree file upon every operation.
+  - Improve the schemas. Add runtime validation with some library like zod.
 
   - Add automated testing;
 
