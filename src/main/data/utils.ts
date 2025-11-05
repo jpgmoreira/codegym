@@ -1,6 +1,7 @@
 import { OjFields, OjProblem } from '@common/schemas/problems';
 import { Oj } from '@common/types/oj';
 import fs from 'fs';
+import type { Database } from 'sqlite';
 
 export function ensureDirExists(dir: string) {
   fs.mkdirSync(dir, { recursive: true });
@@ -15,6 +16,15 @@ export function sanitizeQuery(query: Record<string, any>) {
       delete query[key];
     }
   }
+}
+
+export async function setDbPragmas(db: Database) {
+  await db.exec(`
+      PRAGMA journal_mode = WAL;
+      PRAGMA synchronous = NORMAL;
+      PRAGMA temp_store = MEMORY;
+      PRAGMA foreign_keys = ON;
+    `);
 }
 
 /**

@@ -13,6 +13,7 @@ import {
   insertIntoHistory,
   replaceHistorySnapshot,
 } from '../sql/history';
+import { setDbPragmas } from '../utils';
 
 EventEmitter.instance.on(Events.clearProfileData, () => {
   HistoryManager.instance.clear();
@@ -42,6 +43,7 @@ export class HistoryManager {
       filename,
       driver: sqlite3.Database,
     });
+    await setDbPragmas(this.db);
     await createHistoryTables(this.db);
   }
 
