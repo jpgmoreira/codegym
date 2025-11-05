@@ -1,11 +1,14 @@
 import { DATA_DIR } from '../constants';
-import Datastore from '@seald-io/nedb';
+import sqlite3 from 'sqlite3';
+import { open, type Database } from 'sqlite';
 import path from 'path';
 import { OjProblem } from '@common/schemas/problems';
 import { Oj } from '@common/types/oj';
 import { OjMeta } from '@common/schemas/ojMeta';
 import { updateOjCache } from '../cache/update';
 import { filterOjProblems } from '../cache/filter';
+import { setDbPragmas } from '../utils';
+import { createCacheTables } from '../sql/cache';
 
 /**
  * Singleton for managing cache.
@@ -14,14 +17,19 @@ import { filterOjProblems } from '../cache/filter';
 export class CacheManager {
   static #instance: CacheManager;
 
-  private db: Datastore<OjProblem[Oj]> | null = null;
+  private db: Database | null = null;
 
-  private constructor() {
-    this.db = new Datastore<OjProblem[Oj]>({
-      filename: path.join(DATA_DIR, 'cache.nedb'),
-      autoload: true,
+  private constructor() {}
+
+  public async loadCache() {
+    if (this.db) return;
+    const filename = path.join(DATA_DIR, 'cache.sqlite');
+    this.db = await open({
+      filename,
+      driver: sqlite3.Database,
     });
-    this.db.ensureIndex({ fieldName: 'oj' });
+    await setDbPragmas(this.db);
+    await createCacheTables(this.db);
   }
 
   public static get instance(): CacheManager {

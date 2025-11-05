@@ -1,13 +1,21 @@
 /**
- * Properties "timestamp" and "solvedDate" will be absent *** ONLY *** in the cache's database, to save space.
- * "solvedDate" is a number in the format YYYYMMDD. It is calculated based on the user's local time.
+ * The properties "timestamp" and "solvedDate" are omitted ***only*** in the cache database to reduce storage usage.
+ *
+ * In the history tables, each problem snapshot has a manually generated "id".
+ * In the cache tables, the "id" is automatically assigned by the database.
+ *
+ * The only moment when a problem has no "id" is during the short period between
+ * being downloaded from the OJ and being inserted into the cache database.
+ *
+ * The "solvedDate" field is an integer in the format YYYYMMDD,
+ * calculated based on the user's local time.
  */
 
 import { Oj } from '@common/types/oj';
 import { deepFreeze } from '@common/utils/utils';
 
 type BaseProblem = {
-  id: string;
+  id?: string;
   name: string;
   path: string;
   solvedDate?: number | null;

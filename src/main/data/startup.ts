@@ -9,7 +9,7 @@ import { TreeManager } from './managers/treeManager';
 import { ContestsManager } from './managers/contestsManager';
 
 export async function loadStartupData(): Promise<StartupData> {
-  CacheManager.instance; // Forces cache load at startup to avoid slow loading of the first problem.
+  await CacheManager.instance.loadCache();
   const ojMeta = OjMetaManager.instance.getAllMeta();
   const currProfile = ProfileManager.instance.getCurrProfile();
   const profileRegistry = ProfileManager.instance.getProfileRegistry();

@@ -1,12 +1,12 @@
-import { CfProblem, OjProblem } from '@common/schemas/problems';
+import { CfProblem } from '@common/schemas/problems';
 import { CfResponseDTO } from '../dto/cfResponseDTO';
 import { OjMeta } from '@common/schemas/ojMeta';
 import { POPULARITY_GROUP_SIZE } from '@common/constants';
 import { OjMetaManager } from '@main/data/managers/ojMetaManager';
 import { sanitizeQuery } from '@main/data/utils';
-import { Oj } from '@common/types/oj';
 import { ProfileManager } from '@main/data/managers/profileManager';
-import Datastore from '@seald-io/nedb';
+import type { Database } from 'sqlite';
+import { replaceCacheProblems } from '@main/data/sql/cache';
 
 async function downloadCfProblems() {
   const response = await fetch('https://codeforces.com/api/problemset.problems');
@@ -49,7 +49,7 @@ async function downloadCfProblems() {
     problems.push(newProblem);
   }
   problems.sort((a, b) => {
-    return a.info.solved! < b.info.solved! ? 1 : -1;
+    return a.info.solved < b.info.solved ? 1 : -1;
   });
   problems.forEach((p, i) => {
     p.info.popularity = Math.floor(i / POPULARITY_GROUP_SIZE) + 1;
@@ -61,7 +61,7 @@ async function downloadCfProblems() {
   };
 }
 
-export async function updateCfCache(db: Datastore<OjProblem[Oj]>): Promise<OjMeta['cf']> {
+export async function updateCfCache(db: Database): Promise<OjMeta['cf']> {
   const { problems, stats, tags } = await downloadCfProblems();
   const meta: OjMeta['cf'] = {
     lastCacheUpdate: Date.now(),
@@ -69,12 +69,11 @@ export async function updateCfCache(db: Datastore<OjProblem[Oj]>): Promise<OjMet
     tags,
   };
   OjMetaManager.instance.updateOjMeta('cf', meta);
-  await db.removeAsync({ oj: 'cf' }, { multi: true });
-  await db.insertAsync(problems);
+  await replaceCacheProblems(db, 'cf', problems);
   return meta;
 }
 
-export async function filterCfProblems(db: Datastore<OjProblem[Oj]>): Promise<CfProblem[]> {
+export async function filterCfProblems(db: Database): Promise<CfProblem[]> {
   const currProfile = ProfileManager.instance.getCurrProfile()!;
   const filters = currProfile.ojContext['cf'].filters;
   const tags = filters.tags.values;

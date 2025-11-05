@@ -29,22 +29,28 @@ export async function setDbPragmas(db: Database) {
 
 /**
  * Returns all columns and values (base + info) for an OJ problem, with JSON and boolean handling.
+ * Optionally excludes specific columns (e.g. ["timestamp", "solvedDate"]).
  */
-export function getOjProblemColumnsAndValues<T extends Oj>(problem: OjProblem[T]) {
+export function getOjProblemColumnsAndValues<T extends Oj>(
+  problem: OjProblem[T],
+  exclude: string[] = []
+) {
   const oj = problem.oj as T;
   const mapping = OjFields[oj];
-  const columns = [...mapping.baseFields, ...mapping.infoFields] as Array<
+  const allColumns = [...mapping.baseFields, ...mapping.infoFields] as Array<
     keyof typeof problem | keyof typeof problem.info
   >;
-  const values = [
-    ...mapping.baseFields.map((f) => problem[f]),
-    ...mapping.infoFields.map((f) => {
-      const key = f as keyof typeof problem.info;
+  const columns = allColumns.filter((col) => !exclude.includes(String(col)));
+  const values = columns.map((col) => {
+    if (col in problem) {
+      return problem[col as keyof typeof problem];
+    } else {
+      const key = col as keyof typeof problem.info;
       const val = problem.info[key];
       if (mapping.jsonFields?.includes(key)) return JSON.stringify(val);
       if (mapping.booleanFields?.includes(key)) return val ? 1 : 0;
       return val;
-    }),
-  ];
+    }
+  });
   return { columns, values };
 }

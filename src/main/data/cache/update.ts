@@ -6,10 +6,9 @@ import { updateNepsCache } from './ojs/neps';
 import { updateUvaCache } from './ojs/uva';
 import { updateTimusCache } from './ojs/timus';
 import { updateLeetcodeCache } from './ojs/leetcode';
-import Datastore from '@seald-io/nedb';
-import { OjProblem } from '@common/schemas/problems';
+import type { Database } from 'sqlite';
 
-const updateCacheFnMapping: { [K in Oj]: (db: Datastore<OjProblem[Oj]>) => Promise<OjMeta[K]> } = {
+const updateCacheFnMapping: { [K in Oj]: (db: Database) => Promise<OjMeta[K]> } = {
   cf: updateCfCache,
   kattis: updateKattisCache,
   neps: updateNepsCache,
@@ -18,9 +17,6 @@ const updateCacheFnMapping: { [K in Oj]: (db: Datastore<OjProblem[Oj]>) => Promi
   leetcode: updateLeetcodeCache,
 };
 
-export function updateOjCache<T extends Oj>(
-  oj: T,
-  db: Datastore<OjProblem[Oj]>
-): Promise<OjMeta[T]> {
+export function updateOjCache<T extends Oj>(oj: T, db: Database): Promise<OjMeta[T]> {
   return updateCacheFnMapping[oj](db);
 }

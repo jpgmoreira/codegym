@@ -89,7 +89,8 @@ export class FileProxy<T extends JSONObject> {
 
   private async writeFileAsync() {
     const tmpPath = `${this.filePath}.tmp`;
-    ensureDirExists(tmpPath);
+    const dir = path.dirname(tmpPath);
+    ensureDirExists(dir);
     try {
       const data = JSON.stringify(this._target, null, INDENT);
       // 1. Write to temp file:

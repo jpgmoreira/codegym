@@ -7,6 +7,7 @@ import { Events } from '@main/utils/events';
 import sqlite3 from 'sqlite3';
 import { open, type Database } from 'sqlite';
 import { createGraphTable, upsertGraphRecord } from '../sql/graph';
+import { setDbPragmas } from '../utils';
 
 EventEmitter.instance.on(Events.clearProfileData, () => {
   GraphManager.instance.clear();
@@ -36,6 +37,7 @@ export class GraphManager {
       filename,
       driver: sqlite3.Database,
     });
+    await setDbPragmas(this.db);
     await createGraphTable(this.db);
   }
 
