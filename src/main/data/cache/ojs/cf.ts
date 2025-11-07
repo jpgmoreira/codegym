@@ -3,10 +3,8 @@ import { CfResponseDTO } from '../dto/cfResponseDTO';
 import { OjMeta } from '@common/schemas/ojMeta';
 import { POPULARITY_GROUP_SIZE } from '@common/constants';
 import { OjMetaManager } from '@main/data/managers/ojMetaManager';
-import { sanitizeQuery } from '@main/data/utils';
-import { ProfileManager } from '@main/data/managers/profileManager';
 import type { Database } from 'sqlite';
-import { replaceCacheProblems } from '@main/data/sql/cache';
+import { replaceCacheProblems } from '@main/data/sql/cache/cache';
 
 async function downloadCfProblems() {
   const response = await fetch('https://codeforces.com/api/problemset.problems');
@@ -71,30 +69,4 @@ export async function updateCfCache(db: Database): Promise<OjMeta['cf']> {
   OjMetaManager.instance.updateOjMeta('cf', meta);
   await replaceCacheProblems(db, 'cf', problems);
   return meta;
-}
-
-export async function filterCfProblems(db: Database): Promise<CfProblem[]> {
-  const currProfile = ProfileManager.instance.getCurrProfile()!;
-  const filters = currProfile.ojContext['cf'].filters;
-  const tags = filters.tags.values;
-  const minr = filters.rating.min;
-  const maxr = filters.rating.max;
-  const minsb = filters.popularity.min;
-  const maxsb = filters.popularity.max;
-  const query: Record<string, any> = {
-    oj: 'cf',
-    'info.rating': {},
-    'info.popularity': {},
-  };
-  if (minr !== '') query['info.rating'].$gte = minr;
-  if (maxr !== '') query['info.rating'].$lte = maxr;
-  if (minsb !== '') query['info.popularity'].$gte = minsb;
-  if (maxsb !== '') query['info.popularity'].$lte = maxsb;
-  if (tags.length) {
-    query.$where = function () {
-      return tags.every((t: string) => (this as CfProblem).info.tags.includes(t));
-    };
-  }
-  sanitizeQuery(query);
-  return db.findAsync(query, { _id: 0 });
 }

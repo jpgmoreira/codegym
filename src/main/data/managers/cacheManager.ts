@@ -8,7 +8,7 @@ import { OjMeta } from '@common/schemas/ojMeta';
 import { updateOjCache } from '../cache/update';
 import { filterOjProblems } from '../cache/filter';
 import { setDbPragmas } from '../utils';
-import { createCacheTables } from '../sql/cache';
+import { createCacheTables } from '../sql/cache/cache';
 
 /**
  * Singleton for managing cache.

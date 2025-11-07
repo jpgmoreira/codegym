@@ -1,13 +1,12 @@
 import { POPULARITY_GROUP_SIZE } from '@common/constants';
 import { OjProblem, TimusProblem } from '@common/schemas/problems';
 import { OjMeta } from '@common/schemas/ojMeta';
-import { sanitizeQuery } from '@main/data/utils';
 import { ProfileManager } from '@main/data/managers/profileManager';
 import { OjMetaManager } from '@main/data/managers/ojMetaManager';
 import { type Database } from 'sqlite';
 import * as cheerio from 'cheerio';
 import { Oj } from '@common/types/oj';
-import { replaceCacheProblems } from '@main/data/sql/cache';
+import { replaceCacheProblems } from '@main/data/sql/cache/cache';
 
 async function downloadTimusProblems() {
   const result = await fetch(

@@ -4,10 +4,9 @@ import { OjMeta } from '@common/schemas/ojMeta';
 import { POPULARITY_GROUP_SIZE } from '@common/constants';
 import { OjMetaManager } from '@main/data/managers/ojMetaManager';
 import { ProfileManager } from '@main/data/managers/profileManager';
-import { sanitizeQuery } from '@main/data/utils';
 import { Oj } from '@common/types/oj';
 import { type Database } from 'sqlite';
-import { replaceCacheProblems } from '@main/data/sql/cache';
+import { replaceCacheProblems } from '@main/data/sql/cache/cache';
 
 async function downloadNepsProblems() {
   const response = await fetch('https://api.neps.academy/tables/exercises?query');

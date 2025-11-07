@@ -3,11 +3,10 @@ import { KattisProblem, OjProblem } from '@common/schemas/problems';
 import { OjMeta } from '@common/schemas/ojMeta';
 import { OjMetaManager } from '@main/data/managers/ojMetaManager';
 import { ProfileManager } from '@main/data/managers/profileManager';
-import { sanitizeQuery } from '@main/data/utils';
 import { type Database } from 'sqlite';
 import * as cheerio from 'cheerio';
 import { Oj } from '@common/types/oj';
-import { replaceCacheProblems } from '@main/data/sql/cache';
+import { replaceCacheProblems } from '@main/data/sql/cache/cache';
 
 function parseTextDifficulty(text: string): number | null {
   /**

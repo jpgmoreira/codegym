@@ -1,15 +1,15 @@
 import { Oj } from '@common/types/oj';
 import { OjProblem } from '@common/schemas/problems';
-import { filterCfProblems } from './ojs/cf';
+import { filterCfProblems } from '../sql/cache/filter/cf';
 import { filterKattisProblems } from './ojs/kattis';
 import { filterNepsProblems } from './ojs/neps';
 import { filterUvaProblems } from './ojs/uva';
 import { filterTimusProblems } from './ojs/timus';
 import { filterLeetcodeProblems } from './ojs/leetcode';
-import Datastore from '@seald-io/nedb';
+import { Database } from 'sqlite';
 
 const filterCacheFnMapping: {
-  [K in Oj]: (db: Datastore<OjProblem[Oj]>) => Promise<OjProblem[K][]>;
+  [K in Oj]: (db: Database) => Promise<OjProblem[K][]>;
 } = {
   cf: filterCfProblems,
   kattis: filterKattisProblems,
@@ -19,9 +19,6 @@ const filterCacheFnMapping: {
   leetcode: filterLeetcodeProblems,
 };
 
-export async function filterOjProblems<T extends Oj>(
-  oj: T,
-  db: Datastore<OjProblem[Oj]>
-): Promise<OjProblem[T][]> {
+export async function filterOjProblems<T extends Oj>(oj: T, db: Database): Promise<OjProblem[T][]> {
   return filterCacheFnMapping[oj](db);
 }
