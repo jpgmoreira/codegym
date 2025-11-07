@@ -3,7 +3,7 @@ import { OjProblem } from '@common/schemas/problems';
 import { filterCfProblems } from '../sql/cache/filter/cf';
 import { filterKattisProblems } from '../sql/cache/filter/kattis';
 import { filterNepsProblems } from '../sql/cache/filter/neps';
-import { filterUvaProblems } from './ojs/uva';
+import { filterUvaProblems } from '../sql/cache/filter/uva';
 import { filterTimusProblems } from '../sql/cache/filter/timus';
 import { filterLeetcodeProblems } from '../sql/cache/filter/leetcode';
 import { Database } from 'sqlite';

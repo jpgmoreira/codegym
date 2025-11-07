@@ -1,12 +1,10 @@
-import { OjProblem, UvaProblem } from '@common/schemas/problems';
+import { UvaProblem } from '@common/schemas/problems';
 import * as cheerio from 'cheerio';
 import { UvaResponseDTO } from '../dto/uvaResponseDTO';
 import { POPULARITY_GROUP_SIZE } from '@common/constants';
 import { OjMeta } from '@common/schemas/ojMeta';
-import { ProfileManager } from '@main/data/managers/profileManager';
 import { OjMetaManager } from '@main/data/managers/ojMetaManager';
 import { type Database } from 'sqlite';
-import { Oj } from '@common/types/oj';
 import { replaceCacheProblems } from '@main/data/sql/cache/cache';
 
 async function downloadUvaProblems() {
@@ -59,21 +57,4 @@ export async function updateUvaCache(db: Database): Promise<OjMeta['uva']> {
   OjMetaManager.instance.updateOjMeta('uva', meta);
   await replaceCacheProblems(db, 'uva', problems);
   return meta;
-}
-
-export async function filterUvaProblems(db: Datastore<OjProblem[Oj]>): Promise<UvaProblem[]> {
-  const currProfile = ProfileManager.instance.getCurrProfile()!;
-  const filters = currProfile.ojContext['uva'].filters;
-  const minsb = filters.popularity.min;
-  const maxsb = filters.popularity.max;
-  const starred = filters.starred.value;
-  const query: Record<string, any> = {
-    oj: 'uva',
-    'info.popularity': {},
-  };
-  if (minsb !== '') query['info.popularity'].$gte = minsb;
-  if (maxsb !== '') query['info.popularity'].$lte = maxsb;
-  if (starred) query['info.starred'] = true;
-  sanitizeQuery(query);
-  return db.findAsync(query, { _id: 0 });
 }
