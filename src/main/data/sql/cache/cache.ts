@@ -10,6 +10,7 @@ export async function createCacheTables(db: Database) {
     db.exec(`
       CREATE TABLE IF NOT EXISTS cf (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
+        oj TEXT NOT NULL DEFAULT 'cf' CHECK (oj = 'cf'),
         name TEXT NOT NULL,
         path TEXT NOT NULL,
         solved INTEGER NOT NULL,
@@ -21,6 +22,7 @@ export async function createCacheTables(db: Database) {
     db.exec(`
       CREATE TABLE IF NOT EXISTS kattis (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
+        oj TEXT NOT NULL DEFAULT 'kattis' CHECK (oj = 'kattis'),
         name TEXT NOT NULL,
         path TEXT NOT NULL,
         solved INTEGER NOT NULL,
@@ -34,6 +36,7 @@ export async function createCacheTables(db: Database) {
     db.exec(`
       CREATE TABLE IF NOT EXISTS neps (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
+        oj TEXT NOT NULL DEFAULT 'neps' CHECK (oj = 'neps'),
         name TEXT, -- Neps name can be null
         path TEXT NOT NULL,
         score INTEGER NOT NULL,
@@ -44,6 +47,7 @@ export async function createCacheTables(db: Database) {
     db.exec(`
       CREATE TABLE IF NOT EXISTS leetcode (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
+        oj TEXT NOT NULL DEFAULT 'leetcode' CHECK (oj = 'leetcode'),
         name TEXT NOT NULL,
         path TEXT NOT NULL,
         accepted INTEGER NOT NULL,
@@ -56,6 +60,7 @@ export async function createCacheTables(db: Database) {
     db.exec(`
       CREATE TABLE IF NOT EXISTS timus (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
+        oj TEXT NOT NULL DEFAULT 'timus' CHECK (oj = 'timus'),
         name TEXT NOT NULL,
         path TEXT NOT NULL,
         solved INTEGER NOT NULL,
@@ -67,6 +72,7 @@ export async function createCacheTables(db: Database) {
     db.exec(`
       CREATE TABLE IF NOT EXISTS uva (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
+        oj TEXT NOT NULL DEFAULT 'uva' CHECK (oj = 'uva'),
         name TEXT NOT NULL,
         path TEXT NOT NULL,
         dacu INTEGER NOT NULL,

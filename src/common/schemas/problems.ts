@@ -1,5 +1,4 @@
 /**
- * The property "oj" is not stored in the cache or history database, however it is always present in the program.
  * The properties "timestamp" and "solvedDate" are omitted ***only*** in the cache database to reduce storage usage.
  *
  * In the history tables, each problem snapshot has a manually generated "id".

@@ -17,7 +17,7 @@ export async function setDbPragmas(db: Database) {
 }
 
 /**
- * Returns all columns and values (base + info) for an OJ problem, with JSON and boolean handling.
+ * Returns all columns and values for an OJ problem, with JSON and boolean handling.
  * Optionally excludes specific columns (e.g. ["timestamp", "solvedDate"]).
  */
 export function getOjProblemColumnsAndValues<T extends Oj>(
