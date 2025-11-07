@@ -1,11 +1,9 @@
 import { POPULARITY_GROUP_SIZE } from '@common/constants';
-import { KattisProblem, OjProblem } from '@common/schemas/problems';
+import { KattisProblem } from '@common/schemas/problems';
 import { OjMeta } from '@common/schemas/ojMeta';
 import { OjMetaManager } from '@main/data/managers/ojMetaManager';
-import { ProfileManager } from '@main/data/managers/profileManager';
 import { type Database } from 'sqlite';
 import * as cheerio from 'cheerio';
-import { Oj } from '@common/types/oj';
 import { replaceCacheProblems } from '@main/data/sql/cache/cache';
 
 function parseTextDifficulty(text: string): number | null {
@@ -94,26 +92,4 @@ export async function updateKattisCache(db: Database): Promise<OjMeta['kattis']>
   OjMetaManager.instance.updateOjMeta('kattis', meta);
   await replaceCacheProblems(db, 'kattis', problems);
   return meta;
-}
-
-export async function filterKattisProblems(db: Datastore<OjProblem[Oj]>): Promise<KattisProblem[]> {
-  const currProfile = ProfileManager.instance.getCurrProfile()!;
-  const filters = currProfile.ojContext['kattis'].filters;
-  const mind = filters.difficulty.min;
-  const maxd = filters.difficulty.max;
-  const minsb = filters.popularity.min;
-  const maxsb = filters.popularity.max;
-  const starred = filters.starred.value;
-  const query: Record<string, any> = {
-    oj: 'kattis',
-    'info.difficulty': {},
-    'info.popularity': {},
-  };
-  if (mind !== '') query['info.difficulty'].$gte = mind;
-  if (maxd !== '') query['info.difficulty'].$lte = maxd;
-  if (minsb !== '') query['info.popularity'].$gte = minsb;
-  if (maxsb !== '') query['info.popularity'].$lte = maxsb;
-  if (starred) query['info.starred'] = true;
-  sanitizeQuery(query);
-  return db.findAsync(query, { _id: 0 });
 }
