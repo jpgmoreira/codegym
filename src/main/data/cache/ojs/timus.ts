@@ -1,11 +1,9 @@
 import { POPULARITY_GROUP_SIZE } from '@common/constants';
-import { OjProblem, TimusProblem } from '@common/schemas/problems';
+import { TimusProblem } from '@common/schemas/problems';
 import { OjMeta } from '@common/schemas/ojMeta';
-import { ProfileManager } from '@main/data/managers/profileManager';
 import { OjMetaManager } from '@main/data/managers/ojMetaManager';
 import { type Database } from 'sqlite';
 import * as cheerio from 'cheerio';
-import { Oj } from '@common/types/oj';
 import { replaceCacheProblems } from '@main/data/sql/cache/cache';
 
 async function downloadTimusProblems() {
@@ -63,24 +61,4 @@ export async function updateTimusCache(db: Database): Promise<OjMeta['timus']> {
   OjMetaManager.instance.updateOjMeta('timus', meta);
   await replaceCacheProblems(db, 'timus', problems);
   return meta;
-}
-
-export async function filterTimusProblems(db: Datastore<OjProblem[Oj]>): Promise<TimusProblem[]> {
-  const currProfile = ProfileManager.instance.getCurrProfile()!;
-  const filters = currProfile.ojContext['timus'].filters;
-  const mind = filters.difficulty.min;
-  const maxd = filters.difficulty.max;
-  const minsb = filters.popularity.min;
-  const maxsb = filters.popularity.max;
-  const query: Record<string, any> = {
-    oj: 'timus',
-    'info.difficulty': {},
-    'info.popularity': {},
-  };
-  if (mind !== '') query['info.difficulty'].$gte = mind;
-  if (maxd !== '') query['info.difficulty'].$lte = maxd;
-  if (minsb !== '') query['info.popularity'].$gte = minsb;
-  if (maxsb !== '') query['info.popularity'].$lte = maxsb;
-  sanitizeQuery(query);
-  return db.findAsync(query, { _id: 0 });
 }

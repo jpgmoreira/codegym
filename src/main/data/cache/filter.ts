@@ -4,7 +4,7 @@ import { filterCfProblems } from '../sql/cache/filter/cf';
 import { filterKattisProblems } from '../sql/cache/filter/kattis';
 import { filterNepsProblems } from '../sql/cache/filter/neps';
 import { filterUvaProblems } from './ojs/uva';
-import { filterTimusProblems } from './ojs/timus';
+import { filterTimusProblems } from '../sql/cache/filter/timus';
 import { filterLeetcodeProblems } from '../sql/cache/filter/leetcode';
 import { Database } from 'sqlite';
 
