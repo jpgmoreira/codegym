@@ -1,10 +1,8 @@
-import { NepsProblem, OjProblem } from '@common/schemas/problems';
+import { NepsProblem } from '@common/schemas/problems';
 import { NepsResponseDTO } from '../dto/nepsResponseDTO';
 import { OjMeta } from '@common/schemas/ojMeta';
 import { POPULARITY_GROUP_SIZE } from '@common/constants';
 import { OjMetaManager } from '@main/data/managers/ojMetaManager';
-import { ProfileManager } from '@main/data/managers/profileManager';
-import { Oj } from '@common/types/oj';
 import { type Database } from 'sqlite';
 import { replaceCacheProblems } from '@main/data/sql/cache/cache';
 
@@ -58,24 +56,4 @@ export async function updateNepsCache(db: Database): Promise<OjMeta['neps']> {
   OjMetaManager.instance.updateOjMeta('neps', meta);
   await replaceCacheProblems(db, 'neps', problems);
   return meta;
-}
-
-export async function filterNepsProblems(db: Datastore<OjProblem[Oj]>): Promise<NepsProblem[]> {
-  const currProfile = ProfileManager.instance.getCurrProfile()!;
-  const filters = currProfile.ojContext['neps'].filters;
-  const mins = filters.score.min;
-  const maxs = filters.score.max;
-  const minsb = filters.popularity.min;
-  const maxsb = filters.popularity.max;
-  const query: Record<string, any> = {
-    oj: 'neps',
-    'info.score': {},
-    'info.popularity': {},
-  };
-  if (mins !== '') query['info.score'].$gte = mins;
-  if (maxs !== '') query['info.score'].$lte = maxs;
-  if (minsb !== '') query['info.popularity'].$gte = minsb;
-  if (maxsb !== '') query['info.popularity'].$lte = maxsb;
-  sanitizeQuery(query);
-  return db.findAsync(query, { _id: 0 });
 }

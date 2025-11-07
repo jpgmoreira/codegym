@@ -2,7 +2,7 @@ import { Oj } from '@common/types/oj';
 import { OjProblem } from '@common/schemas/problems';
 import { filterCfProblems } from '../sql/cache/filter/cf';
 import { filterKattisProblems } from '../sql/cache/filter/kattis';
-import { filterNepsProblems } from './ojs/neps';
+import { filterNepsProblems } from '../sql/cache/filter/neps';
 import { filterUvaProblems } from './ojs/uva';
 import { filterTimusProblems } from './ojs/timus';
 import { filterLeetcodeProblems } from '../sql/cache/filter/leetcode';
