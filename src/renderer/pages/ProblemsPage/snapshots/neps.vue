@@ -15,20 +15,18 @@
       <li>
         Score:
         <span class="font-bold">
-          {{ toLocaleNumber(snapshot.info.score) }} [{{
-            toLocaleNumber(meta.stats.score.min!)
-          }}
-          &ndash; {{ toLocaleNumber(meta.stats.score.max!) }}].
+          {{ toLocaleNumber(snapshot.score) }} [{{ toLocaleNumber(meta.stats.score.min!) }} &ndash;
+          {{ toLocaleNumber(meta.stats.score.max!) }}].
         </span>
       </li>
       <li>
         Solved by:
-        <span class="font-bold">{{ toLocaleNumber(snapshot.info.solved) }} users.</span>
+        <span class="font-bold">{{ toLocaleNumber(snapshot.solved) }} users.</span>
       </li>
       <li>
         Popularity:
         <span class="font-bold">
-          {{ toLocaleNumber(snapshot.info.popularity) }} of
+          {{ toLocaleNumber(snapshot.popularity) }} of
           {{ toLocaleNumber(meta.stats.popularity.max!) }}.
         </span>
       </li>

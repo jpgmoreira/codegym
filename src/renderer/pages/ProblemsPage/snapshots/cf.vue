@@ -13,10 +13,10 @@
 <template>
   <div>
     <ul class="list-disc list-inside">
-      <li v-if="snapshot.info.rating !== null">
+      <li v-if="snapshot.rating !== null">
         Rating:
         <span class="font-bold">
-          {{ toLocaleNumber(snapshot.info.rating) }} [{{
+          {{ toLocaleNumber(snapshot.rating) }} [{{
             toLocaleNumber(meta.stats.rating.min!)
           }}
           &ndash; {{ toLocaleNumber(meta.stats.rating.max!) }}].
@@ -24,16 +24,16 @@
       </li>
       <li>
         Solved by:
-        <span class="font-bold">{{ toLocaleNumber(snapshot.info.solved) }} users.</span>
+        <span class="font-bold">{{ toLocaleNumber(snapshot.solved) }} users.</span>
       </li>
       <li>
         Popularity:
         <span class="font-bold">
-          {{ toLocaleNumber(snapshot.info.popularity!) }} of
+          {{ toLocaleNumber(snapshot.popularity!) }} of
           {{ toLocaleNumber(meta.stats.popularity.max!) }}.
         </span>
       </li>
-      <li v-if="snapshot.info.tags && snapshot.info.tags.length">
+      <li v-if="snapshot.tags && snapshot.tags.length">
         <div class="inline-flex items-center">
           Tags:
           <span
@@ -45,7 +45,7 @@
           </span>
         </div>
         <div v-if="showTags" class="tags-container flex flex-wrap gap-1 border rounded-md p-1">
-          <span v-for="tag in snapshot.info.tags" :key="tag" class="tag-badge">{{ tag }}</span>
+          <span v-for="tag in snapshot.tags" :key="tag" class="tag-badge">{{ tag }}</span>
         </div>
       </li>
     </ul>

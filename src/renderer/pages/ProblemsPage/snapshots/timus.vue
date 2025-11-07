@@ -15,7 +15,7 @@
       <li>
         Difficulty:
         <span class="font-bold">
-          {{ toLocaleNumber(snapshot.info.difficulty) }} [{{
+          {{ toLocaleNumber(snapshot.difficulty) }} [{{
             toLocaleNumber(meta.stats.difficulty.min!)
           }}
           &ndash; {{ toLocaleNumber(meta.stats.difficulty.max!) }}].
@@ -24,17 +24,17 @@
       <li>
         Popularity:
         <span class="font-bold">
-          {{ toLocaleNumber(snapshot.info.popularity) }} of
+          {{ toLocaleNumber(snapshot.popularity) }} of
           {{ toLocaleNumber(meta.stats.popularity.max!) }}.
         </span>
       </li>
       <li>
         Solved by:
-        <span class="font-bold">{{ toLocaleNumber(snapshot.info.solved) }} users.</span>
+        <span class="font-bold">{{ toLocaleNumber(snapshot.solved) }} users.</span>
       </li>
-      <li v-if="snapshot.info.source">
+      <li v-if="snapshot.source">
         Source:
-        <span class="font-bold">{{ snapshot.info.source }}.</span>
+        <span class="font-bold">{{ snapshot.source }}.</span>
       </li>
     </ul>
   </div>

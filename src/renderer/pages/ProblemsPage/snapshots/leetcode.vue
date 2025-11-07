@@ -15,26 +15,26 @@
     <ul class="list-disc list-inside">
       <li>
         Accepted:
-        <span class="font-bold">{{ toLocaleNumber(snapshot.info.accepted) }}.</span>
+        <span class="font-bold">{{ toLocaleNumber(snapshot.accepted) }}.</span>
       </li>
       <li>
         Submissions:
-        <span class="font-bold">{{ toLocaleNumber(snapshot.info.submissions) }}.</span>
+        <span class="font-bold">{{ toLocaleNumber(snapshot.submissions) }}.</span>
       </li>
       <li>
         Popularity:
         <span class="font-bold">
-          {{ toLocaleNumber(snapshot.info.popularity) }} of
+          {{ toLocaleNumber(snapshot.popularity) }} of
           {{ toLocaleNumber(meta.stats.popularity.max!) }}.
         </span>
       </li>
       <li>
         Difficulty:
-        <span class="font-bold">{{ difficultyList[snapshot.info.difficulty - 1] }}.</span>
+        <span class="font-bold">{{ difficultyList[snapshot.difficulty - 1] }}.</span>
       </li>
       <li>
         Premium:
-        <span class="font-bold">{{ snapshot.info.premium ? 'Yes' : 'No' }}.</span>
+        <span class="font-bold">{{ snapshot.premium ? 'Yes' : 'No' }}.</span>
       </li>
     </ul>
   </div>

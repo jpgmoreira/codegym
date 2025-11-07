@@ -26,20 +26,14 @@ export function getOjProblemColumnsAndValues<T extends Oj>(
 ) {
   const oj = problem.oj as T;
   const mapping = OjFields[oj];
-  const allColumns = [...mapping.baseFields, ...mapping.infoFields] as Array<
-    keyof typeof problem | keyof typeof problem.info
-  >;
+  const allColumns = mapping.fields;
   const columns = allColumns.filter((col) => !exclude.includes(String(col)));
   const values = columns.map((col) => {
-    if (col in problem) {
-      return problem[col as keyof typeof problem];
-    } else {
-      const key = col as keyof typeof problem.info;
-      const val = problem.info[key];
-      if (mapping.jsonFields?.includes(key)) return JSON.stringify(val);
-      if (mapping.booleanFields?.includes(key)) return val ? 1 : 0;
-      return val;
-    }
+    const key = col as keyof typeof problem;
+    const val = problem[key];
+    if (mapping.jsonFields?.includes(key)) return JSON.stringify(val);
+    if (mapping.booleanFields?.includes(key)) return val ? 1 : 0;
+    return val;
   });
   return { columns, values };
 }

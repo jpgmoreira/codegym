@@ -15,16 +15,16 @@
     <ul class="list-disc list-inside">
       <li>
         Distinct users accepted:
-        <span class="font-bold">{{ toLocaleNumber(snapshot.info.dacu) }}.</span>
+        <span class="font-bold">{{ toLocaleNumber(snapshot.dacu) }}.</span>
       </li>
       <li>
         Popularity:
         <span class="font-bold">
-          {{ toLocaleNumber(snapshot.info.popularity) }} of
+          {{ toLocaleNumber(snapshot.popularity) }} of
           {{ toLocaleNumber(meta.stats.popularity.max!) }}.
         </span>
       </li>
-      <div v-if="snapshot.info.starred">
+      <div v-if="snapshot.starred">
         <img :src="star" class="star" />
       </div>
     </ul>

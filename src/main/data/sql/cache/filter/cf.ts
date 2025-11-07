@@ -11,7 +11,7 @@ export async function filterCfProblems(db: Database): Promise<CfProblem[]> {
   const minp = filters.popularity.min;
   const maxp = filters.popularity.max;
 
-  let sql = 'SELECT * FROM cf WHERE TRUE';
+  let sql = "SELECT 'cf' AS oj, * FROM cf WHERE TRUE";
 
   const params: (string | number)[] = [];
 
@@ -41,5 +41,10 @@ export async function filterCfProblems(db: Database): Promise<CfProblem[]> {
   }
 
   const rows = await db.all<CfProblem[]>(sql, params);
+  for (const row of rows) {
+    if (row.tags) {
+      row.tags = JSON.parse(row.tags as unknown as string);
+    }
+  }
   return rows;
 }

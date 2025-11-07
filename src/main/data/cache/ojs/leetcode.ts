@@ -23,21 +23,19 @@ async function downloadLeetcodeProblems() {
       oj: 'leetcode',
       name: p.stat.question__title,
       path: p.stat.question__title_slug,
-      info: {
-        accepted: p.stat.total_acs,
-        submissions: p.stat.total_submitted,
-        difficulty: p.difficulty.level,
-        premium: p.paid_only,
-        popularity: -1,
-      },
+      accepted: p.stat.total_acs,
+      submissions: p.stat.total_submitted,
+      difficulty: p.difficulty.level,
+      premium: p.paid_only,
+      popularity: -1,
     };
     problems.push(newProblem);
   });
   problems.sort((a, b) => {
-    return a.info.accepted < b.info.accepted ? 1 : -1;
+    return a.accepted < b.accepted ? 1 : -1;
   });
   problems.forEach((p, i) => {
-    p.info.popularity = Math.floor(i / POPULARITY_GROUP_SIZE) + 1;
+    p.popularity = Math.floor(i / POPULARITY_GROUP_SIZE) + 1;
   });
   return {
     problems,

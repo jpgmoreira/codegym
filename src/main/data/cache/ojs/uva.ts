@@ -27,19 +27,17 @@ async function downloadUvaProblems() {
       oj: 'uva',
       name: p[2],
       path: p[0].toString(),
-      info: {
-        dacu: p[3],
-        starred: starredProblems.has(p[1]),
-        popularity: -1,
-      },
+      dacu: p[3],
+      starred: starredProblems.has(p[1]),
+      popularity: -1,
     };
     problems.push(newProblem);
   });
   problems.sort((a, b) => {
-    return a.info.dacu < b.info.dacu ? 1 : -1;
+    return a.dacu < b.dacu ? 1 : -1;
   });
   problems.forEach((p, i) => {
-    p.info.popularity = Math.floor(i / POPULARITY_GROUP_SIZE) + 1;
+    p.popularity = Math.floor(i / POPULARITY_GROUP_SIZE) + 1;
   });
   const stats: OjMeta['uva']['stats'] = {
     popularity: {

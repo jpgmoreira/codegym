@@ -13,31 +13,29 @@
 <template>
   <div>
     <ul class="list-disc list-inside">
-      <li v-if="snapshot.info.difficulty !== null">
+      <li v-if="snapshot.difficulty !== null">
         Difficulty:
         <span class="font-bold">
-          {{ snapshot.info.textDifficulty }} [{{
-            toLocaleNumber(meta.stats.difficulty.min!)
-          }}
-          &ndash; {{ toLocaleNumber(meta.stats.difficulty.max!) }}].
+          {{ snapshot.textDifficulty }} [{{ toLocaleNumber(meta.stats.difficulty.min!) }} &ndash;
+          {{ toLocaleNumber(meta.stats.difficulty.max!) }}].
         </span>
       </li>
       <li>
         Popularity:
         <span class="font-bold">
-          {{ toLocaleNumber(snapshot.info.popularity) }} of
+          {{ toLocaleNumber(snapshot.popularity) }} of
           {{ toLocaleNumber(meta.stats.popularity.max!) }}.
         </span>
       </li>
       <li>
         Solved by:
-        <span class="font-bold">{{ toLocaleNumber(snapshot.info.solved) }} users.</span>
+        <span class="font-bold">{{ toLocaleNumber(snapshot.solved) }} users.</span>
       </li>
       <li>
         Users submitted:
-        <span class="font-bold">{{ toLocaleNumber(snapshot.info.submissions) }}.</span>
+        <span class="font-bold">{{ toLocaleNumber(snapshot.submissions) }}.</span>
       </li>
-      <div v-if="snapshot.info.starred">
+      <div v-if="snapshot.starred">
         <img :src="star" class="star" />
       </div>
     </ul>

@@ -32,25 +32,23 @@ async function downloadCfProblems() {
       oj: 'cf',
       name: problemset[i].name,
       path,
-      info: {
-        rating: problemset[i].rating || null,
-        tags: problemset[i].tags,
-        solved: problemStatistics[i].solvedCount,
-        popularity: -1,
-      },
+      rating: problemset[i].rating || null,
+      tags: problemset[i].tags,
+      solved: problemStatistics[i].solvedCount,
+      popularity: -1,
     };
-    if (newProblem.info.rating != null) {
-      stats.rating.min = Math.min(stats.rating.min!, newProblem.info.rating);
-      stats.rating.max = Math.max(stats.rating.max!, newProblem.info.rating);
+    if (newProblem.rating != null) {
+      stats.rating.min = Math.min(stats.rating.min!, newProblem.rating);
+      stats.rating.max = Math.max(stats.rating.max!, newProblem.rating);
     }
-    newProblem.info.tags.forEach((t) => tagsSet.add(t.toLowerCase()));
+    newProblem.tags.forEach((t) => tagsSet.add(t.toLowerCase()));
     problems.push(newProblem);
   }
   problems.sort((a, b) => {
-    return a.info.solved < b.info.solved ? 1 : -1;
+    return a.solved < b.solved ? 1 : -1;
   });
   problems.forEach((p, i) => {
-    p.info.popularity = Math.floor(i / POPULARITY_GROUP_SIZE) + 1;
+    p.popularity = Math.floor(i / POPULARITY_GROUP_SIZE) + 1;
   });
   return {
     problems,

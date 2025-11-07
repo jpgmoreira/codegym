@@ -111,16 +111,16 @@ export async function fetchHistoryPage<T extends Oj>(
   const total = totalRow?.total ?? 0;
   const mapping = OjFields[oj];
   const data = rows.map((row) => {
-    const base: Partial<OjProblem[T]> = {};
-    mapping.baseFields.forEach((f) => (base[f] = row[f]));
-    const info: Partial<OjProblem[T]['info']> = {};
-    mapping.infoFields.forEach((f) => {
-      let val = row[f as keyof typeof row.info];
-      if (mapping.jsonFields?.includes(f)) val = val && JSON.parse(val);
-      if (mapping.booleanFields?.includes(f)) val = !!val;
-      info[f] = val;
+    const fields: Partial<OjProblem[T]> = {};
+    mapping.fields.forEach((f) => {
+      let val = row[f] as unknown;
+      if (typeof val === 'string') {
+        if (mapping.jsonFields?.includes(f)) val = val && JSON.parse(val);
+        if (mapping.booleanFields?.includes(f)) val = Boolean(val);
+      }
+      fields[f] = val as any;
     });
-    return { ...base, oj, info } as OjProblem[T];
+    return { ...fields, oj } as OjProblem[T];
   });
   return { data, total };
 }

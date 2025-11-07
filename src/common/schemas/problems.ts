@@ -1,4 +1,5 @@
 /**
+ * The property "oj" is not stored in the cache or history database, however it is always present in the program.
  * The properties "timestamp" and "solvedDate" are omitted ***only*** in the cache database to reduce storage usage.
  *
  * In the history tables, each problem snapshot has a manually generated "id".
@@ -16,6 +17,7 @@ import { deepFreeze } from '@common/utils/utils';
 
 type BaseProblem = {
   id?: string;
+  oj: Oj;
   name: string;
   path: string;
   solvedDate?: number | null;
@@ -24,63 +26,51 @@ type BaseProblem = {
 
 export type CfProblem = BaseProblem & {
   oj: 'cf';
-  info: {
-    solved: number;
-    rating: number | null;
-    popularity: number;
-    tags: string[];
-  };
+  solved: number;
+  rating: number | null;
+  popularity: number;
+  tags: string[];
 };
 
 export type KattisProblem = BaseProblem & {
   oj: 'kattis';
-  info: {
-    solved: number;
-    submissions: number;
-    textDifficulty: string;
-    difficulty: number | null;
-    popularity: number;
-    starred: boolean;
-  };
+  solved: number;
+  submissions: number;
+  textDifficulty: string;
+  difficulty: number | null;
+  popularity: number;
+  starred: boolean;
 };
 
 export type NepsProblem = BaseProblem & {
   oj: 'neps';
-  info: {
-    score: number;
-    solved: number;
-    popularity: number;
-  };
+  score: number;
+  solved: number;
+  popularity: number;
 };
 
 export type LeetcodeProblem = BaseProblem & {
   oj: 'leetcode';
-  info: {
-    accepted: number;
-    difficulty: number;
-    premium: boolean;
-    popularity: number;
-    submissions: number;
-  };
+  accepted: number;
+  difficulty: number;
+  premium: boolean;
+  popularity: number;
+  submissions: number;
 };
 
 export type TimusProblem = BaseProblem & {
   oj: 'timus';
-  info: {
-    solved: number;
-    source: string | null;
-    difficulty: number;
-    popularity: number;
-  };
+  solved: number;
+  source: string | null;
+  difficulty: number;
+  popularity: number;
 };
 
 export type UvaProblem = BaseProblem & {
   oj: 'uva';
-  info: {
-    dacu: number;
-    popularity: number;
-    starred: boolean;
-  };
+  dacu: number;
+  popularity: number;
+  starred: boolean;
 };
 
 export type OjProblem = {
@@ -96,42 +86,43 @@ export type OjProblem = {
  * This is used to simplify SQL queries:
  */
 
-type OjMapping<T extends Oj> = {
-  baseFields: Readonly<Array<keyof OjProblem[T]>>;
-  infoFields: Readonly<Array<keyof OjProblem[T]['info']>>;
-  jsonFields?: Readonly<Array<keyof OjProblem[T]['info']>>;
-  booleanFields?: Readonly<Array<keyof OjProblem[T]['info']>>;
+type OjFields<T extends Oj> = {
+  fields: Readonly<Array<keyof OjProblem[T]>>;
+  jsonFields?: Readonly<Array<keyof OjProblem[T]>>;
+  booleanFields?: Readonly<Array<keyof OjProblem[T]>>;
 };
 
-const baseFields = Object.freeze(['id', 'name', 'path', 'solvedDate', 'timestamp'] as const);
+const baseFields = Object.freeze(['id', 'oj', 'name', 'path', 'solvedDate', 'timestamp'] as const);
 
-export const OjFields = deepFreeze<{ [T in Oj]: OjMapping<T> }>({
+export const OjFields = deepFreeze<{ [T in Oj]: OjFields<T> }>({
   cf: {
-    baseFields,
-    infoFields: ['solved', 'rating', 'popularity', 'tags'],
+    fields: [...baseFields, 'solved', 'rating', 'popularity', 'tags'],
     jsonFields: ['tags'],
   },
   kattis: {
-    baseFields,
-    infoFields: ['solved', 'submissions', 'textDifficulty', 'difficulty', 'popularity', 'starred'],
+    fields: [
+      ...baseFields,
+      'solved',
+      'submissions',
+      'textDifficulty',
+      'difficulty',
+      'popularity',
+      'starred',
+    ],
     booleanFields: ['starred'],
   },
   neps: {
-    baseFields,
-    infoFields: ['score', 'solved', 'popularity'],
+    fields: [...baseFields, 'score', 'solved', 'popularity'],
   },
   leetcode: {
-    baseFields,
-    infoFields: ['accepted', 'difficulty', 'premium', 'popularity', 'submissions'],
+    fields: [...baseFields, 'accepted', 'difficulty', 'premium', 'popularity', 'submissions'],
     booleanFields: ['premium'],
   },
   timus: {
-    baseFields,
-    infoFields: ['solved', 'source', 'difficulty', 'popularity'],
+    fields: [...baseFields, 'solved', 'source', 'difficulty', 'popularity'],
   },
   uva: {
-    baseFields,
-    infoFields: ['dacu', 'popularity', 'starred'],
+    fields: [...baseFields, 'dacu', 'popularity', 'starred'],
     booleanFields: ['starred'],
   },
 } as const);

@@ -27,23 +27,21 @@ async function downloadNepsProblems() {
       oj: 'neps',
       name: p.title.value,
       path: p.id.toString(),
-      info: {
-        score: p.score,
-        solved: p.solved,
-        popularity: -1,
-      },
+      score: p.score,
+      solved: p.solved,
+      popularity: -1,
     };
     problems.push(newProblem);
-    if (newProblem.info.score != null) {
-      stats.score.min = Math.min(stats.score.min!, newProblem.info.score);
-      stats.score.max = Math.max(stats.score.max!, newProblem.info.score);
+    if (newProblem.score != null) {
+      stats.score.min = Math.min(stats.score.min!, newProblem.score);
+      stats.score.max = Math.max(stats.score.max!, newProblem.score);
     }
   });
   problems.sort((a, b) => {
-    return a.info.solved < b.info.solved ? 1 : -1;
+    return a.solved < b.solved ? 1 : -1;
   });
   problems.forEach((p, i) => {
-    p.info.popularity = Math.floor(i / POPULARITY_GROUP_SIZE) + 1;
+    p.popularity = Math.floor(i / POPULARITY_GROUP_SIZE) + 1;
   });
   return {
     problems,

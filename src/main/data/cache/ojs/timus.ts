@@ -32,23 +32,21 @@ async function downloadTimusProblems() {
         oj: 'timus',
         name: $(tds[2]).text().trim(),
         path: $(tds[1]).text().trim(),
-        info: {
-          source: $(tds[3]).text().trim() || null,
-          solved: parseInt($(tds[4]).text().trim()),
-          difficulty: parseInt($(tds[5]).text().trim()),
-          popularity: -1,
-        },
+        source: $(tds[3]).text().trim() || null,
+        solved: parseInt($(tds[4]).text().trim()),
+        difficulty: parseInt($(tds[5]).text().trim()),
+        popularity: -1,
       };
-      stats.difficulty.min = Math.min(stats.difficulty.min!, newProblem.info.difficulty);
-      stats.difficulty.max = Math.max(stats.difficulty.max!, newProblem.info.difficulty);
+      stats.difficulty.min = Math.min(stats.difficulty.min!, newProblem.difficulty);
+      stats.difficulty.max = Math.max(stats.difficulty.max!, newProblem.difficulty);
       problems.push(newProblem);
     });
   stats.popularity.max = Math.floor((problems.length - 1) / POPULARITY_GROUP_SIZE) + 1;
   problems.sort((a, b) => {
-    return a.info.solved < b.info.solved ? 1 : -1;
+    return a.solved < b.solved ? 1 : -1;
   });
   problems.forEach((p, i) => {
-    p.info.popularity = Math.floor(i / POPULARITY_GROUP_SIZE) + 1;
+    p.popularity = Math.floor(i / POPULARITY_GROUP_SIZE) + 1;
   });
   return {
     problems,

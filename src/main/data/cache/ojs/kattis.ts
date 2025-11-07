@@ -55,28 +55,26 @@ async function downloadKattisProblems() {
         oj: 'kattis',
         name: $(cols[0]).text().trim(),
         path: $(cols[0]).children('a').first().attr('href')!.replace('/problems/', ''),
-        info: {
-          solved: parseInt($(cols[4]).text()),
-          submissions: parseInt($(cols[3]).text()),
-          textDifficulty,
-          difficulty,
-          starred: false,
-          popularity: -1,
-        },
+        solved: parseInt($(cols[4]).text()),
+        submissions: parseInt($(cols[3]).text()),
+        textDifficulty,
+        difficulty,
+        starred: false,
+        popularity: -1,
       };
-      newProblem.info.starred = starredProblems.has(newProblem.path);
-      if (newProblem.info.difficulty !== null) {
-        stats.difficulty.min = Math.min(stats.difficulty.min!, newProblem.info.difficulty);
-        stats.difficulty.max = Math.max(stats.difficulty.max!, newProblem.info.difficulty);
+      newProblem.starred = starredProblems.has(newProblem.path);
+      if (newProblem.difficulty !== null) {
+        stats.difficulty.min = Math.min(stats.difficulty.min!, newProblem.difficulty);
+        stats.difficulty.max = Math.max(stats.difficulty.max!, newProblem.difficulty);
       }
       problems.push(newProblem);
     });
   }
   problems.sort((a, b) => {
-    return a.info.solved < b.info.solved ? 1 : -1;
+    return a.solved < b.solved ? 1 : -1;
   });
   problems.forEach((p, i) => {
-    p.info.popularity = Math.floor(i / POPULARITY_GROUP_SIZE) + 1;
+    p.popularity = Math.floor(i / POPULARITY_GROUP_SIZE) + 1;
   });
   stats.popularity = {
     max: Math.floor((problems.length - 1) / POPULARITY_GROUP_SIZE) + 1,
