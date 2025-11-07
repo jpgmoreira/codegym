@@ -30,15 +30,16 @@
 
 <template>
   <ProblemsPageHeader />
-  <div class="flex flex-col flex-1 problems-page">
+  <div class="problems-page flex-1 grid">
     <Snapshot
-      class="rounded-md m-1 mb-0 flex-1"
+      class="rounded-md m-1 mb-0"
       :curr-oj="currOj"
       :oj-context="ojContext"
       :snapshot="snapshot"
     />
-    <Filters class="rounded-md m-1 flex-1" :curr-oj="currOj" :oj-context="ojContext" />
+    <Filters class="rounded-md m-1" :curr-oj="currOj" :oj-context="ojContext" />
   </div>
+
   <footer class="mt-auto w-full flex justify-around py-1.5">
     <BusyButton
       class="flex items-center btn-primary"
@@ -63,6 +64,10 @@
 </template>
 
 <style scoped>
+  .problems-page {
+    grid-template-rows: 1fr 1fr;
+  }
+
   :deep(.filters) input[type='number'] {
     width: 130px;
   }
