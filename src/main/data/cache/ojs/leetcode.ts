@@ -1,11 +1,9 @@
-import { LeetcodeProblem, OjProblem } from '@common/schemas/problems';
+import { LeetcodeProblem } from '@common/schemas/problems';
 import { LeetcodeResponseDTO } from '../dto/leetcodeResponseDTO';
 import { OjMeta } from '@common/schemas/ojMeta';
 import { POPULARITY_GROUP_SIZE } from '@common/constants';
-import { ProfileManager } from '@main/data/managers/profileManager';
 import { OjMetaManager } from '@main/data/managers/ojMetaManager';
 import { type Database } from 'sqlite';
-import { Oj } from '@common/types/oj';
 import { replaceCacheProblems } from '@main/data/sql/cache/cache';
 
 async function downloadLeetcodeProblems() {
@@ -52,32 +50,4 @@ export async function updateLeetcodeCache(db: Database): Promise<OjMeta['leetcod
   OjMetaManager.instance.updateOjMeta('leetcode', meta);
   await replaceCacheProblems(db, 'leetcode', problems);
   return meta;
-}
-
-export async function filterLeetcodeProblems(
-  db: Datastore<OjProblem[Oj]>
-): Promise<LeetcodeProblem[]> {
-  const currProfile = ProfileManager.instance.getCurrProfile()!;
-  const filters = currProfile.ojContext['leetcode'].filters;
-  const minsb = filters.popularity.min;
-  const maxsb = filters.popularity.max;
-  const premium = filters.premium.value;
-  const difficulties = filters.difficulty.values
-    .map((d) => {
-      if (d === 'easy') return 1;
-      if (d === 'medium') return 2;
-      return 3;
-    })
-    .filter((x) => x !== undefined);
-  const query: Record<string, any> = {
-    oj: 'leetcode',
-    'info.popularity': {},
-  };
-  if (minsb !== '') query['info.popularity'].$gte = minsb;
-  if (maxsb !== '') query['info.popularity'].$lte = maxsb;
-  if (premium === 'yes') query['info.premium'] = true;
-  if (premium === 'no') query['info.premium'] = false;
-  if (difficulties.length) query['info.difficulty'] = { $in: difficulties };
-  sanitizeQuery(query);
-  return db.findAsync(query, { _id: 0 });
 }

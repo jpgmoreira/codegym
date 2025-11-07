@@ -5,7 +5,7 @@ import { filterKattisProblems } from '../sql/cache/filter/kattis';
 import { filterNepsProblems } from './ojs/neps';
 import { filterUvaProblems } from './ojs/uva';
 import { filterTimusProblems } from './ojs/timus';
-import { filterLeetcodeProblems } from './ojs/leetcode';
+import { filterLeetcodeProblems } from '../sql/cache/filter/leetcode';
 import { Database } from 'sqlite';
 
 const filterCacheFnMapping: {
