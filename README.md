@@ -4,6 +4,8 @@ CodeGym is a desktop application that makes competitive programming practice mor
 
 With CodeGym, you can explore problems from multiple online judges, organize your own contests, and track your progress over time.
 
+You can browse the code in the [mvp](https://github.com/jpgmoreira/codegym/tree/mvp) branch.
+
 ## Features
 
 - Filter problems by difficulty, tags, and other criteria.
@@ -29,9 +31,9 @@ With CodeGym, you can explore problems from multiple online judges, organize you
 
 You can also download pre-built installers here:
 
-- [Linux (rpm)](https://github.com/jpgmoreira/codegym/releases/download/0.0.2/codegym-0.0.2.x86_64.rpm)
-- [Linux (deb)](https://github.com/jpgmoreira/codegym/releases/download/0.0.2/codegym_0.0.2_amd64.deb)
-- [Windows](https://github.com/jpgmoreira/codegym/releases/download/0.0.2/codegym-0.0.2-setup.exe)
+- [Linux (rpm)](https://github.com/jpgmoreira/codegym/releases/download/0.1.0/codegym-0.1.0.x86_64.rpm)
+- [Linux (deb)](https://github.com/jpgmoreira/codegym/releases/download/0.1.0/codegym_0.1.0_amd64.deb)
+- [Windows](https://github.com/jpgmoreira/codegym/releases/download/0.1.0/codegym-0.1.0-setup.exe)
 
 ## How to Run
 
