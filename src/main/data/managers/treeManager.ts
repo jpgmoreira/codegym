@@ -1,23 +1,22 @@
 import { randomId } from '@common/utils/utils';
 import { DATA_DIR, TREE_PAGE_SIZE } from '../constants';
 import { FileProxy } from '../fileProxy';
-import { NodeController, Node, FileNode, DirNode, NodeType, HeadAndTail } from '@common/types/tree';
+import { Links, Node, FileNode, DirNode, NodeType, HeadAndTail } from '@common/types/tree';
 import { ModifierKeys } from '@common/types/keys';
 import { TreeOperationResponseDTO } from '@common/dto/treeOperationResponseDTO';
 import { GenericResponseDTO } from '@common/dto/genericResponseDTO';
 import { ContestsManager } from './contestsManager';
 import path from 'path';
 import { ProfileManager } from './profileManager';
-import fs from 'fs';
 
 // Contains a linked list of the base nodes of the tree.
-type RootController = NodeController & {
+type Root = Links & {
   nextDir: number; // Number of the next directory to be created.
   nextFile: number; // Number of the next file to be created.
 };
 
 type TreeData = {
-  rootController: RootController;
+  root: Root;
   idToNode: Record<string, Node>; // Maps node ids to the node objects.
 };
 
@@ -58,7 +57,7 @@ export class TreeManager {
 
   private getEmptyTreeData(): TreeData {
     return {
-      rootController: {
+      root: {
         nextDir: 1,
         nextFile: 1,
         dirs: { headId: null, tailId: null },
@@ -68,25 +67,9 @@ export class TreeManager {
     };
   }
 
-  private safeCopy(src: string, dest: string) {
-    const tmp = dest + '.tmp';
-    fs.copyFileSync(src, tmp);
-    fs.renameSync(tmp, dest);
-  }
-
   public loadTree(profileId: string) {
-    const filePath = path.join(DATA_DIR, 'profileData', profileId, 'tree', 'tree.json');
-    const bkpPath = path.join(DATA_DIR, 'profileData', profileId, 'tree', 'tree.json.bkp');
-    try {
-      // In case the FileProxy creation fails because the "tree.json" file is corrupt,
-      // an exception is thrown and the backup file stays safe (corrupt content is not copied).
-      this._proxy = new FileProxy(filePath, this.getEmptyTreeData());
-      this.safeCopy(filePath, bkpPath);
-    } catch {
-      // File "tree.json" is corrupt: restore from backup.
-      this.safeCopy(bkpPath, filePath);
-      this._proxy = new FileProxy(filePath, this.getEmptyTreeData());
-    }
+    const filePath = path.join(DATA_DIR, 'profileData', profileId, 'tree.json');
+    this._proxy = new FileProxy(filePath, this.getEmptyTreeData());
     this.refresh(false);
     this.clearHidden();
   }
@@ -169,14 +152,10 @@ export class TreeManager {
    *  - nDesc;
    *  - nSelDesc;
    *  - nFileDesc;
-   *  - nProblems;
-   *  - nSolved;
-   *  - nTodo;
-   *  - nFavorite;
    */
   private refresh(flush: boolean) {
-    const dirHead = this.getHead(this.target.rootController.dirs, false);
-    const fileHead = this.getHead(this.target.rootController.files, false);
+    const dirHead = this.getHead(this.target.root.dirs, false);
+    const fileHead = this.getHead(this.target.root.files, false);
     this.expandedFlat.length = 0;
     this.nSelectedNodes = 0;
     this.nSelectedFiles = 0;
@@ -226,7 +205,7 @@ export class TreeManager {
     return {
       id: randomId(),
       type: 'dir',
-      text: `${prefix} ${this.target.rootController.nextDir}`,
+      text: `${prefix} ${this.target.root.nextDir}`,
       depth: 0,
       open: false,
       selected: false,
@@ -249,7 +228,7 @@ export class TreeManager {
   }
 
   private createFileNode(prefix: string, parentId: string | null): FileNode {
-    const text = `${prefix} ${this.target.rootController.nextFile}`;
+    const text = `${prefix} ${this.target.root.nextFile}`;
     const contestId = ContestsManager.instance.createContest(text);
     return {
       id: randomId(),
@@ -266,7 +245,7 @@ export class TreeManager {
     } as const;
   }
 
-  private appendNode(node: Node, control: NodeController) {
+  private appendNode(node: Node, control: Links) {
     const sub = node.type === 'dir' ? control.dirs : control.files;
     if (!sub.headId) {
       sub.headId = node.id;
@@ -283,7 +262,7 @@ export class TreeManager {
   }
 
   private appendNodeAbove(node: Node, baseNode: Node) {
-    const control = this.getParent(baseNode, false) || this.target.rootController;
+    const control = this.getParent(baseNode, false) || this.target.root;
     const sub = node.type === 'dir' ? control.dirs : control.files;
     const prev = this.getPrev(baseNode, false);
     node.nextId = baseNode.id;
@@ -294,7 +273,7 @@ export class TreeManager {
   }
 
   private appendNodeBelow(node: Node, baseNode: Node) {
-    const control = this.getParent(baseNode, false) || this.target.rootController;
+    const control = this.getParent(baseNode, false) || this.target.root;
     const sub = node.type === 'dir' ? control.dirs : control.files;
     const next = this.getNext(baseNode, false);
     node.prevId = baseNode.id;
@@ -308,10 +287,10 @@ export class TreeManager {
     let newNode: Node;
     if (type === 'dir') {
       newNode = this.createDirNode(prefix, parentId);
-      this.proxy.rootController.nextDir++;
+      this.proxy.root.nextDir++;
     } else {
       newNode = this.createFileNode(prefix, parentId);
-      this.proxy.rootController.nextFile++;
+      this.proxy.root.nextFile++;
     }
     this.proxy.idToNode[newNode.id] = newNode;
     return newNode;
@@ -325,7 +304,7 @@ export class TreeManager {
       this.openDir(parent);
       this.appendNode(newNode, parent);
     } else {
-      this.appendNode(newNode, this.target.rootController);
+      this.appendNode(newNode, this.target.root);
     }
     this.refresh(true);
   }
@@ -391,7 +370,7 @@ export class TreeManager {
       };
     }
     const node = this.proxy.idToNode[nodeId];
-    const control = this.getParent(node, false) || this.target.rootController;
+    const control = this.getParent(node, false) || this.target.root;
     const dirHead = this.getHead(control.dirs, false);
     const fileHead = this.getHead(control.files, false);
     for (const head of [dirHead, fileHead]) {
@@ -437,7 +416,7 @@ export class TreeManager {
     this._proxy!.queueWrite();
   }
 
-  private setSubtreeSelection(control: NodeController, state: boolean) {
+  private setSubtreeSelection(control: Links, state: boolean) {
     const dirHead = this.getHead(control.dirs, false);
     const fileHead = this.getHead(control.files, false);
     let curr: Node | null = dirHead;
@@ -479,7 +458,7 @@ export class TreeManager {
       // Orphaned node: no need to remove from tree.
       return;
     }
-    const control = node.parentId ? this.getParent(node, false)! : this.target.rootController;
+    const control = node.parentId ? this.getParent(node, false)! : this.target.root;
     const sub = node.type === 'file' ? control.files : control.dirs;
     const head = this.getHead(sub, false)!;
     const tail = this.getTail(sub, false)!;
@@ -494,7 +473,7 @@ export class TreeManager {
     node.parentId = null;
   }
 
-  private deleteSubtree(control: NodeController) {
+  private deleteSubtree(control: Links) {
     const dirHead = this.getHead(control.dirs, false);
     const fileHead = this.getHead(control.files, false);
     let curr: Node | null = dirHead;
@@ -650,7 +629,7 @@ export class TreeManager {
 
   public moveSelectedNodesInto(destinationId: string | null) {
     const destinationNode = destinationId ? (this.target.idToNode[destinationId] as DirNode) : null;
-    const control = destinationNode || this.target.rootController;
+    const control = destinationNode || this.target.root;
     if (destinationNode && (destinationNode.type !== 'dir' || destinationNode.selected)) return;
     if (destinationNode) this.openDir(destinationNode);
     for (const node of this.expandedFlat) {

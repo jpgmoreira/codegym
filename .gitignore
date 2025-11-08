@@ -10,3 +10,4 @@ out
 *.log*
 src/scripts/*
 !src/scripts/*.py
+electron.vite.config.*.mjs

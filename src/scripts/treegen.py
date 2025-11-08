@@ -39,7 +39,7 @@ class Node:
 
 def create_random_tree(total_nodes: int):
     id_to_node = {}
-    root_controller = {
+    root = {
         "nextDir": 1,
         "nextFile": 1,
         "dirs": {"headId": None, "tailId": None},
@@ -63,15 +63,15 @@ def create_random_tree(total_nodes: int):
 
         node_id = random_id()
         name_prefix = "Folder" if node_type == "dir" else "File"
-        name = f"{name_prefix} {root_controller['nextDir'] if node_type == 'dir' else root_controller['nextFile']}"
+        name = f"{name_prefix} {root['nextDir'] if node_type == 'dir' else root['nextFile']}"
         node = Node(node_id, node_type, name, parent_id)
         node.depth = depth
 
         # Increment counters
         if node_type == "dir":
-            root_controller["nextDir"] += 1
+            root["nextDir"] += 1
         else:
-            root_controller["nextFile"] += 1
+            root["nextFile"] += 1
 
         id_to_node[node_id] = vars(node)
 
@@ -107,7 +107,7 @@ def create_random_tree(total_nodes: int):
             if total_nodes <= 0:
                 break
 
-    # Define head/tail in rootController
+    # Define head/tail in root
     dirs = [
         n for n in id_to_node.values() if n["type"] == "dir" and n["parentId"] is None
     ]
@@ -115,19 +115,19 @@ def create_random_tree(total_nodes: int):
         n for n in id_to_node.values() if n["type"] == "file" and n["parentId"] is None
     ]
     if dirs:
-        root_controller["dirs"]["headId"] = dirs[0]["id"]
-        root_controller["dirs"]["tailId"] = dirs[-1]["id"]
+        root["dirs"]["headId"] = dirs[0]["id"]
+        root["dirs"]["tailId"] = dirs[-1]["id"]
         for i in range(1, len(dirs)):
             dirs[i]["prevId"] = dirs[i - 1]["id"]
             dirs[i - 1]["nextId"] = dirs[i]["id"]
     if files:
-        root_controller["files"]["headId"] = files[0]["id"]
-        root_controller["files"]["tailId"] = files[-1]["id"]
+        root["files"]["headId"] = files[0]["id"]
+        root["files"]["tailId"] = files[-1]["id"]
         for i in range(1, len(files)):
             files[i]["prevId"] = files[i - 1]["id"]
             files[i - 1]["nextId"] = files[i]["id"]
 
-    return {"rootController": root_controller, "idToNode": id_to_node}
+    return {"root": root, "idToNode": id_to_node}
 
 
 def main():

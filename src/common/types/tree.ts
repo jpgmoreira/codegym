@@ -7,7 +7,7 @@ export type HeadAndTail = {
 };
 
 // Stores the linked lists of dir and file direct children.
-export type NodeController = {
+export type Links = {
   dirs: HeadAndTail;
   files: HeadAndTail;
 };
@@ -23,9 +23,9 @@ export type BaseNode = {
   prevId: string | null; // Previous sibling ID, in the same doubly linked list.
 };
 
-// Dir nodes store their children as a doubly linked list (NodeController).
+// Dir nodes store their children as a doubly linked list (Links).
 export type DirNode = BaseNode &
-  NodeController & {
+  Links & {
     type: 'dir';
     open: boolean;
     nDesc: number; // Total number of descendants, dir or file, not including the node.
