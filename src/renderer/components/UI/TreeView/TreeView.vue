@@ -282,8 +282,8 @@
 
   async function handleDeletion() {
     modalState.isDeleting = true;
-    if (modalState.multiple) deleteSelectedNodes();
-    else deleteNode();
+    if (modalState.multiple) await deleteSelectedNodes();
+    else await deleteNode();
     modalState.isDeleting = false;
     closeModal();
   }
