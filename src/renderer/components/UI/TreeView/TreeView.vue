@@ -428,7 +428,7 @@
   >
     <!-- The modal belongs to here, because the delete node operation belongs to here,
    and the modal must intercept the delete node operation to request for confirmation. -->
-    <Modal :visible="modalState.visible" @close="closeModal">
+    <Modal :visible="modalState.visible" :frozen="modalState.isDeleting" @close="closeModal">
       <template #header>
         <div v-if="!modalState.multiple && modalState.currentNode?.type === 'dir'">
           Delete folder
